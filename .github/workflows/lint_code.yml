@@ -1,6 +1,6 @@
 name: Lint code
 
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
   build:
@@ -10,18 +10,30 @@ jobs:
         python-version: ["3.12"]
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pylint pytest
-    - name: Analysing the code with pylint
+
+    - name: Run pylint on code
       run: |
-          echo fixme
-#        pylint $(git ls-files '*.py')
+        pylint $(git ls-files '*.py') > pylint_report.txt || true
+        echo "::set-output name=report::$(cat pylint_report.txt)"
+
+    - name: Create GitHub Issue
+      if: steps.pylint.outputs.report != ''
+      uses: peter-evans/create-issue-from-file@v3
+      with:
+        title: "Pylint Issues Detected on ${{ github.sha }}"
+        content-filepath: pylint_report.txt
+        labels: "lint"
+
     - name: Unittests
       run: |
         pytest
