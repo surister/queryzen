@@ -24,10 +24,12 @@ jobs:
     - name: Run pylint on code
       run: |
         pylint $(git ls-files '*.py') > pylint_report.txt || true
-        cat pylint_report.txt >> $GITHUB_OUTPUT
+        echo "report<<EOF" >> $GITHUB_ENV
+        cat pylint_report.txt >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
     - name: Create GitHub Issue
-      if: $GITHUB_OUTPUT != ''
+      if: env.report != ''
       uses: peter-evans/create-issue-from-file@v3
       with:
         title: "Pylint Issues Detected on ${{ github.sha }}"
