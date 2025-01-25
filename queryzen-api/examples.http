@@ -22,7 +22,7 @@ Content-Type: application/json
 
 ### Retrieve a Query Lambda with parameters
 
-POST 127.0.0.1:8000/lambdas/mountain_filter/version/2/
+POST 127.0.0.1:8000/lambdas/mountain_filter/version/auto/
 Content-Type: application/json
 
 {

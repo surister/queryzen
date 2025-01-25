@@ -1,9 +1,11 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, serializers, viewsets, status
+
+from rest_framework import mixins, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.validators import UniqueTogetherValidator
 
-from core.models import LambdaQuery
+from core.models import QueryLambda
 
 
 class QueryLambdasViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -12,12 +14,19 @@ class QueryLambdasViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             name = serializers.CharField()
             value = serializers.JSONField()
 
-        parameters = ParameterSerializer(many=True)
+        parameters = ParameterSerializer(many=True, read_only=False)
 
     class QuerySerializer(serializers.ModelSerializer):
         class Meta:
-            model = LambdaQuery
+            model = QueryLambda
             fields = '__all__'
+            validators = [
+                UniqueTogetherValidator(
+                    QueryLambda.objects.all(),
+                    fields=('name', 'version'),
+                    message="This pair name/version is already in use."
+                )
+            ]
 
     def get_serializer_class(self):
         if self.action == 'version':
@@ -25,7 +34,7 @@ class QueryLambdasViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         return self.QuerySerializer
 
     serializer_class = QuerySerializer
-    queryset = LambdaQuery.objects.all()
+    queryset = QueryLambda.objects.all().order_by('-created_at')
 
     @action(
         methods=['POST'],
@@ -35,7 +44,11 @@ class QueryLambdasViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     def version(self, request, pk, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        lambda_query = get_object_or_404(LambdaQuery, name=pk, version=kwargs.get('version'))
+        version = kwargs.get('version')
+        if version != 'auto':
+            lambda_query = get_object_or_404(QueryLambda, name=pk, version=kwargs.get('version'))
+        else:
+            lambda_query = self.get_queryset().filter(name=pk).first()
 
         result_query = lambda_query.query
         for param in serializer.validated_data['parameters']:
