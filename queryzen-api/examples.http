@@ -1,0 +1,41 @@
+### Create a new Query Lambda
+POST http://127.0.0.1:8000/lambdas/
+Content-Type: application/json
+
+{
+    "name": "mountain_filter",
+    "query": "SELECT * from geo.mountains WHERE height >= :height",
+    "version": "1"
+}
+###
+
+### Create a new Query Lambda version
+POST http://127.0.0.1:8000/lambdas/
+Content-Type: application/json
+
+{
+    "name": "mountain_filter",
+    "query": "SELECT * from geo.mountains WHERE height >= :height AND country IN (:countries)",
+    "version": "2"
+}
+###
+
+### Retrieve a Query Lambda with parameters
+
+POST 127.0.0.1:8000/lambdas/mountain_filter/version/2/
+Content-Type: application/json
+
+{
+  "parameters": [
+    {
+      "name": "height",
+      "value": 500
+    },
+    {
+      "name": "countries",
+      "value": "Spain, Portugal, France"
+    }
+  ]
+}
+
+###

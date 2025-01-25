@@ -1,5 +1,5 @@
 """
-URL configuration for queryzen_rest_api project.
+URL configuration for queryzen_api project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.1/topics/http/urls/
@@ -14,7 +14,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.urls import include, path
 
 urlpatterns = [
-
+    path('', include('core.urls')),
 ]
