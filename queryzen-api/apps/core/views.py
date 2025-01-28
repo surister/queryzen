@@ -1,5 +1,5 @@
 from rest_framework.decorators import action
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -44,6 +44,9 @@ class ZenApiView(APIView):
     def put(self, request, *args, **kwargs):
         serializer = CreateZenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        if QueryZen.objects.filter(name=kwargs.get('zen_name'), version=serializer.validated_data['version']).exists():
+            raise ValidationError(f'This zen already has a version {serializer.validated_data["version"]}')
 
         zen = QueryZen.objects.create(
             **serializer.validated_data,
