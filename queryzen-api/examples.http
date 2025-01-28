@@ -39,3 +39,13 @@ Content-Type: application/json
 }
 
 ###
+
+### Create a new zen
+PUT http://localhost:8000/collections/production/zen/state_filter
+Content-Type: application/json
+
+{
+  "version": "2",
+  "description": "Testing new api",
+  "query": "SELECT * FROM whatever"
+}
