@@ -21,7 +21,7 @@ class QueryZen(UUIDMixin):
     # TODO: Add created_by
 
     class Meta:
-        unique_together = ('name', 'version',)
+        unique_together = ('collection', 'name', 'version',)
 
 
 class Execution(UUIDMixin):
