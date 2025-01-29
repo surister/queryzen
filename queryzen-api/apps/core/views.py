@@ -34,8 +34,7 @@ class CollectionsViewSet(viewsets.ModelViewSet):
             return self._delete_zen(request, collection_name, kwargs.get('zen_name'))
         if self.request.method == 'POST':
             return self._run_zen(request, collection_name, kwargs.get('zen_name'))
-        else:
-            raise MethodNotAllowed({'msg': f'{self.request.method} is not allowed'})
+        raise MethodNotAllowed({'msg': f'{self.request.method} is not allowed'})
 
     def _run_zen(self, request, collection_name, zen_name):
         return Response({'zen_name': zen_name})
