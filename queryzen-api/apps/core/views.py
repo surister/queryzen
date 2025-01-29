@@ -1,3 +1,5 @@
+import http
+
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
@@ -26,13 +28,13 @@ class CollectionsViewSet(viewsets.ModelViewSet):
     filterset_class = ZenFilter
 
     def _handle_request(self, request, collection_name, *args, **kwargs):
-        if self.request.method == 'GET':
+        if self.request.method == http.HTTPMethod.GET:
             return self._get_zens_given(collection_name, kwargs.get('zen_name'))
-        if self.request.method == 'PUT':
+        if self.request.method == http.HTTPMethod.PUT:
             return self._create_zen(request, collection_name, kwargs.get('zen_name'))
-        if self.request.method == 'DELETE':
+        if self.request.method == http.HTTPMethod.DELETE:
             return self._delete_zen(request, collection_name, kwargs.get('zen_name'))
-        if self.request.method == 'POST':
+        if self.request.method == http.HTTPMethod.POST:
             return self._run_zen(request, collection_name, kwargs.get('zen_name'))
         raise MethodNotAllowed({'msg': f'{self.request.method} is not allowed'})
 
