@@ -1,62 +1,51 @@
-# name: Lint code
+name: Lint code
 
-# on: [push, workflow_dispatch]
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-24.04
-#     strategy:
-#       matrix:
-#         python-version: ["3.12"]
-#     steps:
-#     - uses: actions/checkout@v4
-
-#     - name: Set up Python ${{ matrix.python-version }}
-#       uses: actions/setup-python@v3
-#       with:
-#         python-version: ${{ matrix.python-version }}
-
-#     - name: Install dependencies
-#       run: |
-#         python -m pip install --upgrade pip
-#         pip install pylint pytest
-
-#     - name: Run pylint on code
-#       run: |
-#         pylint $(git ls-files '*.py') > pylint_report.txt || true
-#         echo "report<<EOF" >> $GITHUB_ENV
-#         cat pylint_report.txt >> $GITHUB_ENV
-#         echo "EOF" >> $GITHUB_ENV
-
-#     - name: Create GitHub Issue
-#       if: env.report != ''
-#       uses: peter-evans/create-issue-from-file@v3
-#       with:
-#         title: "Pylint Issues Detected on ${{ steps.vars.outputs.sha_short }}"
-#         content-filepath: pylint_report.txt
-#         labels: "lint"
-
-#     - name: Unittests
-#       run: |
-#         pytest
-name: Build
-
-on:
-  push:
-    branches:
-      - feature/cicd-workflows
-
+on: [push, workflow_dispatch]
 
 jobs:
   build:
-    name: Build and analyze
-    runs-on: ubuntu-latest
-    
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ["3.12"]
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@v4
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint pytest pytest-cov 
+
+    - name: Run pylint on code
+      run: |
+        pylint $(git ls-files '*.py') > pylint_report.txt || true
+        echo "report<<EOF" >> $GITHUB_ENV
+        cat pylint_report.txt >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+        
+    - name: Run tests and generate coverage report
+      run: |
+        pytest --cov=src --cov-report=xml:coverage.xml --cov-report=term
+
+    # - name: Create GitHub Issue
+    #   if: env.report != ''
+    #   uses: peter-evans/create-issue-from-file@v3
+    #   with:
+    #     title: "Pylint Issues Detected on ${{ steps.vars.outputs.sha_short }}"
+    #     content-filepath: pylint_report.txt
+    #     labels: "lint"
+
+    - name: Unittests
+      run: |
+        pytest
+
+    - name: Run sonar scan
+      uses: sonarsource/sonarqube-scan-action@v4
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
