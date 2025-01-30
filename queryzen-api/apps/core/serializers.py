@@ -16,7 +16,9 @@ class DeleteZenSerializer(serializers.ModelSerializer):
 
 
 class ExecuteZenSerializer(serializers.Serializer):
-    parameters = serializers.JSONField()
+    parameters = serializers.JSONField(read_only=False)
+    version = serializers.CharField()
+    target = serializers.CharField()
 
 
 class ExecutionSerializer(serializers.ModelSerializer):

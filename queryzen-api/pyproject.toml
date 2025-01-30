@@ -14,6 +14,10 @@ djangorestframework = "^3.15.2"
 django-filter = "^24.3"
 faker = "^35.0.0"
 factory-boy = "^3.3.1"
+celery = "^5.4.0"
+django-celery-results = "^2.5.1"
+redis = "^5.2.1"
+sqlalchemy = "^2.0.37"
 
 
 [build-system]

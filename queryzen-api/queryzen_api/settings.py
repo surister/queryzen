@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+
+from databases.base import SQLiteDatabase
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,6 +35,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_filters',
+    'django_celery_results',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -126,3 +129,14 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
 }
+CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
+CELERY_IMPORTS = ('apps.core.tasks',)
+
+
+ZEN_DATABASES = {
+    'testing': SQLiteDatabase(
+        'tdd.sqlite'
+    )
+}
+ZEN_TIMEOUT = 2

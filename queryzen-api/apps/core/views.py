@@ -1,5 +1,7 @@
 import http
 
+import celery
+from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
@@ -8,7 +10,9 @@ from rest_framework.response import Response
 
 from apps.core.filters import QueryZenFilter, ZenFilter
 from apps.core.models import QueryZen
-from apps.core.serializers import QueryZenSerializer, CreateZenSerializer, DeleteZenSerializer, CollectionsSerializer
+from apps.core.serializers import QueryZenSerializer, CreateZenSerializer, DeleteZenSerializer, CollectionsSerializer, \
+    ExecuteZenSerializer
+from apps.core.tasks import run_query
 
 from django_filters import rest_framework as filters
 
@@ -38,8 +42,39 @@ class CollectionsViewSet(viewsets.ModelViewSet):
             return self._run_zen(request, collection_name, kwargs.get('zen_name'))
         raise MethodNotAllowed({'msg': f'{self.request.method} is not allowed'})
 
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return QueryZenSerializer
+        if self.action == 'zen':
+            if self.request.method == http.HTTPMethod.GET:
+                return CreateZenSerializer
+            if self.request.method == http.HTTPMethod.PUT:
+                return CreateZenSerializer
+            if self.request.method == http.HTTPMethod.DELETE:
+                return DeleteZenSerializer
+            if self.request.method == http.HTTPMethod.POST:
+                return ExecuteZenSerializer
+
     def _run_zen(self, request, collection_name, zen_name):
-        return Response({'zen_name': zen_name})
+        serializer = ExecuteZenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        zen = get_object_or_404(
+            QueryZen,
+            name=zen_name,
+            collection=collection_name,
+            version=serializer.data['version']
+        )
+        try:
+            async_job = run_query.delay(
+                serializer.validated_data['target'],
+                zen.pk,
+                serializer.validated_data['parameters']
+            )
+            query_result = async_job.get(timeout=getattr(settings, 'ZEN_TIMEOUT'))
+            return Response(query_result)
+        except Exception as e:
+            return Response({'msg': f'{self.request.method} is timeout'}, status=status.HTTP_400_BAD_REQUEST)
 
     def _delete_zen(self, request, collection_name, zen_name):
         serializer = DeleteZenSerializer(data=request.data)
