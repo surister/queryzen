@@ -44,7 +44,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - feature/cicd-workflows
 
 
 jobs:
