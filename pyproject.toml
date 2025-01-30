@@ -8,11 +8,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
+httpx = "^0.28.1"
 
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.3.3"
 pytest = "^8.3.4"
+pytest-cov = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core"]
