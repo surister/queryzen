@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from apps.core.filters import QueryZenFilter, ZenFilter
 from apps.core.models import QueryZen
 from apps.core.serializers import QueryZenSerializer, CreateZenSerializer, DeleteZenSerializer, CollectionsSerializer
+from apps.core.exceptions import ZenAlreadyExists
 
 from django_filters import rest_framework as filters
 
@@ -79,7 +80,7 @@ class CollectionsViewSet(viewsets.ModelViewSet):
                 version=serializer.validated_data['version'],
                 collection=collection_name
         ).exists():
-            raise ValidationError(f'This zen already has a version {serializer.validated_data["version"]}')
+            raise ZenAlreadyExists(f'Zen {collection_name}/{zen_name} already has a version: "{serializer.validated_data["version"]}"')
 
         zen = QueryZen.objects.create(
             **serializer.validated_data,
