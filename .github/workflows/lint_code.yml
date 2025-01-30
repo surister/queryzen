@@ -27,10 +27,10 @@ jobs:
         echo "report<<EOF" >> $GITHUB_ENV
         cat pylint_report.txt >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
-        
+
     - name: Run tests and generate coverage report
       run: |
-        pytest --cov=src --cov-report=xml:coverage.xml --cov-report=term
+        pytest --cov=queryzen-api --cov-report=xml:coverage.xml --cov-report=term
 
     # - name: Create GitHub Issue
     #   if: env.report != ''
