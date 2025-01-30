@@ -24,6 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         poetry config virtualenvs.create false
+        poetry lock
         poetry install --all-extras
 
     - name: Run pylint on code
