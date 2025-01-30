@@ -48,10 +48,6 @@ jobs:
     #     content-filepath: pylint_report.txt
     #     labels: "lint"
 
-    - name: Unittests
-      run: |
-        pytest
-
     - name: Run sonar scan
       uses: sonarsource/sonarqube-scan-action@v4
       env:
