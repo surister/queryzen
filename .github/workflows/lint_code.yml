@@ -30,7 +30,7 @@ jobs:
 
     - name: Run tests and generate coverage report
       run: |
-        pytest --cov=queryzen*,tests --cov-report=xml:coverage.xml --cov-report=term
+        pytest --cov=queryzen-api,tests --cov-report=xml:coverage.xml --cov-report=term
 
     # - name: Create GitHub Issue
     #   if: env.report != ''
