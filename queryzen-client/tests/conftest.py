@@ -127,7 +127,7 @@ def local_queryzen():
 
 
 @pytest.fixture
-def queryzen(request):
+def queryzen(request) -> QueryZen:
     # We either use mocked_queryzen or local_queryzen depending on chosen setting.
     use_local = request.config.getoption("--use-local")  # Get a CLI option
     queryzen = 'local_queryzen' if use_local else 'mocked_queryzen'

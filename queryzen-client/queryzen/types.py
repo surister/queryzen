@@ -10,6 +10,13 @@ ColumnCenter = Literal["left", "center", "right"]
 
 
 class _AUTO:
+    """
+    Automatic id handled by queryzen backend.
+
+    When creating a queryzen, an incremental integer will be used e.g. 1, 2, 3, 4, 5, 6...
+
+    When getting a queryzen, the latest queryzen will be returned.
+    """
     def __repr__(self):
         return repr(str(self))
 

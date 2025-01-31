@@ -1,14 +1,18 @@
+"""
+Tests for QueryZen client API.
+"""
+
 import pytest
 
-from queryzen import Zen
+from queryzen import Zen, AUTO, DEFAULT_COLLECTION
 from queryzen.exceptions import ZenAlreadyExists, ZenDoesNotExist
 
 
-def check_zen(q: Zen, name, query, version):
-    assert isinstance(q, Zen)
-    assert q.query == query
-    assert q.name == name
-    assert str(q.version) == version
+def check_zen(zen: Zen, name, query, version):
+    assert isinstance(zen, Zen)
+    assert zen.query == query
+    assert zen.name == name
+    assert str(zen.version) == version
 
 
 def test_queryzen_create_one(queryzen):
@@ -44,6 +48,9 @@ def test_queryzen_create_repeated_version(queryzen):
 
     queryzen.create('mountain_view', collection='m', query='q', version=2)
 
+def test_queryzen_default_collection(queryzen):
+    q = queryzen.create(name='q', query='query')
+    assert q.collection == DEFAULT_COLLECTION
 
 def test_queryzen_get_one(queryzen):
     """
@@ -59,11 +66,33 @@ def test_queryzen_get_one(queryzen):
 
 def test_queryzen_get_one_unknown(queryzen):
     """
-    Test that if we request a Zen and it does not exist, an exception is raised.
+    Test that if we request a Zen, and it does not exist, an exception is raised.
     """
 
     with pytest.raises(ZenDoesNotExist):
         queryzen.get(name='qz_that_doesnt_exist')
+
+def test_queryzen_get_or_create(queryzen):
+    """
+    Test QueryZen.get_or_create method.
+    """
+    name = 'zen'
+    query = 'q'
+    version = 3
+
+    # Zen should not exist at this point.
+    created, zen = queryzen.get_or_create(name=name, query=query, version=version)
+
+    assert isinstance(created, bool)
+    assert created is True
+    assert check_zen(zen, name, query, version)
+
+    # Zen should now exist as it was created before.
+    created, zen = queryzen.get_or_create(name=name, query=query)
+
+    assert isinstance(created, bool)
+    assert created is False
+    assert check_zen(zen, name, query, version)
 
 
 def test_queryzen_list(queryzen):
