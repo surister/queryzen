@@ -27,7 +27,6 @@ class SQLiteDatabase(Database):
         result = cursor.execute(sql, parameters)
         rows = result.fetchall()
         columns = [x for xs in cursor.description for x in xs if x is not None]
-
         cursor.close()
 
         return columns, rows
