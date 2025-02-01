@@ -32,28 +32,28 @@ class UnknownError(Exception):
     # from which this was thrown, e.g. UnknownError("When creating a Zen, the JSON representation
     # of the object was not returned", ...) Structure of the raised error:
 
-    Exception(
-        """
-        Error from backend not caught gracefully, this is a bug, please report this entire
-        message in a Github Issue:
-        
-        https://github.com/surister/queryzen/issues/new?template=Blank+issue
-        
-        Response from backend:
-        
-        Response(
-            status_code = 200,
-            error_message = "error message",    
-        )
-        
-        Involved Zen (if Any)
-        
-        Zen(
-            name='zen',
-            ...
-        )
-        """
-    )
+    # Exception(
+    #     """
+    #     Error from backend not caught gracefully, this is a bug, please report this entire
+    #     message in a Github Issue:
+    #
+    #     https://github.com/surister/queryzen/issues/new?template=Blank+issue
+    #
+    #     Response from backend:
+    #
+    #     Response(
+    #         status_code = 200,
+    #         error_message = "error message",
+    #     )
+    #
+    #     Involved Zen (if Any)
+    #
+    #     Zen(
+    #         name='zen',
+    #         ...
+    #     )
+    #     """
+    # )
     def __init__(self, message: str, status_code: int):
         self.message = (f'Error from backend not caught gracefully, this is a bug,'
                         f' please report it: {status_code} {message}')
