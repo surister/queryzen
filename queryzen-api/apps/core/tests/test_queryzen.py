@@ -30,7 +30,6 @@ class QueryZenTestCase(TestCase):
 
         q: QueryZen = QueryZenFactory.create(
             collection='test',
-            version='testing_version',
             name='testing_zen',
         )
 
@@ -41,7 +40,7 @@ class QueryZenTestCase(TestCase):
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 1
 
-        filter_through_version = f'{reverse('zens-list')}?version={q.version}'
+        filter_through_version = f'{reverse('zens-list')}?version={q.version}&collection={q.collection}&name={q.name}'
 
         response = self.client.get(filter_through_version)
 
@@ -88,11 +87,9 @@ class QueryZenTestCase(TestCase):
         """
         q = QueryZenFactory.create(
             name='testing_zen',
-            version='1',
         )
-        QueryZenFactory.create(
+        q2 = QueryZenFactory.create(
             name='testing_zen',
-            version='2',
         )
         url = reverse('collections-zen', args=[q.collection, q.name])
 
@@ -108,7 +105,6 @@ class QueryZenTestCase(TestCase):
         """
         payload = {
             'query': 'SELECT * from testing_zen',
-            'version': '1',
             'description': 'testing_zen',
         }
 
@@ -134,7 +130,9 @@ class QueryZenTestCase(TestCase):
         Delete an existing zen
         """
 
-        zen_to_delete: QueryZen = QueryZenFactory.create()
+        zen_to_delete: QueryZen = QueryZenFactory.create(
+            name='deleting_zen',
+        )
 
         url = reverse('collections-zen', args=[zen_to_delete.collection, zen_to_delete.name])
 

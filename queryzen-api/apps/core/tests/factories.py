@@ -13,7 +13,3 @@ class QueryZenFactory(DjangoModelFactory):
 
     class Meta:
         model = QueryZen
-        django_get_or_create = ('name', 'version')
-
-    name = factory.Sequence(lambda n: f'Zen{n}')
-    version = factory.LazyAttribute(lambda _: fake.word())

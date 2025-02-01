@@ -6,7 +6,7 @@ from apps.core.models import QueryZen, Execution
 class CreateZenSerializer(serializers.ModelSerializer):
     class Meta:
         model = QueryZen
-        fields = ('version', 'description', 'query')
+        fields = ('description', 'query')
 
 
 class DeleteZenSerializer(serializers.ModelSerializer):

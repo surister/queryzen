@@ -109,13 +109,6 @@ class CollectionsViewSet(viewsets.ModelViewSet):
         serializer = CreateZenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        if QueryZen.objects.filter(
-                name=zen_name,
-                version=serializer.validated_data['version'],
-                collection=collection_name
-        ).exists():
-            raise ValidationError(f'This zen already has a version {serializer.validated_data["version"]}')
-
         zen = QueryZen.objects.create(
             **serializer.validated_data,
             **{'name': zen_name, 'collection': collection_name}
