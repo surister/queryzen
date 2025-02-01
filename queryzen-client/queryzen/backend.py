@@ -1,3 +1,9 @@
+"""
+Code for the backend ABC class and HTTP implementation, if you implement QueryZen in other protocol
+you would use classes in this file to make a new Client-Api for that new implementation.
+
+Implement QueryZenClientABC to make a new client.
+"""
 import abc
 import dataclasses
 import datetime
@@ -6,6 +12,7 @@ import urllib
 
 import httpx
 
+from queryzen.queryzen import DEFAULT_COLLECTION
 from queryzen.types import _AUTO
 
 
@@ -17,7 +24,7 @@ class Url(str):
     def __truediv__(self, other):
         return Url(
             self +
-            f'{"/" if not self.endswith('/') else ""}' +
+            f'{'/' if not self.endswith('/') else ''}' +
             str(other)
         )
 
@@ -39,38 +46,48 @@ class QueryZenResponse:
         """Returns whether the action resulted in an error."""
         return not self.error
 
-
 class QueryZenClientABC(abc.ABC):
     """
     Abstract class for a QueryZen client.
     """
 
     @abc.abstractmethod
-    def create(self, name, version, collection, description, query) -> QueryZenResponse:
-        pass
+    def create(self, *, name, version, collection, description, query) -> QueryZenResponse:
+        """Create one ``Zen``"""
+
 
     @abc.abstractmethod
-    def get_one(self, name: str, version: str) -> QueryZenResponse:
-        pass
+    def get(self, name: str, version: str) -> QueryZenResponse:
+        """Get ``Zen``"""
+
 
     @abc.abstractmethod
-    def get_all(self, **filters) -> list[QueryZenResponse]:
-        pass
+    def list(self, **filters) -> list[QueryZenResponse]:
+        """Get all ``Zen`` and filter them by ``filters``"""
 
     @abc.abstractmethod
-    def delete(self) -> QueryZenResponse:
-        pass
+    def delete(
+            self,
+            name: str,
+            version: int,
+            collection: str = DEFAULT_COLLECTION
+    ) -> QueryZenResponse:
+        """Abc method for deleting a ``Zen``"""
 
     @abc.abstractmethod
-    def run(self) -> QueryZenResponse:
-        pass
-
+    def run(
+            self,
+            name: str,
+            version: int,
+            collection: str = DEFAULT_COLLECTION
+    ) -> QueryZenResponse:
+        """Run a ``Zen``"""
 
 class QueryZenHttpClient(QueryZenClientABC):
     """
     QueryZen HTTP implementation, the default implementation and implemented by QueryZen.
 
-    This class handles the management of zens in sync with the HTTP backend developed by us.
+    This class handles the management of ``Zen``s in sync with the HTTP backend developed by us.
 
     It uses httpx to make the http requests.
     """
@@ -87,10 +104,20 @@ class QueryZenHttpClient(QueryZenClientABC):
                *,
                name: str,
                version: int | _AUTO,
-               collection: str = 'main',
+               collection: str = DEFAULT_COLLECTION,
                description: str = '',
                query: str,
                ) -> QueryZenResponse:
+        """
+        Creates a ``Zen`` via PUT request to the backend.
+
+        Args:
+            name: The name of the ``Zen``
+            version: The version of the ``Zen``
+            collection: The name of the collection, default is ``DEFAULT_COLLECTION``
+            description: The description of the ``Zen``
+            query: The query of the ``Zen``
+        """
         z_response = QueryZenResponse()
 
         response = self.client.put(
@@ -116,7 +143,7 @@ class QueryZenHttpClient(QueryZenClientABC):
         z_response.data = resp_data if isinstance(resp_data, list) else [resp_data]
         return z_response
 
-    def get_all(self, **filters) -> QueryZenResponse:
+    def list(self, **filters) -> QueryZenResponse:
         z_response = QueryZenResponse()
 
         response = httpx.get(
@@ -129,10 +156,11 @@ class QueryZenHttpClient(QueryZenClientABC):
 
         return z_response
 
-    def get_one(self, name: str, version: int, collection: str = 'main') -> QueryZenResponse:
-        """
-        List all zens from a given name, version and collection can return many.
-        """
+    def get(self,
+            name: str,
+            version: int,
+            collection: str = DEFAULT_COLLECTION
+            ) -> QueryZenResponse:
         z_response = QueryZenResponse()
 
         response = self.client.get(
@@ -141,12 +169,13 @@ class QueryZenHttpClient(QueryZenClientABC):
 
         if response.is_error:
             z_response.error = response.text
+
         z_response.data = response.json()
 
         return z_response
 
-    def delete(self, name, version):
-        raise NotImplemented
+    def delete(self, name: str, version: int, collection: str = DEFAULT_COLLECTION):
+        raise NotImplementedError()
 
-    def run(self, name: str, version: int, parameters: dict) -> dict:
-        raise NotImplemented
+    def run(self, name: str, version: int, collection: str = DEFAULT_COLLECTION) -> dict:
+        raise NotImplementedError()

@@ -1,7 +1,31 @@
+# pylint: disable=C0114
+
 from os import getenv
 import logging
 
-from .queryzen import QueryZen, Zen, DEFAULT_COLLECTION
+from .exceptions import IncompatibleAPI
+from .queryzen import QueryZen, Zen, DEFAULT_COLLECTION, AUTO
+
+
+def strtobool(val) -> bool:
+    """Convert a string representation of truth to true (1) or false (0).
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
+    are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
+    'val' is anything else.
+    """
+    if isinstance(val, bool):
+        return val
+
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return True
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return False
+    else:
+        raise ValueError(f'invalid truth value {val}')
+
+
+__version__ = 1.22
 
 # We test the unit tests against the backend itself to ensure 100% client/backend compatability.
 # The version of the API that we tested against.
@@ -17,12 +41,11 @@ API_VERSION_COMPATIBLE = 1.23
 # Fixme make this getenv result be interpreted as Python 'True/False'.
 # Fixme make a step in the CI that checks that this is True in publish time.
 #
-ENFORCE_COMPATABILITY = getenv('QUERYZEN_ENFORCE_COMPATABILITY_RUNTIME', False)
+
+ENFORCE_COMPATABILITY = strtobool(getenv('QUERYZEN_ENFORCE_COMPATABILITY_RUNTIME', 'false'))
 
 # What to do if we find an incompatibility, set to raise in publish.
 ENFORCE_COMPATABILITY_ACTION = getenv('QUERYZEN_ENFORCE_COMPATABILITY_RUNTIME_ACTION', 'warn')
-
-__version__ = 1.22
 
 
 def get_api_version():
@@ -30,8 +53,8 @@ def get_api_version():
     return 0
 
 
-def is_api_compatible(backend_version):
-    return API_VERSION_COMPATIBLE == backend_version()
+def is_api_compatible(version):
+    return API_VERSION_COMPATIBLE == version
 
 
 # Question, do we check only this at publish time or runtime?
@@ -39,21 +62,24 @@ if ENFORCE_COMPATABILITY:
     backend_version = get_api_version()
     if not is_api_compatible(backend_version):
         message = f"""
-        Package version {__version__!r} compatibility is untested for backend version {backend_version!r},
-        compatibility is only tested for {API_VERSION_COMPATIBLE!r}, please update the package to the latest
-        version.
+        Package version {__version__!r} compatibility is untested for backend version
+        {backend_version!r}, compatibility is only tested for {API_VERSION_COMPATIBLE!r},
+        please update the package to the latest version.
         
         You can turn this off by setting the env variable 'ENFORCE_COMPATABILITY' to 'false'.
         
         If the package is in the latest version and this still triggers, there is a bug, please
-        report this message in a github issue #fixme Add github link
-                """ # fixme Add github link
+        report this message in a github issue at:
+        https://github.com/surister/queryzen/issues/new/choose
+                """
         if ENFORCE_COMPATABILITY_ACTION == 'raise_exception':
-            raise Exception(message)
+            raise IncompatibleAPI(message)
         else:
-            logging.WARN(message)
+            logging.warning(message)
 
 __all__ = [
     'QueryZen',
-    'Zen'
+    'Zen',
+    'DEFAULT_COLLECTION',
+    'AUTO'
 ]
