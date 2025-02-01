@@ -4,7 +4,9 @@ from os import getenv
 import logging
 
 from .exceptions import IncompatibleAPI
-from .queryzen import QueryZen, Zen, DEFAULT_COLLECTION, AUTO
+from .queryzen import QueryZen, Zen, AUTO
+from .constants import DEFAULT_COLLECTION
+
 
 
 def strtobool(val) -> bool:
