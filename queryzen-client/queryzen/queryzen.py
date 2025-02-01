@@ -6,14 +6,11 @@ import dataclasses
 import datetime
 import typing
 
-from queryzen.backend import QueryZenHttpClient, QueryZenClientABC
-from queryzen.exceptions import ZenAlreadyExists, ZenDoesNotExist, UnknownError
-from queryzen.types import AUTO, Rows
-from queryzen.types import Columns
+from .backend import QueryZenHttpClient, QueryZenClientABC
+from .exceptions import ZenAlreadyExists, ZenDoesNotExist, UnknownError
+from .types import AUTO, Rows, Columns
+from .constants import DEFAULT_COLLECTION
 
-# The default collection of queryzen is 'main', if not specified
-# we will always query this. # Fixme unit test this.
-DEFAULT_COLLECTION = 'main'
 
 @dataclasses.dataclass
 class ZenExecution:
