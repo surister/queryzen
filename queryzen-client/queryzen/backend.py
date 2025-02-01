@@ -12,8 +12,8 @@ import urllib
 
 import httpx
 
-from queryzen.queryzen import DEFAULT_COLLECTION
-from queryzen.types import _AUTO
+from .constants import DEFAULT_COLLECTION
+from .types import _AUTO
 
 
 class Url(str):
