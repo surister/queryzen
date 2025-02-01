@@ -80,7 +80,6 @@ def generate_zens(entities):
                 name=random.choice(query_names),
                 description=fake.text(),
                 query=generate_random_sql(),
-                version=f"v{fake.random_int(min=1, max=10)}.{fake.random_int(min=0, max=9)}",
                 state=fake.random_element(QueryZen.State.values)
             )
         except IntegrityError:
