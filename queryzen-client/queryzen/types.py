@@ -1,3 +1,7 @@
+"""
+Types for our typing needs, we aim to be 100% type safe and enforce correctness with mypi.
+"""
+
 from typing import Literal
 
 Column = str
@@ -6,7 +10,7 @@ Columns = list[Column]
 Row = list | tuple
 Rows = list[Row]
 
-ColumnCenter = Literal["left", "center", "right"]
+ColumnCenter = Literal['left', 'center', 'right']
 
 
 class _AUTO:

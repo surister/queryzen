@@ -1,10 +1,11 @@
+# pylint: skip-file
+
 import pytest
 import datetime
 
 from queryzen import QueryZen
 from queryzen.backend import QueryZenResponse
 from queryzen.queryzen import QueryZenClientABC, Zen
-from queryzen.exceptions import ZenAlreadyExists
 
 def filter_dataclasses(items: list, filters: dict[str, object]) -> list:
     return [item for item in items if all(getattr(item, k) == v for k, v in filters.items())]
@@ -47,7 +48,7 @@ class MockQueryZenBackendClient(QueryZenClientABC):
             data=[]
         )
 
-    def get_all(self, **filters) -> 'QueryZenResponse':
+    def list(self, **filters) -> 'QueryZenResponse':
         if not filters:
             print(list(map(lambda x: x.to_dict(), self.zens)))
             zens = list(map(lambda x: x.to_dict(), self.zens))
@@ -62,7 +63,7 @@ class MockQueryZenBackendClient(QueryZenClientABC):
             data=zens
         )
 
-    def get_one(self, name: str, version: str) -> 'QueryZenResponse':
+    def get(self, name: str, version: str) -> 'QueryZenResponse':
 
         zen = list(
             map(
@@ -109,21 +110,22 @@ def local_queryzen():
     qz = QueryZen()
 
     # We copy the current state of the database before a test, run the test, which modifies the DB
-    # and then put everything back, albeit a bit dirty, it allows us to run the unit tests on the actual
-    # database (avoiding mocking).
+    # and then put everything back, albeit a bit dirty, it allows us to run the unit tests
+    # on the actual database (avoiding mocking).
 
-    # Risk: It depends on the monorepo nature of the project, not suitable for CI runs, it's helpful
-    # right now where we don't want to invest time creating a super-dupper mock class for our backend.
+    # Risk: It depends on the monorepo nature of the project, not suitable for CI runs,
+    # it's helpful right now where we don't want to invest time creating a super-dupper
+    # mock class for our backend.
 
     import pathlib, shutil
-    DB_PATH = pathlib.Path(__file__).parent.parent.parent / 'queryzen-api'
+    db_path = pathlib.Path(__file__).parent.parent.parent / 'queryzen-api'
 
-    shutil.copy2(DB_PATH / 'db.sqlite3', DB_PATH / 'tmp.db.sqlite3')
+    shutil.copy2(db_path / 'db.sqlite3', db_path / 'tmp.db.sqlite3')
 
     yield qz
 
-    shutil.copy2(DB_PATH / 'tmp.db.sqlite3', DB_PATH / 'db.sqlite3')
-    (DB_PATH / 'tmp.db.sqlite3').unlink()
+    shutil.copy2(db_path / 'tmp.db.sqlite3', db_path / 'db.sqlite3')
+    (db_path / 'tmp.db.sqlite3').unlink()
 
 
 @pytest.fixture

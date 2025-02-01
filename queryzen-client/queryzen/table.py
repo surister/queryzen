@@ -1,11 +1,7 @@
 """
 Utilities to create Markdown tables.
 """
-
-import dataclasses
-import datetime
-
-from .types import Columns, Column, Row, Rows, ColumnCenter
+from .types import Columns, Rows, ColumnCenter
 
 
 def center_string(string: str, pad_length: int, direction: ColumnCenter = "left") -> str:
