@@ -81,7 +81,8 @@ class CollectionsViewSet(viewsets.ModelViewSet):
             query_result = async_job.get(timeout=getattr(settings, 'ZEN_TIMEOUT'))
             return Response(query_result)
         except Exception as e:
-            return Response({'msg': f'{self.request.method} is timeout'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(f'Running a Zen resulted in an uncaught exception: {e}',
+                            status=status.HTTP_400_BAD_REQUEST)
 
     def _delete_zen(self, request, collection_name, zen_name):
         serializer = DeleteZenSerializer(data=request.data)
@@ -130,6 +131,7 @@ class CollectionsViewSet(viewsets.ModelViewSet):
             QueryZenSerializer(queryset, many=True).data,
         )
 
-    @action(detail=True, methods=['get', 'put', 'delete', 'post'], url_path='zen/(?P<zen_name>[^/.]+)')
+    @action(detail=True, methods=['get', 'put', 'delete', 'post'],
+            url_path='zen/(?P<zen_name>[^/.]+)')
     def zen(self, request, pk, *args, **kwargs):
         return self._handle_request(request, pk, *args, **kwargs)
