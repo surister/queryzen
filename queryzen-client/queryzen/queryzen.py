@@ -7,7 +7,7 @@ import datetime
 import typing
 
 from .backend import QueryZenHttpClient, QueryZenClientABC
-from .exceptions import ZenDoesNotExist, UncaughtBackendError
+from .exceptions import ZenAlreadyExists, ZenDoesNotExist, UnknownError
 from .types import AUTO, Rows, Columns
 from .constants import DEFAULT_COLLECTION
 
@@ -84,35 +84,16 @@ class QueryZen:
         )
 
         if response.error:
-            raise UncaughtBackendError(
-                response=response,
-                zen=Zen(
-                    id=-1,
-                    version=-1,
-                    created_at=None,
-                    name=name,
-                    query=query,
-                    collection=collection,
-                    description=description
-                ),
-                context='This was raise while creating a Zen.'
-            )
+            if response.error_code == 409:
+                raise ZenAlreadyExists(response.error)
+            raise UnknownError(response.error, status_code=response.error_code)
 
         if not response.data:
-            raise UncaughtBackendError(
-                response=response,
-                zen=Zen(
-                    id=-1,
-                    version=-1,
-                    created_at=-1,
-                    name=name,
-                    query=query,
-                    collection=collection,
-                    description=description
-                ),
-                context='When creating a Zen, the JSON representation '
-                        'of the object was not returned'
-            )
+            raise UnknownError(
+                'When creating a Zen, the JSON representation '
+                'of the object was not returned',
+                 response.error_code
+            )  # Fixme improve this
 
         return Zen(**response.data[0])
 
@@ -154,11 +135,7 @@ class QueryZen:
             raise ZenDoesNotExist()
 
         if response.error:
-            raise UncaughtBackendError(
-                response=response,
-                zen=Zen.empty(),
-                context='Getting a Zen'
-            )
+            raise UnknownError(response.error, status_code=response.error_code)
 
         return Zen(**response.data[0])
 
@@ -195,11 +172,7 @@ class QueryZen:
         response = self._client.list(**filters)
 
         if response.error:
-            raise UncaughtBackendError(
-                response,
-                zen=Zen.empty(),
-                context="Listing Zens"
-            )
+            raise UnknownError(response.error, status_code=response.error_code)
 
         return [
             Zen(**data) for data in response.data
