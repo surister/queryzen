@@ -75,9 +75,7 @@ class QueryZenClientABC(abc.ABC):
     @abc.abstractmethod
     def delete(
             self,
-            name: str,
-            version: int,
-            collection: str = DEFAULT_COLLECTION
+            zen: 'Zen',
     ) -> QueryZenResponse:
         """Abc method for deleting a ``Zen``"""
 
@@ -185,9 +183,12 @@ class QueryZenHttpClient(QueryZenClientABC):
         )
         return self.make_response(response)
 
-        z_response.data = response.json()
+    def delete(self, zen: 'Zen') -> QueryZenResponse:
+        response = self.client.delete(
+            self.url / self.COLLECTIONS / zen.collection / self.MAIN_ENDPOINT / zen.name + '/',
+        )
+        return self.make_response(response)
 
-        return z_response
 
     def run(self,
             name: str,
