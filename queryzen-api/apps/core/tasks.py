@@ -26,16 +26,16 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
         columns, rows = db_instance.execute(zen.query, parameters)
         execution.state = Execution.State.VALID
         zen.state = QueryZen.State.VALID
-    except sqlite3.OperationalError as exc:
+    except sqlite3.OperationalError as e:
+        error = str(e)
         execution.state = Execution.State.INVALID
-        error = str(exc)
         zen.state = QueryZen.State.INVALID
 
     zen.save()
     execution.save()
 
     finished_at = datetime.datetime.now(datetime.UTC)
-    execution_time = (finished_at - executed_at).total_seconds() * 1000
+    execution_time = (finished_at - executed_at).total_seconds() * 1000 # milliseconds
 
     response = ZenExecutionResponseSerializer(
         {
