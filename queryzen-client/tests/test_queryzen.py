@@ -52,6 +52,7 @@ def test_queryzen_get_one(queryzen):
     q = queryzen.get(name=name)
     check_zen(q, name, version=1, query=query)
 
+
 def test_uncaught_api_error_is_reported(queryzen):
     # All defined API error, like 409 for a Zen that already exists are handled
     # by the client, if any uncaught one shows up, we raise it.
