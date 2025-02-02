@@ -101,8 +101,17 @@ class Zen:
 
     @classmethod
     def empty(cls):
-        """Returns an empty Zen, used for testing and debugging."""
-        return Zen(id=-1, name='_', version=-1, query='_', description='-1', created_at=-1)
+        """
+        Returns an empty Zen, used for testing and debugging or when you just need an empty Zen.
+
+        Integer values are -1 and string values are '_', anything else might be a -1 even
+        """
+        return Zen(id=-1,
+                   name='_',
+                   version=-1,
+                   query='_',
+                   description='-1',
+                   created_at=datetime.datetime.now())
 
 class QueryZen:
     """
