@@ -401,7 +401,6 @@ class QueryZen:
                 zen=zen,
                 context='Backend returned ok but did not send data back'
             )
-        print('execution')
         execution = ZenExecution(
             rows=response.get_from_data('rows'),
             columns=response.get_from_data('columns'),
@@ -411,6 +410,5 @@ class QueryZen:
             finished_at=response.get_from_data('finished_at'),
             execution_duration=response.get_from_data('execution_time_ms')
         )
-        print(execution)
         zen.executions.append(execution)
         return execution
