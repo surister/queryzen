@@ -8,48 +8,32 @@ import pytest
 
 from queryzen import Zen, DEFAULT_COLLECTION
 from queryzen.backend import QueryZenResponse
-from queryzen.exceptions import UnknownError, ZenAlreadyExists, ZenDoesNotExist
+from queryzen.exceptions import UncaughtBackendError, ZenDoesNotExist
 
 
 def check_zen(zen: Zen, name, query, version):
     assert isinstance(zen, Zen)
     assert zen.query == query
     assert zen.name == name
-    assert str(zen.version) == version
+    assert zen.version == version
 
 
-def test_queryzen_create_one(queryzen):
+def test_queryzen_create(queryzen):
     query = 'select * from mountain where :height > 10'
     name = 'mountain_view'
 
-    q = queryzen.create('mountain_view', query)
-    check_zen(q, name, query, 'latest')
+    q = queryzen.create(name, query=query)
+    check_zen(q, name, query, 1)
 
-    version = '2'
-    name = name + '3'
-
-    q = queryzen.create(name, query=query, version=version)
-
-    check_zen(q, name, query, version)
+    q = queryzen.create(name, query=query)
+    check_zen(q, name, query, 2)
 
 
-def test_queryzen_create_repeated_collection(queryzen):
+def test_queryzen_create_same_collection(queryzen):
+    # Different collections should not raise anything.
     queryzen.create('mountain_view', collection='m', query='q')
-
-    with pytest.raises(ZenAlreadyExists):
-        queryzen.create('mountain_view', collection='m', query='q')
-
-    # Same name but different collection shouldn't raise
+    queryzen.create('mountain_view', collection='m', query='q')
     queryzen.create('mountain_view', collection='a', query='q')
-
-
-def test_queryzen_create_repeated_version(queryzen):
-    queryzen.create('mountain_view', collection='m', query='q', version=1)
-
-    with pytest.raises(ZenAlreadyExists):
-        queryzen.create('mountain_view', collection='m', query='q', version=1)
-
-    queryzen.create('mountain_view', collection='m', query='q', version=2)
 
 
 def test_queryzen_default_collection(queryzen):
@@ -66,12 +50,7 @@ def test_queryzen_get_one(queryzen):
     queryzen.create(name, query=query)
 
     q = queryzen.get(name=name)
-    check_zen(q, name, version='latest', query=query)
-
-    version = '4'
-    q = queryzen.create(name, query=query, version=version)
-    check_zen(q, name, query, version)
-
+    check_zen(q, name, version=1, query=query)
 
 def test_uncaught_api_error_is_reported(queryzen):
     # All defined API error, like 409 for a Zen that already exists are handled
@@ -83,19 +62,19 @@ def test_uncaught_api_error_is_reported(queryzen):
     queryzen._client.delete = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
     queryzen._client.list = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
 
-    with pytest.raises(UnknownError):
+    with pytest.raises(UncaughtBackendError):
         queryzen.create('s', 's')
 
-    with pytest.raises(UnknownError):
+    with pytest.raises(UncaughtBackendError):
         queryzen.get('s')
 
-    with pytest.raises(UnknownError):
+    with pytest.raises(UncaughtBackendError):
         queryzen.get_or_create('a', 'b')
     # Delete is not implemented
     # with pytest.raises(UnknownError):
     #     queryzen.delete('s', 's')
 
-    with pytest.raises(UnknownError):
+    with pytest.raises(UncaughtBackendError):
         queryzen.list()
 
 
@@ -114,10 +93,10 @@ def test_queryzen_get_or_create(queryzen):
     """
     name = 'zen'
     query = 'q'
-    version = '3'
+    version = 1
 
     # Zen should not exist at this point.
-    created, zen = queryzen.get_or_create(name=name, query=query, version=version)
+    created, zen = queryzen.get_or_create(name=name, query=query)
 
     assert isinstance(created, bool)
     assert created is True
@@ -135,29 +114,31 @@ def test_queryzen_list(queryzen):
     """
     Test queryzen.list
     """
-    qz = queryzen
 
-    qs = qz.list()
+    qs = queryzen.list()
     assert not qs  # Is empty
 
-    _ = qz.create('z', 'select 1')
-    qz.create('z', 'select 2', version=2)
+    q = queryzen.create('z', 'select 1')
+    queryzen.create('z', 'select 2')
 
-    qs = qz.list()
+    qs = queryzen.list()
 
     assert len(qs) == 2
     assert isinstance(qs, list)
-    # assert _ in qs # fixme why it fails
+    assert qs[0].version == 1
+    assert q == qs[0]
+    assert qs[1].version == 2
+
 
 
 def test_queryzen_filters(queryzen):
     qz = queryzen
     name = 'name1'
     collection = 'col1'
-    version = '1'
-    qz.create(name, version=version, query='q', collection=collection)
-    qz.create(name, version='2', query='q', collection=collection)
-    qz.create('name2', version=version, query='q')
+    version = 1
+    qz.create(name, query='q', collection=collection)
+    qz.create(name, query='q', collection=collection)
+    qz.create('name2', query='q')
 
     result: list[Zen] = qz.list(name=name)
 
