@@ -10,20 +10,44 @@ from .backend import QueryZenHttpClient, QueryZenClientABC
 from .exceptions import ZenDoesNotExist, UncaughtBackendError
 from .types import AUTO, Rows, Columns
 from .constants import DEFAULT_COLLECTION
+from .table import make_table, ColumnCenter
 
 
 @dataclasses.dataclass
 class ZenExecution:
     """
-    Represents the execution of a Zen in a Zen backend.
+    Represents the execution of a Zen in a Zen backend. If backend does not return row_count,
+    we compute it ourselves with `len(rows)`, if there are a lot it could be slow, ideally the
+    database also returns the row_count.
+
+    Args:
+        rows: The rows of the response.
+        columns: The columns of the response.
+        row_count: How many rows there are.
+        executed_at: The time the query was executed in UTC.
+        finished_at: The time the query finished running in UTC.
+        execution_duration: The milliseconds it took the query to run.
     """
     rows: Rows
     columns: Columns
     row_count: int
+    executed_at: datetime.datetime
+    finished_at: datetime.datetime
+    execution_duration: int
 
     def has_data(self):
         return self.row_count > 0
 
+    def as_table(self, column_center: ColumnCenter = 'left'):
+        return make_table(columns=self.columns,
+                          rows=self.rows,
+                          column_center=column_center)
+
+    def iter_rows(self):
+        return iter(self.rows)
+
+    def iter_cols(self):
+        pass
 
 
 @dataclasses.dataclass
@@ -41,7 +65,7 @@ class Zen:
     created_by: str = dataclasses.field(default_factory=lambda: 'not_implemented')
     state: typing.Literal['valid', 'invalid', 'unknown'] = dataclasses.field(
         default_factory=lambda: 'unknown')
-    executions: list = dataclasses.field(default_factory=list)  # Improve typing
+    executions: list[ZenExecution] = dataclasses.field(default_factory=list)  # Improve typing
 
     def to_dict(self) -> dict:
         """Transform the instance into a dictionary"""
