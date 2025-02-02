@@ -125,6 +125,33 @@ class QueryZenTestCase(TestCase):
         assert zen.name == name
         assert zen.collection == collection
 
+    def test_create_new_queryzen_will_increase_version(self):
+        """
+        When a new queryzen is created with the same name and collection than a previous one, it will increase the
+        version + 1
+        """
+        q = QueryZenFactory.create(
+            name='testing_zen',  # default collection is main
+        )
+
+        payload = {
+            'query': 'SELECT * from testing_zen WHERE test > :param',
+            'description': 'testing_zen',
+        }
+
+        url = reverse('collections-zen', args=[q.collection, q.name])
+
+        zens_before = QueryZen.objects.count()
+        response = self.client.put(url, payload, content_type='application/json')
+        zens_after = QueryZen.objects.count()
+
+        zen = QueryZen.objects.get(pk=response.data.get('id'))
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data is not None
+        assert zens_after == zens_before + 1
+        assert zen.version == q.version + 1
+
     def test_delete_zen(self):
         """
         Delete an existing zen
