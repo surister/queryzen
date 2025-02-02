@@ -13,7 +13,6 @@ import urllib
 import httpx
 
 from .constants import DEFAULT_COLLECTION
-from .types import _AUTO
 
 
 class Url(str):
@@ -52,13 +51,13 @@ class QueryZenClientABC(abc.ABC):
     """
 
     @abc.abstractmethod
-    def create(self, *, name, version, collection, description, query) -> QueryZenResponse:
+    def create(self, *, name, collection, description, query) -> QueryZenResponse:
         """Create one ``Zen``"""
 
 
     @abc.abstractmethod
-    def get(self, name: str, version: str) -> QueryZenResponse:
-        """Get ``Zen``"""
+    def get(self, name: str, version: str, collection: str) -> QueryZenResponse:
+        """Get a ``Zen``"""
 
 
     @abc.abstractmethod
@@ -103,7 +102,6 @@ class QueryZenHttpClient(QueryZenClientABC):
     def create(self,
                *,
                name: str,
-               version: int | _AUTO,
                collection: str = DEFAULT_COLLECTION,
                description: str = '',
                query: str,
@@ -111,9 +109,12 @@ class QueryZenHttpClient(QueryZenClientABC):
         """
         Creates a ``Zen`` via PUT request to the backend.
 
+        The version is automatically handled by QueryZen, it is an integer that is auto-incremented
+        e.g. 1, 2, 3
+
+
         Args:
             name: The name of the ``Zen``
-            version: The version of the ``Zen``
             collection: The name of the collection, default is ``DEFAULT_COLLECTION``
             description: The description of the ``Zen``
             query: The query of the ``Zen``
@@ -124,8 +125,7 @@ class QueryZenHttpClient(QueryZenClientABC):
             self.url / self.COLLECTIONS / collection / self.MAIN_ENDPOINT / name + '/',
             json={
                 'description': description,
-                'query': query,
-                'version': str(version)
+                'query': query
             }
         )
 
