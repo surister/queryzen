@@ -7,5 +7,3 @@ RUN pip install poetry
 COPY pyproject.toml .
 
 RUN poetry install
-
-COPY . .
