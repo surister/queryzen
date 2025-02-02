@@ -51,6 +51,11 @@ class QueryZenClientABC(abc.ABC):
     """
 
     @abc.abstractmethod
+    def make_response(self, response) -> QueryZenResponse:
+        """
+        Maps the response from the client to the general Response class ``QueryZenResponse``
+        """
+    @abc.abstractmethod
     def create(self, *, name, collection, description, query) -> QueryZenResponse:
         """Create one ``Zen``"""
 
@@ -99,6 +104,27 @@ class QueryZenHttpClient(QueryZenClientABC):
             os.getenv('API_URL') or 'http://localhost:8000'
         )
 
+    def make_response(self, response: httpx.Response) -> QueryZenResponse:
+        """
+        Httpx implementation of `make_response`, error in details like {'detail': 'error'} are
+        flattened out, if several errors are returned we will lose them.
+
+        assigned `error_code`s are HTTP error codes.
+        """
+        z_response = QueryZenResponse()
+        resp_data = response.json()
+
+        # Error handling.
+        if not response.is_success:
+            z_response.error_code = response.status_code
+
+            # If api response with {'detail': 'error'} we unwrap it to have flat messages.
+            z_response.error = resp_data.get('detail') if 'detail' in resp_data else response.text
+
+        # Make it always a list
+        z_response.data = resp_data if isinstance(resp_data, list) else [resp_data]
+        return z_response
+
     def create(self,
                *,
                name: str,
@@ -128,20 +154,7 @@ class QueryZenHttpClient(QueryZenClientABC):
                 'query': query
             }
         )
-
-        resp_data = response.json()
-
-        # Error handling.
-        if not response.is_success:
-            z_response.error_code = response.status_code
-
-            # If api response with {'detail': 'error'} we unwrap it to have nicer messages
-            z_response.error = resp_data.get(
-                'detail') if 'detail' in resp_data else resp_data
-
-        # Make it always in a list
-        z_response.data = resp_data if isinstance(resp_data, list) else [resp_data]
-        return z_response
+        return self.make_response(response)
 
     def list(self, **filters) -> QueryZenResponse:
         z_response = QueryZenResponse()
@@ -150,11 +163,7 @@ class QueryZenHttpClient(QueryZenClientABC):
             self.url / self.MAIN_ENDPOINT / '?' + urllib.parse.urlencode(filters)
         )
 
-        if response.is_error:
-            z_response.error = response.text
-        z_response.data = response.json()
-
-        return z_response
+        return self.make_response(response)
 
     def get(self,
             name: str,
@@ -166,9 +175,7 @@ class QueryZenHttpClient(QueryZenClientABC):
         response = self.client.get(
             self.url / self.COLLECTIONS / collection / self.MAIN_ENDPOINT / name + '/',
         )
-
-        if response.is_error:
-            z_response.error = response.text
+        return self.make_response(response)
 
         z_response.data = response.json()
 
