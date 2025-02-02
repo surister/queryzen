@@ -129,16 +129,15 @@ class QueryZen:
 
         ```
     """
+
     def __init__(self, client: QueryZenClientABC | None = None):
         self._client: QueryZenClientABC = client or QueryZenHttpClient()
 
-    def create(
-            self,
-            name: str,
-            query: str,
-            description: str = None,
-            collection: str = DEFAULT_COLLECTION
-    ):
+    def create(self,
+               name: str,
+               query: str,
+               description: str = None,
+               collection: str = DEFAULT_COLLECTION):
         response = self._client.create(
             name=name,
             query=query,
@@ -179,7 +178,9 @@ class QueryZen:
 
         return Zen(**response.data[0])
 
-    def get(self, name: str, collection=DEFAULT_COLLECTION, version=AUTO) -> Zen:
+    def get(self,
+            name: str, collection=DEFAULT_COLLECTION,
+            version=AUTO) -> Zen:
         """
         Get one zen from the given name, collection and version, raises ``ZenDoesNotExist``
         if it does not exist.
@@ -276,7 +277,6 @@ class QueryZen:
     ) -> (bool, Zen):
         """
         Get a Zen or create it.
-
 
         Examples:
             >>> qz = QueryZen()
@@ -400,7 +400,7 @@ class QueryZen:
             raise UncaughtBackendError(
                 response,
                 zen=zen,
-                conetxt=f'Backend returned ok but did not send data back'
+                context='Backend returned ok but did not send data back'
             )
         print('execution')
         execution = ZenExecution(

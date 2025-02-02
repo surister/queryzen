@@ -1,6 +1,6 @@
-import datetime
+# pylint: skip-file
 
-import pytest
+import datetime
 
 from queryzen import DEFAULT_COLLECTION
 from queryzen import Zen
@@ -26,23 +26,24 @@ def test_zen_difference():
     zen.name = 'd'
     assert list(Zen.empty().difference(zen).keys()) == ['name', 'version']
 
-
     difference = ['id', 'query']
     zen = Zen.empty()
     zen.id = '123'
     zen.query = '123'
     assert list(Zen.empty().difference(zen, difference).keys()) == difference
 
+
 def test_zen_defaults():
-    zen  = Zen(id=-1,
-               name='_',
-               version=-1,
-               query='_',
-               description='-1',
-               created_at=datetime.datetime.now()
-               )
+    zen = Zen(id=-1,
+              name='_',
+              version=-1,
+              query='_',
+              description='-1',
+              created_at=datetime.datetime.now()
+              )
 
     assert zen.collection == DEFAULT_COLLECTION
+
 
 def test_zen_to_dict():
     t = datetime.datetime.now()
