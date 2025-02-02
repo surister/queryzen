@@ -13,13 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def run_query(target: str, zen_id: str, parameters: dict or None = None):
+def run_query(target: str, zen_id: str, parameters: dict | None = None):
     executed_at = datetime.datetime.now(datetime.UTC)
     zen = QueryZen.objects.get(pk=zen_id)
     execution = Execution(zen=zen)
     db_instance: Database = getattr(settings, 'ZEN_DATABASES').get(target)
 
-    error: str or None = None
+    error: str | None = None
     columns = rows = []
     try:
         columns, rows = db_instance.execute(zen.query, parameters)
