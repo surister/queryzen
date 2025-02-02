@@ -301,8 +301,117 @@ class QueryZen:
         except ZenDoesNotExist:
             return True, self.create(name=name, collection=collection, query=query)
 
-    def delete(self):
-        raise NotImplementedError
+    def delete(self, zen: Zen) -> bool:
+        """
+        Deletes a Zen
 
-    def run(self, **params) -> None:
-        raise NotImplementedError
+        Args:
+            zen: The zen to delete.
+
+        Examples:
+
+            Delete the latest Zen.
+
+            ```
+
+            from queryzen import QueryZen
+
+            qz = QueryZen()
+
+            zen = qz.create('z', 'select 1')
+
+            qz.delete(zen)
+
+            ```
+
+            Delete a Zen by version.
+
+            ```
+
+            from queryzen import QueryZen
+
+            qz = QueryZen()
+
+            try:
+                zen = qz.get('z', version=3)
+                qz.delete(zen)
+            except queryzen.ZenDoesNotExist:
+                print('Why are we trying to delete a Zen that does not exist?')
+
+            ```
+
+        Returns:
+            if the zen was deleted.
+        """
+        response = self._client.delete(zen)
+
+        if response.error:
+            raise UncaughtBackendError(
+                response,
+                zen=zen,
+                context='Deleting Zen'
+            )
+        return True
+
+    def run(self, zen: Zen, **params):
+        """
+        Runs a zen with the given parameters.
+
+        Args:
+            zen: The zen to run.
+            params: Parameters to send to the backend.
+
+
+        Backend Parameters:
+            ``timeout`` (int): Time in seconds the backend will take until returning a timeout error
+            ``database`` (str): The database the Zen will be run to, if none is defined the default
+            one will be used. If you only have one defined, that will be the default.
+
+        Examples:
+            ```
+
+            from queryzen import QueryZen
+
+            qz = QueryZen()
+
+            q = qz.create('q', 'select 1')
+
+            result = qz.run(q, timeout=1000, database='postgres_main')
+
+            print(result.as_table())
+
+            ```
+        """
+        response = self._client.run(
+            name=zen.name,
+            collection=zen.collection,
+            version=zen.version,
+            **params
+        )
+
+        if response.error:
+            raise UncaughtBackendError(
+                response,
+                zen=zen,
+                context=f'Running a Zen with: params {params}'
+            )
+
+        if not response.data:
+            raise UncaughtBackendError(
+                response,
+                zen=zen,
+                conetxt=f'Backend returned ok but did not send data back'
+            )
+        print('execution')
+        execution = ZenExecution(
+            rows=response.get_from_data('rows'),
+            columns=response.get_from_data('columns'),
+            row_count=len(response.get_from_data('rows'))
+            if not hasattr(response.data[0], 'row_count') else response.get_from_data('row_count'),
+            executed_at=response.get_from_data('executed_at'),
+            finished_at=response.get_from_data('finished_at'),
+            execution_duration=response.get_from_data('execution_time_ms')
+        )
+        print(execution)
+        zen.executions.append(execution)
+        return execution
