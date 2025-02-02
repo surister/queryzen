@@ -290,7 +290,6 @@ class QueryZen:
             name: The name of the Zen.
             query: The query (only used if created).
             collection: The collection of the Zen (defaults to ``DEFAULT_COLLECTION``).
-            version: The version of the Zen (defaults to ``AUTO``, the latest will be returned).
 
         Returns:
             (created, Zen) Returns a tuple, the first element is a bool on whether the zen was
