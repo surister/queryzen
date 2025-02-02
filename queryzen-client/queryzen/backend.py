@@ -9,6 +9,7 @@ import dataclasses
 import datetime
 import os
 import urllib
+from typing import Any
 
 import httpx
 
@@ -144,15 +145,12 @@ class QueryZenHttpClient(QueryZenClientABC):
         The version is automatically handled by QueryZen, it is an integer that is auto-incremented
         e.g. 1, 2, 3
 
-
         Args:
             name: The name of the ``Zen``
             collection: The name of the collection, default is ``DEFAULT_COLLECTION``
             description: The description of the ``Zen``
             query: The query of the ``Zen``
         """
-        z_response = QueryZenResponse()
-
         response = self.client.put(
             self.url / self.COLLECTIONS / collection / self.MAIN_ENDPOINT / name + '/',
             json={
@@ -163,8 +161,6 @@ class QueryZenHttpClient(QueryZenClientABC):
         return self.make_response(response)
 
     def list(self, **filters) -> QueryZenResponse:
-        z_response = QueryZenResponse()
-
         response = httpx.get(
             self.url / self.MAIN_ENDPOINT / '?' + urllib.parse.urlencode(filters)
         )
@@ -176,8 +172,6 @@ class QueryZenHttpClient(QueryZenClientABC):
             version: int,
             collection: str = DEFAULT_COLLECTION
             ) -> QueryZenResponse:
-        z_response = QueryZenResponse()
-
         response = self.client.get(
             self.url / self.COLLECTIONS / collection / self.MAIN_ENDPOINT / name + '/',
         )

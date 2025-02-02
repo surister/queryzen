@@ -168,3 +168,25 @@ def test_queryzen_filters(queryzen):
     assert not all(
         map(lambda z: z.collection == collection, result)
     )
+
+def test_zen_delete(queryzen):
+    name = 't'
+    query = 'q'
+
+    with pytest.raises(ZenDoesNotExist):
+        # Make sure it does not exist
+        queryzen.get(name)
+
+    created, zen = queryzen.get_or_create(name, query)
+    assert created and zen
+
+    deleted = queryzen.delete(zen)
+
+    assert deleted
+
+    with pytest.raises(ZenDoesNotExist):
+        queryzen.get(name)
+
+def test_zen_run_basic(queryzen):
+    _, zen = queryzen.get_or_create('t', query='SELECT 1')
+    queryzen.run(zen, database='testing')
