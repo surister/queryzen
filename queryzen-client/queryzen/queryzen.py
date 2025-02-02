@@ -111,7 +111,7 @@ class Zen:
                    version=-1,
                    query='_',
                    description='-1',
-                   created_at=datetime.datetime.now())
+                   created_at=datetime.datetime(year=1978, month=12, day=6))
 
 class QueryZen:
     """
