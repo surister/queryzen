@@ -86,9 +86,14 @@ class QueryZenClientABC(abc.ABC):
             self,
             name: str,
             version: int,
-            collection: str = DEFAULT_COLLECTION
+            collection: str = DEFAULT_COLLECTION,
+            **params: dict
     ) -> QueryZenResponse:
-        """Run a ``Zen``"""
+        """
+        Run a ``Zen``with the given params.
+
+        TODO: Add parameters like 'timeout'
+        """
 
 class QueryZenHttpClient(QueryZenClientABC):
     """
@@ -184,8 +189,18 @@ class QueryZenHttpClient(QueryZenClientABC):
 
         return z_response
 
-    def delete(self, name: str, version: int, collection: str = DEFAULT_COLLECTION):
-        raise NotImplementedError()
-
-    def run(self, name: str, version: int, collection: str = DEFAULT_COLLECTION) -> dict:
-        raise NotImplementedError()
+    def run(self,
+            name: str,
+            version: int,
+            collection: str = DEFAULT_COLLECTION,
+            **params: dict
+            ) -> QueryZenResponse:
+        response = self.client.post(
+            self.url / self.COLLECTIONS / collection / self.MAIN_ENDPOINT / name + '/',
+            json={
+                'version': version,
+                'parameters': params,
+                'database': params.get('database')
+            }
+        )
+        return self.make_response(response)
