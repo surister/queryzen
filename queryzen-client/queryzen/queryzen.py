@@ -220,7 +220,7 @@ class QueryZen:
             raise UncaughtBackendError(
                 response,
                 zen=Zen.empty(),
-                context='Listing Zens'
+                context="Listing Zens"
             )
 
         return [
