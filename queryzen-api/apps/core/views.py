@@ -80,20 +80,15 @@ class CollectionsViewSet(viewsets.ModelViewSet):
         serializer = DeleteZenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        if not QueryZen.objects.filter(
-                version=serializer.validated_data['version'],
-                name=zen_name,
-                collection=collection_name
-        ).exists():
-            raise NotFound()
-
-        QueryZen.objects.filter(
-            version=serializer.validated_data['version'],
+        zen = get_object_or_404(
+            QueryZen,
             name=zen_name,
-            collection=collection_name
-        ).delete()
+            collection=collection_name,
+            version=serializer.data['version']
+        )
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        zen.delete()
+        return Response(status=status.HTTP_200_OK)
 
     def _get_zens_given(self, collection_name, zen_name):
         queryset = self.filter_queryset(self.get_queryset())
@@ -113,7 +108,6 @@ class CollectionsViewSet(viewsets.ModelViewSet):
             **serializer.validated_data,
             **{'name': zen_name, 'collection': collection_name}
         )
-
         return Response(QueryZenSerializer(zen).data, status=status.HTTP_201_CREATED)
 
     def list(self, request, *args, **kwargs):
