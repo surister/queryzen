@@ -69,9 +69,12 @@ class CollectionsViewSet(viewsets.ModelViewSet):
             collection=collection_name,
             version=serializer.data['version']
         )
+        # Todo: Handle if task backend is not online (test with no doing docker compose up)
+        # Todo: Handle if Zen does not receive the params it needs to run
+
         try:
             async_job = run_query.delay(
-                serializer.validated_data['target'],
+                serializer.validated_data['database'],
                 zen.pk,
                 serializer.validated_data['parameters']
             )
