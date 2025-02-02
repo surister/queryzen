@@ -71,13 +71,21 @@ class Zen:
         """Transform the instance into a dictionary"""
         return dataclasses.asdict(self)
 
-    def difference(self, other: 'Zen') -> dict:
+    def difference(self, other: 'Zen', compare: list[str] = None) -> dict[str: tuple]:
         """
-        Returns a dictionary with the difference between to 'Zen', it only
-        compares name, version and query.
-        """
-        keys = ['name', 'description', 'version']
+        Returns a dictionary with the difference between 'Zen's, it only
+        compares name, version and query. You can specify which fields to compare in the
+        ``compare`` parameter.
 
+        >>> Zen.empty().difference(Zen.empty())
+        {}
+
+        >>> Zen(name='name1', ...).difference(Zen(name='name2', ...))
+        {'name': ('name1', 'name2'), ...}
+
+        """
+        if not compare:
+            compare = ['name', 'description', 'version']
 
         difference = {}
         s = self.to_dict()
@@ -86,7 +94,7 @@ class Zen:
         if not isinstance(other, Zen):
             raise TypeError('Can only check between Zen instances')
 
-        for key in keys:
+        for key in compare:
             if not o[key] == s[key]:
                 difference[key] = (s[key], o[key])
         return difference
