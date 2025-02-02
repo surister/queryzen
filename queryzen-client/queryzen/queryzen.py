@@ -33,7 +33,7 @@ class Zen:
     """
     id: int
     name: str
-    version: str
+    version: int
     query: str
     description: str
     created_at: datetime.datetime
@@ -72,15 +72,13 @@ class QueryZen:
             name: str,
             query: str,
             description: str = None,
-            collection: str = DEFAULT_COLLECTION,
-            version=AUTO
+            collection: str = DEFAULT_COLLECTION
     ):
         response = self._client.create(
             name=name,
             query=query,
             collection=collection,
-            description=description,
-            version=version
+            description=description
         )
 
         if response.error:
@@ -209,8 +207,7 @@ class QueryZen:
             self,
             name: str,
             query: str,
-            collection: str = DEFAULT_COLLECTION,
-            version=AUTO
+            collection: str = DEFAULT_COLLECTION
     ) -> (bool, Zen):
         """
         Get a Zen or create it.
@@ -235,9 +232,9 @@ class QueryZen:
             created or not, the second element is the Zen.
         """
         try:
-            return False, self.get(name=name, collection=collection, version=version)
+            return False, self.get(name=name, collection=collection)
         except ZenDoesNotExist:
-            return True, self.create(name=name, collection=collection, version=version, query=query)
+            return True, self.create(name=name, collection=collection, query=query)
 
     def delete(self):
         raise NotImplementedError
