@@ -1,22 +1,26 @@
 import http
 
 import celery
+
 from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError, NotFound, MethodNotAllowed
-from rest_framework.response import Response
-
-from apps.core.filters import QueryZenFilter, ZenFilter
-from apps.core.models import QueryZen
-from apps.core.serializers import QueryZenSerializer, CreateZenSerializer, DeleteZenSerializer, CollectionsSerializer, \
-    ExecuteZenSerializer
-from apps.core.tasks import run_query
 
 from django_filters import rest_framework as filters
 
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError, NotFound, MethodNotAllowed
+from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
+
+from apps.core.filters import QueryZenFilter, ZenFilter
+from apps.core.models import QueryZen
+from apps.core.serializers import (QueryZenSerializer,
+                                   CreateZenSerializer,
+                                   DeleteZenSerializer,
+                                   CollectionsSerializer,
+                                   ExecuteZenSerializer)
+from apps.core.tasks import run_query
 
 
 class TransversalZenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
