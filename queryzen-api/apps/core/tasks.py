@@ -4,6 +4,7 @@ import sqlite3
 
 from celery import shared_task
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from apps.core.models import QueryZen, Execution
 from apps.core.serializers import ZenExecutionResponseSerializer
@@ -13,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def run_query(target: str, zen_id: str, parameters: dict | None = None):
+def run_query(database: str, pk: str, parameters: dict | None = None):
     executed_at = datetime.datetime.now(datetime.UTC)
-    zen = QueryZen.objects.get(pk=zen_id)
+    zen = get_object_or_404(QueryZen, pk=pk)
     execution = Execution(zen=zen)
-    db_instance: Database = getattr(settings, 'ZEN_DATABASES').get(target)
+    db_instance: Database = getattr(settings, 'ZEN_DATABASES').get(database)
 
     error: str | None = None
     columns = rows = []
