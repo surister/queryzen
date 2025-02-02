@@ -45,6 +45,9 @@ class QueryZenResponse:
         """Returns whether the action resulted in an error."""
         return not self.error
 
+    def get_from_data(self, key) -> Any:
+        return self.data[0].get(key)
+
 class QueryZenClientABC(abc.ABC):
     """
     Abstract class for a QueryZen client.
