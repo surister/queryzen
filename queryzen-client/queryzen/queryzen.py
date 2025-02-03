@@ -26,14 +26,16 @@ class ZenExecution:
         row_count: How many rows there are.
         executed_at: The time the query was executed in UTC.
         finished_at: The time the query finished running in UTC.
-        execution_duration: The milliseconds it took the query to run.
+        execution_duration_ms: The milliseconds it took the query to run.
+        query: The query that produced this result.
     """
-    rows: Rows
+    rows: Rows = dataclasses.field(repr=False)
     columns: Columns
     row_count: int
     executed_at: datetime.datetime
     finished_at: datetime.datetime
-    execution_duration: int
+    execution_duration_ms: int
+    query: str
 
     def has_data(self):
         return self.row_count > 0
@@ -112,6 +114,7 @@ class Zen:
                    query='_',
                    description='-1',
                    created_at=datetime.datetime(year=1978, month=12, day=6))
+
 
 class QueryZen:
     """
@@ -408,7 +411,8 @@ class QueryZen:
             if not hasattr(response.data[0], 'row_count') else response.get_from_data('row_count'),
             executed_at=response.get_from_data('executed_at'),
             finished_at=response.get_from_data('finished_at'),
-            execution_duration=response.get_from_data('execution_time_ms')
+            execution_duration_ms=response.get_from_data('execution_time_ms'),
+            query=response.get_from_data('query')
         )
         zen.executions.append(execution)
         return execution

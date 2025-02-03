@@ -49,6 +49,7 @@ class QueryZenResponse:
     def get_from_data(self, key) -> Any:
         return self.data[0].get(key)
 
+
 class QueryZenClientABC(abc.ABC):
     """
     Abstract class for a QueryZen client.
@@ -59,15 +60,14 @@ class QueryZenClientABC(abc.ABC):
         """
         Maps the response from the client to the general Response class ``QueryZenResponse``
         """
+
     @abc.abstractmethod
     def create(self, *, name, collection, description, query) -> QueryZenResponse:
         """Create one ``Zen``"""
 
-
     @abc.abstractmethod
     def get(self, name: str, version: str, collection: str) -> QueryZenResponse:
         """Get a ``Zen``"""
-
 
     @abc.abstractmethod
     def list(self, **filters) -> list[QueryZenResponse]:
@@ -93,6 +93,7 @@ class QueryZenClientABC(abc.ABC):
 
         TODO: Add parameters like 'timeout'
         """
+
 
 class QueryZenHttpClient(QueryZenClientABC):
     """
@@ -182,7 +183,6 @@ class QueryZenHttpClient(QueryZenClientABC):
             self.url / self.COLLECTIONS / zen.collection / self.MAIN_ENDPOINT / zen.name + '/',
         )
         return self.make_response(response)
-
 
     def run(self,
             name: str,
