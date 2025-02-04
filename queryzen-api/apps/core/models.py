@@ -48,3 +48,4 @@ class Execution(UUIDMixin):
     state = models.CharField(max_length=2, choices=State.choices)
     executed_at = models.DateTimeField(auto_now_add=True)
     zen = models.ForeignKey(to=QueryZen, on_delete=models.CASCADE, related_name='executions')
+    query = models.TextField()
