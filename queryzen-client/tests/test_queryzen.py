@@ -9,6 +9,7 @@ import pytest
 from queryzen import Zen, DEFAULT_COLLECTION
 from queryzen.backend import QueryZenResponse
 from queryzen.exceptions import UncaughtBackendError, ZenDoesNotExist
+from queryzen.queryzen import ZenExecution
 
 
 def check_zen(zen: Zen, name, query, version):
@@ -131,7 +132,6 @@ def test_queryzen_list(queryzen):
     assert qs[1].version == 2
 
 
-
 def test_queryzen_filters(queryzen):
     qz = queryzen
     name = 'name1'
@@ -169,6 +169,7 @@ def test_queryzen_filters(queryzen):
         map(lambda z: z.collection == collection, result)
     )
 
+
 def test_zen_delete(queryzen):
     name = 't'
     query = 'q'
@@ -181,12 +182,70 @@ def test_zen_delete(queryzen):
     assert created and zen
 
     deleted = queryzen.delete(zen)
-
     assert deleted
 
     with pytest.raises(ZenDoesNotExist):
         queryzen.get(name)
 
+
 def test_zen_run_basic(queryzen):
+    """
+    Check that we can run two sequential zens.
+    """
     _, zen = queryzen.get_or_create('t', query='SELECT 1')
+
     queryzen.run(zen, database='testing')
+    assert len(zen.executions) == 1
+
+    queryzen.run(zen, database='testing')
+    assert len(zen.executions) == 2
+
+
+def test_zen_run(queryzen):
+    _, zen = queryzen.get_or_create('t', query='SELECT 1')
+
+    result = queryzen.run(zen, database='testing')
+    assert len(zen.executions) == 1
+
+    assert isinstance(result, ZenExecution)
+    assert not result.error
+    assert result == zen.executions[0]
+
+    n_times = 10
+    for _ in range(n_times):
+        queryzen.run(zen, database='testing')
+
+    assert len(zen.executions) == n_times + 1
+
+
+def test_zen_run_parameters(queryzen):
+    query = """
+    SELECT *
+    FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie'))
+    WHERE column2 LIKE :startswith OR column1 = :id;
+    """
+    _, zen = queryzen.get_or_create('t', query=query)
+
+    result = queryzen.run(zen, database='testing', id=2, startswith='A%')
+
+    assert result.rows == [[1, 'Alice'], [2, 'Bob']]
+    assert result.columns == ['column1', 'column2']
+
+
+def test_zen_run_query(queryzen):
+    # THIS TEST DEPENDS ON A database that implements `GET COMPILED QUERY`.
+    # For example CrateDB.
+    query = "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE :startswith OR col1 = :id;"
+    _, zen = queryzen.get_or_create('t', query=query)
+
+    result = queryzen.run(zen, database='crate', id=2, startswith='A%')
+
+    assert result.rows == [[1, 'Alice'], [2, 'Bob']]
+    assert result.columns == ['col1', 'col2']
+    assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE 'A%' OR col1 = 2;"
+
+
+# todo handle if database does not exist or there is no configured database
+# handle if parameters are not being sent
+# handle if query is raises error (wrong syntax) - or rather that database fails.
+
