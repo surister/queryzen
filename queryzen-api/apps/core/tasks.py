@@ -23,10 +23,11 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
     error: str | None = None
     columns = rows = []
     try:
-        columns, rows = db_instance.execute(zen.query, parameters)
+        columns, rows, query = db_instance.execute(zen.query, parameters)
         execution.state = Execution.State.VALID
+        execution.query = query
         zen.state = QueryZen.State.VALID
-    except sqlite3.OperationalError as e:
+    except Exception as e:
         error = str(e)
         execution.state = Execution.State.INVALID
         zen.state = QueryZen.State.INVALID
@@ -46,6 +47,7 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
             'error': error if error else None,
             'executed_at': executed_at,
             'finished_at': finished_at,
+            'query': query
         }
     )
     return response.data

@@ -48,3 +48,4 @@ class ZenExecutionResponseSerializer(serializers.Serializer):
     error = serializers.CharField(allow_blank=True)
     executed_at = serializers.DateTimeField()
     finished_at = serializers.DateTimeField()
+    query = serializers.CharField()
