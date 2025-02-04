@@ -13,7 +13,12 @@ class QueryZen(UUIDMixin):
         INVALID = "IN", _("Invalid")
 
     def save(self, *args, **kwargs):
-        self.version = int(self.latest.version) + 1 if self.latest else 1
+        self.version = 1  # The Default version is 1 in new instances.
+
+        # If a new instance is being created, get the latest one and add one.
+        if not self.pk:
+            if last := self.latest.version:
+                self.version = last + 1
 
         super().save(*args, **kwargs)
 
