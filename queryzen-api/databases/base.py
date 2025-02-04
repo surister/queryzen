@@ -3,6 +3,8 @@ import functools
 import logging
 import sqlite3
 
+import httpx
+
 logger = logging.getLogger(__name__)
 
 

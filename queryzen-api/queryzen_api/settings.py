@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 
-from databases.base import SQLiteDatabase
+from databases.base import SQLiteDatabase, CrateDatabase
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -137,6 +137,7 @@ CELERY_IMPORTS = ('apps.core.tasks',)
 ZEN_DATABASES = {
     'testing': SQLiteDatabase(
         'tdd.sqlite'
-    )
+    ),
+    'crate': CrateDatabase()
 }
 ZEN_TIMEOUT = 2
