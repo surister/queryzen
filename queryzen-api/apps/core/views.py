@@ -1,15 +1,12 @@
 import http
 
-import celery
-
 from django.conf import settings
-from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
 from django_filters import rest_framework as filters
 
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError, NotFound, MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
 
@@ -44,20 +41,17 @@ class CollectionsViewSet(viewsets.ModelViewSet):
             return self._delete_zen(request, collection_name, kwargs.get('zen_name'))
         if self.request.method == http.HTTPMethod.POST:
             return self._run_zen(request, collection_name, kwargs.get('zen_name'))
-        raise MethodNotAllowed({'msg': f'{self.request.method} is not allowed'})
+        raise MethodNotAllowed(f'{self.request.method} is not allowed')
 
     def get_serializer_class(self):
-        if self.action == 'list':
-            return QueryZenSerializer
-        if self.action == 'zen':
-            if self.request.method == http.HTTPMethod.GET:
-                return CreateZenSerializer
-            if self.request.method == http.HTTPMethod.PUT:
-                return CreateZenSerializer
-            if self.request.method == http.HTTPMethod.DELETE:
-                return DeleteZenSerializer
-            if self.request.method == http.HTTPMethod.POST:
-                return ExecuteZenSerializer
+        if self.request.method == http.HTTPMethod.GET:
+            return CreateZenSerializer
+        if self.request.method == http.HTTPMethod.PUT:
+            return CreateZenSerializer
+        if self.request.method == http.HTTPMethod.DELETE:
+            return DeleteZenSerializer
+        if self.request.method == http.HTTPMethod.POST:
+            return ExecuteZenSerializer
 
     def _run_zen(self, request, collection_name, zen_name):
         serializer = ExecuteZenSerializer(data=request.data)
@@ -79,6 +73,7 @@ class CollectionsViewSet(viewsets.ModelViewSet):
                 serializer.validated_data['parameters']
             )
             query_result = async_job.get(timeout=getattr(settings, 'ZEN_TIMEOUT'))
+
             return Response(query_result)
         except Exception as e:
             return Response(f'Running a Zen resulted in an uncaught exception: {e}',
@@ -118,20 +113,8 @@ class CollectionsViewSet(viewsets.ModelViewSet):
         )
         return Response(QueryZenSerializer(zen).data, status=status.HTTP_201_CREATED)
 
-    def list(self, request, *args, **kwargs):
-        queryset = QueryZen.objects.values('collection').annotate(zen_count=Count('name'))
-        return Response(CollectionsSerializer(queryset, many=True).data)
-
-    def retrieve(self, request, pk, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        queryset = queryset.filter(
-            collection=pk,
-        )
-        return Response(
-            QueryZenSerializer(queryset, many=True).data,
-        )
-
-    @action(detail=True, methods=['get', 'put', 'delete', 'post'],
+    @action(detail=True,
+            methods=['get', 'put', 'delete', 'post'],
             url_path='zen/(?P<zen_name>[^/.]+)')
     def zen(self, request, pk, *args, **kwargs):
         return self._handle_request(request, pk, *args, **kwargs)
