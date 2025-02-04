@@ -36,6 +36,11 @@ class ZenExecution:
     finished_at: datetime.datetime
     execution_duration_ms: int
     query: str
+    error: str = ''
+
+    @property
+    def is_error(self):
+        return bool(self.error)
 
     def has_data(self):
         return self.row_count > 0
