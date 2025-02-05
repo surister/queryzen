@@ -11,6 +11,7 @@ class QueryZen(UUIDMixin):
     class State(models.TextChoices):
         VALID = "VA", _("Valid")
         INVALID = "IN", _("Invalid")
+        UNKNOWN = "UN", _("UNKNOWN")
 
     def save(self, *args, **kwargs):
         self.version = 1  # The Default version is 1 in new instances.
@@ -28,7 +29,7 @@ class QueryZen(UUIDMixin):
     query = models.TextField()
     version = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
-    state = models.CharField(max_length=2, choices=State.choices, default=State.VALID)
+    state = models.CharField(max_length=2, choices=State.choices, default=State.UNKNOWN)
 
     # TODO: Add created_by
 
@@ -37,7 +38,7 @@ class QueryZen(UUIDMixin):
         return QueryZen.objects.filter(name=self.name, collection=self.collection).order_by('-version').first()
 
     class Meta:
-        unique_together = ('collection', 'name', 'version',)
+        unique_together = ('collection', 'name', 'version')
 
 
 class Execution(UUIDMixin):
