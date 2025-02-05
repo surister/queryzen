@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from apps.core.models import QueryZen, Execution
+from apps.core.models import Zen, Execution
 
 
 class CreateZenSerializer(serializers.ModelSerializer):
     class Meta:
-        model = QueryZen
+        model = Zen
         fields = ('description', 'query')
 
 
@@ -25,7 +25,7 @@ class ZenSerializer(serializers.ModelSerializer):
     executions = ExecutionSerializer(many=True)
 
     class Meta:
-        model = QueryZen
+        model = Zen
         fields = '__all__'
 
 

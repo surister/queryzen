@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
-from apps.core.models import QueryZen
+from apps.core.models import Zen
 from apps.core.tests.factories import QueryZenFactory
 
 
@@ -28,7 +28,7 @@ class QueryZenTestCase(TestCase):
         Request zens with applying filters
         """
 
-        q: QueryZen = QueryZenFactory.create(
+        q: Zen = QueryZenFactory.create(
             collection='test',
             name='testing_zen',
         )
@@ -113,11 +113,11 @@ class QueryZenTestCase(TestCase):
 
         url = reverse('collections-zen', args=[collection, name])
 
-        zens_before = QueryZen.objects.count()
+        zens_before = Zen.objects.count()
         response = self.client.put(url, payload, content_type='application/json')
-        zens_after = QueryZen.objects.count()
+        zens_after = Zen.objects.count()
 
-        zen = QueryZen.objects.get(pk=response.data.get('id'))
+        zen = Zen.objects.get(pk=response.data.get('id'))
 
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data is not None
@@ -141,11 +141,11 @@ class QueryZenTestCase(TestCase):
 
         url = reverse('collections-zen', args=[q.collection, q.name])
 
-        zens_before = QueryZen.objects.count()
+        zens_before = Zen.objects.count()
         response = self.client.put(url, payload, content_type='application/json')
-        zens_after = QueryZen.objects.count()
+        zens_after = Zen.objects.count()
 
-        zen = QueryZen.objects.get(pk=response.data.get('id'))
+        zen = Zen.objects.get(pk=response.data.get('id'))
 
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data is not None
@@ -157,15 +157,15 @@ class QueryZenTestCase(TestCase):
         Delete an existing zen
         """
 
-        zen_to_delete: QueryZen = QueryZenFactory.create(
+        zen_to_delete: Zen = QueryZenFactory.create(
             name='deleting_zen',
         )
 
         url = reverse('collections-zen', args=[zen_to_delete.collection, zen_to_delete.name])
 
-        zens_before = QueryZen.objects.count()
+        zens_before = Zen.objects.count()
         response = self.client.delete(url, {'version': zen_to_delete.version}, content_type='application/json')
-        zens_after = QueryZen.objects.count()
+        zens_after = Zen.objects.count()
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert response.data is None

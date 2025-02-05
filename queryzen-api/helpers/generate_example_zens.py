@@ -10,7 +10,7 @@ import django
 
 django.setup()
 
-from apps.core.models import QueryZen
+from apps.core.models import Zen
 from apps.core.tests.factories import QueryZenFactory
 
 fake = Faker()
@@ -73,14 +73,14 @@ def generate_zens(entities):
     query_names = [
         'mountain_filter', 'country_filter', 'state_filter'
     ]
-    while QueryZen.objects.count() < entities:
+    while Zen.objects.count() < entities:
         try:
             QueryZenFactory.create(
                 collection=random.choice(collections),
                 name=random.choice(query_names),
                 description=fake.text(),
                 query=generate_random_sql(),
-                state=fake.random_element(QueryZen.State.values)
+                state=fake.random_element(Zen.State.values)
             )
         except IntegrityError:
             pass

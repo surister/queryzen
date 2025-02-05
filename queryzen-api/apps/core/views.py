@@ -11,7 +11,7 @@ from rest_framework import mixins, viewsets, status
 
 from apps.core.exceptions import ZenAlreadyExistsError
 from apps.core.filters import QueryZenFilter, ZenFilter
-from apps.core.models import QueryZen
+from apps.core.models import Zen
 from apps.core.serializers import (ZenSerializer,
                                    CreateZenSerializer,
                                    ExecuteZenSerializer)
@@ -26,7 +26,7 @@ class ZenFilterViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     Check ``QueryZenFilter.Meta.fields`` to see the available ones.
     """
-    queryset = QueryZen.objects.all()
+    queryset = Zen.objects.all()
     serializer_class = ZenSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = QueryZenFilter
@@ -37,9 +37,9 @@ class ZenViewSet(views.APIView):
         """
         Get a Zen.
         """
-        queryset = QueryZen.filter_by(collection=collection,
-                                      name=name,
-                                      version=version)
+        queryset = Zen.filter_by(collection=collection,
+                                 name=name,
+                                 version=version)
         objects = get_object_or_404(queryset)
 
         return Response(ZenSerializer(objects, many=False).data)
@@ -50,7 +50,7 @@ class ZenViewSet(views.APIView):
         serializer.is_valid(raise_exception=True)
 
         zen = get_object_or_404(
-            QueryZen,
+            Zen,
             collection=collection,
             name=name,
             version=version,
@@ -82,15 +82,15 @@ class ZenViewSet(views.APIView):
             # If version is not 'latest' (aka automatically handed by us),
             # check that it does not exist. If 'latest', we'll pick the
             # latest object and add one to its version, so we'll never collide.
-            queryset = QueryZen.filter_by(collection=collection,
-                                          name=name,
-                                          version=version)
+            queryset = Zen.filter_by(collection=collection,
+                                     name=name,
+                                     version=version)
             print('hio')
             if queryset.exists():
 
                 raise ZenAlreadyExistsError()
 
-        zen = QueryZen(
+        zen = Zen(
             collection=collection,
             name=name,
             version=version,
@@ -101,7 +101,7 @@ class ZenViewSet(views.APIView):
 
     def delete(self, request, collection: str, name: str, version: str):
         zen = get_object_or_404(
-            QueryZen,
+            Zen,
             collection=collection,
             name=name,
             version=version

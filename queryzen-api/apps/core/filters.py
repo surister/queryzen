@@ -1,15 +1,15 @@
-from apps.core.models import QueryZen
+from apps.core.models import Zen
 
 from django_filters import rest_framework as filters
 
 
 class QueryZenFilter(filters.FilterSet):
     class Meta:
-        model = QueryZen
+        model = Zen
         fields = ('name', 'version', 'collection', 'state')
 
 
 class ZenFilter(filters.FilterSet):
     class Meta:
-        model = QueryZen
+        model = Zen
         fields = ('version', 'state')

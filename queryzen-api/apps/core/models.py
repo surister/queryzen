@@ -8,7 +8,7 @@ from apps.shared.mixins import UUIDMixin
 from django.utils.translation import gettext_lazy as _
 
 
-class QueryZen(UUIDMixin):
+class Zen(UUIDMixin):
     class State(models.TextChoices):
         VALID = "VA", _("Valid")
         INVALID = "IN", _("Invalid")
@@ -39,7 +39,7 @@ class QueryZen(UUIDMixin):
 
     @property
     def latest(self) -> QuerySet:
-        return QueryZen.objects.filter(name=self.name, collection=self.collection).order_by('-version')
+        return Zen.objects.filter(name=self.name, collection=self.collection).order_by('-version')
 
     @classmethod
     def filter_by(cls, collection: str, name: str, version) -> QuerySet:
@@ -62,5 +62,5 @@ class Execution(UUIDMixin):
 
     state = models.CharField(max_length=2, choices=State.choices)
     executed_at = models.DateTimeField(auto_now_add=True)
-    zen = models.ForeignKey(to=QueryZen, on_delete=models.CASCADE, related_name='executions')
+    zen = models.ForeignKey(to=Zen, on_delete=models.CASCADE, related_name='executions')
     query = models.TextField()
