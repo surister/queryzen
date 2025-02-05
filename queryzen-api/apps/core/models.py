@@ -14,12 +14,15 @@ class QueryZen(UUIDMixin):
         UNKNOWN = "UN", _("UNKNOWN")
 
     def save(self, *args, **kwargs):
-        self.version = 1  # The Default version is 1 in new instances.
+        # self.version is either 'latest' or an integer.
+        last_obj = self.latest.first()
 
-        # If a new instance is being created, get the latest one and add one.
-        if not self.pk:
-            if last := self.latest.version:
-                self.version = last + 1
+        if last_obj:  # Check if last_obj exists
+            if self.version == 'latest':
+                self.version = last_obj.version + 1
+        else:
+            # First object, so the version starts at 1.
+            self.version = 1
 
         super().save(*args, **kwargs)
 
