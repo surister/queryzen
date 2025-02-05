@@ -1,7 +1,5 @@
 import os
 
-from django.conf import settings
-
 from celery import Celery
 
 # Set the default Django settings module for the 'celery' program.
@@ -22,3 +20,28 @@ app.autodiscover_tasks()
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')
+
+
+def is_execution_engine_working(ping_timeout: int = 5) -> (bool, str):
+    """
+    Checks whether the execution engine (broker + celery) are up.
+
+    Args:
+        ping_timeout: The timeout in seconds for the ping that is sent to the workers.
+
+    Returns:
+        A tuple:
+            First element: True if both broker and a celery worker can be reached; a query is
+            expected to be able to run.
+            Second element: An error message, it can pinpoint the offender..
+    """
+    try:
+        result = app.control.inspect(timeout=ping_timeout).ping()
+        if not result:
+            return False, (f'Zen could not be executed, no worker responded to ping.'
+                           f' Check that there are there alive workers.')
+
+    except Exception as e:
+        return False, f'Broker could not be reached be reached: {repr(e)}'
+
+    return True, None
