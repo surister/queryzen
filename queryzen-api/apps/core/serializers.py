@@ -20,7 +20,7 @@ class ExecutionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class QueryZenSerializer(serializers.ModelSerializer):
+class ZenSerializer(serializers.ModelSerializer):
     executions = ExecutionSerializer(many=True)
 
     class Meta:

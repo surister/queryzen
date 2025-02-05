@@ -12,7 +12,7 @@ from rest_framework import mixins, viewsets, status
 
 from apps.core.filters import QueryZenFilter, ZenFilter
 from apps.core.models import QueryZen
-from apps.core.serializers import (QueryZenSerializer,
+from apps.core.serializers import (ZenSerializer,
                                    CreateZenSerializer,
                                    DeleteZenSerializer,
                                    CollectionsSerializer,
@@ -22,7 +22,7 @@ from apps.core.tasks import run_query
 
 class TransversalZenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = QueryZen.objects.all()
-    serializer_class = QueryZenSerializer
+    serializer_class = ZenSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = QueryZenFilter
 

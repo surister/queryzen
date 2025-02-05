@@ -1,5 +1,4 @@
 import abc
-import functools
 import logging
 import sqlite3
 
