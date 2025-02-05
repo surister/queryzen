@@ -7,8 +7,9 @@ import datetime
 import typing
 
 from .backend import QueryZenHttpClient, QueryZenClientABC
-from .exceptions import ZenDoesNotExist, UncaughtBackendError
-from .types import AUTO, Rows, Columns
+from .exceptions import UncaughtBackendError, ZenDoesNotExistError, \
+    ZenAlreadyExists
+from .types import AUTO, Rows, Columns, _AUTO
 from .constants import DEFAULT_COLLECTION
 from .table import make_table, ColumnCenter
 
@@ -145,15 +146,20 @@ class QueryZen:
                name: str,
                query: str,
                description: str = None,
-               collection: str = DEFAULT_COLLECTION):
+               collection: str = DEFAULT_COLLECTION,
+               version: _AUTO | int = AUTO):
         response = self._client.create(
-            name=name,
-            query=query,
             collection=collection,
+            name=name,
+            version=version,
+            query=query,
             description=description
         )
 
         if response.error:
+            if response.error_code == 409:
+                raise ZenAlreadyExists()
+
             raise UncaughtBackendError(
                 response=response,
                 zen=Zen(
@@ -165,7 +171,7 @@ class QueryZen:
                     collection=collection,
                     description=description
                 ),
-                context='This was raise while creating a Zen.'
+                context='This was raised while creating a Zen.'
             )
 
         if not response.data:
@@ -187,8 +193,9 @@ class QueryZen:
         return Zen(**response.data[0])
 
     def get(self,
-            name: str, collection=DEFAULT_COLLECTION,
-            version=AUTO) -> Zen:
+            name: str,
+            collection=DEFAULT_COLLECTION,
+            version: _AUTO | int = AUTO) -> Zen:
         """
         Get one zen from the given name, collection and version, raises ``ZenDoesNotExist``
         if it does not exist.
@@ -216,16 +223,23 @@ class QueryZen:
         Returns:
             A zen, if it exists.
         """
+        if not isinstance(version, (int, _AUTO)):
+            # TODO unit test this
+            raise ValueError('version should be an integer')
+
+        if isinstance(version, int):
+            version = str(version)
+
         response = self._client.get(
             name=name,
             version=version,
             collection=collection
         )
 
-        if not response.data:
-            raise ZenDoesNotExist()
-
         if response.error:
+            if response.error_code == 404:
+                raise ZenDoesNotExistError()
+
             raise UncaughtBackendError(
                 response=response,
                 zen=Zen.empty(),
@@ -277,12 +291,10 @@ class QueryZen:
             Zen(**data) for data in response.data
         ]
 
-    def get_or_create(
-            self,
-            name: str,
-            query: str,
-            collection: str = DEFAULT_COLLECTION
-    ) -> (bool, Zen):
+    def get_or_create(self,
+                      name: str,
+                      query: str,
+                      collection: str = DEFAULT_COLLECTION) -> (bool, Zen):
         """
         Get a Zen or create it.
 
@@ -305,7 +317,7 @@ class QueryZen:
         """
         try:
             return False, self.get(name=name, collection=collection)
-        except ZenDoesNotExist:
+        except ZenDoesNotExistError:
             return True, self.create(name=name, collection=collection, query=query)
 
     def delete(self, zen: Zen) -> bool:
@@ -353,6 +365,8 @@ class QueryZen:
         response = self._client.delete(zen)
 
         if response.error:
+            if response.error_code == 404:
+                raise ZenDoesNotExistError('You are trying to delete a Zen that does not exist')
             raise UncaughtBackendError(
                 response,
                 zen=zen,

@@ -8,7 +8,7 @@ import pytest
 
 from queryzen import Zen, DEFAULT_COLLECTION
 from queryzen.backend import QueryZenResponse
-from queryzen.exceptions import UncaughtBackendError, ZenDoesNotExist
+from queryzen import exceptions
 from queryzen.queryzen import ZenExecution
 
 
@@ -28,6 +28,23 @@ def test_queryzen_create(queryzen):
 
     q = queryzen.create(name, query=query)
     check_zen(q, name, query, 2)
+
+
+def test_queryzen_create_version(queryzen):
+    """Test different combinations of version and auto"""
+    query = 'select 1'
+    name = 'mountain_views'
+
+    queryzen.create(name, query=query, version=1)
+
+    with pytest.raises(exceptions.ZenAlreadyExists):
+        queryzen.create(name, query=query, version=1)
+    #
+    queryzen.create(name, query=query, version=3)
+    queryzen.create(name, query=query, version=4)
+
+    zen = queryzen.create(name, query=query)
+    assert zen.version == 5
 
 
 def test_queryzen_create_same_collection(queryzen):
@@ -64,19 +81,19 @@ def test_uncaught_api_error_is_reported(queryzen):
     queryzen._client.delete = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
     queryzen._client.list = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
 
-    with pytest.raises(UncaughtBackendError):
+    with pytest.raises(exceptions.UncaughtBackendError):
         queryzen.create('s', 's')
 
-    with pytest.raises(UncaughtBackendError):
+    with pytest.raises(exceptions.UncaughtBackendError):
         queryzen.get('s')
 
-    with pytest.raises(UncaughtBackendError):
+    with pytest.raises(exceptions.UncaughtBackendError):
         queryzen.get_or_create('a', 'b')
     # Delete is not implemented
     # with pytest.raises(UnknownError):
     #     queryzen.delete('s', 's')
 
-    with pytest.raises(UncaughtBackendError):
+    with pytest.raises(exceptions.UncaughtBackendError):
         queryzen.list()
 
 
@@ -85,7 +102,7 @@ def test_queryzen_get_one_unknown(queryzen):
     Test that if we request a Zen, and it does not exist, an exception is raised.
     """
 
-    with pytest.raises(ZenDoesNotExist):
+    with pytest.raises(exceptions.ZenDoesNotExistError):
         queryzen.get(name='qz_that_doesnt_exist')
 
 
@@ -132,7 +149,7 @@ def test_queryzen_list(queryzen):
     assert qs[1].version == 2
 
 
-def test_queryzen_filters(queryzen):
+def test_queryzen_list_filters(queryzen):
     qz = queryzen
     name = 'name1'
     collection = 'col1'
@@ -174,7 +191,7 @@ def test_zen_delete(queryzen):
     name = 't'
     query = 'q'
 
-    with pytest.raises(ZenDoesNotExist):
+    with pytest.raises(exceptions.ZenDoesNotExistError):
         # Make sure it does not exist
         queryzen.get(name)
 
@@ -184,7 +201,7 @@ def test_zen_delete(queryzen):
     deleted = queryzen.delete(zen)
     assert deleted
 
-    with pytest.raises(ZenDoesNotExist):
+    with pytest.raises(exceptions.ZenDoesNotExistError):
         queryzen.get(name)
 
 
@@ -244,8 +261,6 @@ def test_zen_run_query(queryzen):
     assert result.columns == ['col1', 'col2']
     assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE 'A%' OR col1 = 2;"
 
-
 # todo handle if database does not exist or there is no configured database
 # handle if parameters are not being sent
 # handle if query is raises error (wrong syntax) - or rather that database fails.
-

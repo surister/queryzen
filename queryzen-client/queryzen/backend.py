@@ -14,6 +14,7 @@ from typing import Any
 import httpx
 
 from .constants import DEFAULT_COLLECTION
+from .types import _AUTO, AUTO
 
 
 class Url(str):
@@ -62,7 +63,7 @@ class QueryZenClientABC(abc.ABC):
         """
 
     @abc.abstractmethod
-    def create(self, *, name, collection, description, query) -> QueryZenResponse:
+    def create(self, *, collection, name, version, description, query) -> QueryZenResponse:
         """Create one ``Zen``"""
 
     @abc.abstractmethod
@@ -104,13 +105,28 @@ class QueryZenHttpClient(QueryZenClientABC):
     It uses httpx to make the http requests.
     """
     MAIN_ENDPOINT = 'zen/'
-    COLLECTIONS = 'collections/'
+    COLLECTIONS = 'collection/'
+    VERSION = 'version/'
 
     def __init__(self, client: httpx.Client = None):
         self.client: httpx.Client = client or httpx.Client()
         self.url: Url = Url(
             os.getenv('API_URL') or 'http://localhost:8000'
         )
+
+    def make_url(self, collection: str, name: str, version: str) -> str:
+        """
+        Makes a valid QueryZen REST url.
+        """
+        return (self.url /
+                self.COLLECTIONS /
+                collection /
+                self.MAIN_ENDPOINT /
+                name /
+                self.VERSION /
+                version /
+                ''
+                )
 
     def make_response(self, response: httpx.Response) -> QueryZenResponse:
         """
@@ -137,9 +153,9 @@ class QueryZenHttpClient(QueryZenClientABC):
                *,
                name: str,
                collection: str = DEFAULT_COLLECTION,
+               version: _AUTO = AUTO,
                description: str = '',
-               query: str,
-               ) -> QueryZenResponse:
+               query: str) -> QueryZenResponse:
         """
         Creates a ``Zen`` via PUT request to the backend.
 
@@ -148,12 +164,13 @@ class QueryZenHttpClient(QueryZenClientABC):
 
         Args:
             name: The name of the ``Zen``
+            version: The version of the Zen, integer, by default it will be the last version + 1
             collection: The name of the collection, default is ``DEFAULT_COLLECTION``
             description: The description of the ``Zen``
             query: The query of the ``Zen``
         """
         response = self.client.put(
-            self.url / self.COLLECTIONS / collection / self.MAIN_ENDPOINT / name + '/',
+            self.make_url(collection, name, version),
             json={
                 'description': description,
                 'query': query
@@ -169,18 +186,18 @@ class QueryZenHttpClient(QueryZenClientABC):
         return self.make_response(response)
 
     def get(self,
+            collection: str,
             name: str,
-            version: int,
-            collection: str = DEFAULT_COLLECTION
+            version: str,
             ) -> QueryZenResponse:
         response = self.client.get(
-            self.url / self.COLLECTIONS / collection / self.MAIN_ENDPOINT / name + '/',
+            self.make_url(collection, name, version),
         )
         return self.make_response(response)
 
     def delete(self, zen: 'Zen') -> QueryZenResponse:
         response = self.client.delete(
-            self.url / self.COLLECTIONS / zen.collection / self.MAIN_ENDPOINT / zen.name + '/',
+            self.make_url(zen.collection, zen.name, zen.version)
         )
         return self.make_response(response)
 
@@ -191,7 +208,7 @@ class QueryZenHttpClient(QueryZenClientABC):
             **params: dict
             ) -> QueryZenResponse:
         response = self.client.post(
-            self.url / self.COLLECTIONS / collection / self.MAIN_ENDPOINT / name + '/',
+            self.make_url(collection, name, version),
             json={
                 'version': version,
                 'parameters': params,

@@ -2,6 +2,7 @@
 
 from queryzen.backend import QueryZenResponse
 
+
 class ZenAlreadyExists(Exception):
     """
     Raised if you try to create a ``Zen`` that already exists.
@@ -9,11 +10,12 @@ class ZenAlreadyExists(Exception):
     pass
 
 
-class ZenDoesNotExist(Exception):
+class ZenDoesNotExistError(Exception):
     """
     Raised if you try to get a ``Zen`` that does not exist.
     """
     pass
+
 
 class IncompatibleAPI(Exception):
     """
@@ -23,11 +25,11 @@ class IncompatibleAPI(Exception):
     # Todo add message
     pass
 
+
 class UncaughtBackendError(Exception):
     """
     Raised when the backend returns an error code that we do not implicitly catch.
     """
-
 
     def __init__(self, response: QueryZenResponse, zen: 'Zen' = None, context: str = None):
         self.message = f"""
@@ -43,7 +45,7 @@ class UncaughtBackendError(Exception):
         Involved Zen (if any):
         --
         {zen}
-        
+
         Extra context:
         --
         {context}
