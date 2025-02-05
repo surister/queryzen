@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.db import models
+from django.db.models import QuerySet
 
 from apps.shared.mixins import UUIDMixin
 
@@ -37,8 +38,18 @@ class QueryZen(UUIDMixin):
     # TODO: Add created_by
 
     @property
-    def latest(self) -> QueryZen:
-        return QueryZen.objects.filter(name=self.name, collection=self.collection).order_by('-version').first()
+    def latest(self) -> QuerySet:
+        return QueryZen.objects.filter(name=self.name, collection=self.collection).order_by('-version')
+
+    @classmethod
+    def filter_by(cls, collection: str, name: str, version) -> QuerySet:
+        """Filter the Zens given the collection name and version."""
+        queryset = cls.objects.filter(collection=collection, name=name)
+        if version == 'latest':
+            queryset = queryset.order_by('-version')
+        else:
+            queryset = queryset.filter(version=version)
+        return queryset
 
     class Meta:
         unique_together = ('collection', 'name', 'version')
