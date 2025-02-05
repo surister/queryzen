@@ -5,63 +5,55 @@ from django.shortcuts import get_object_or_404
 
 from django_filters import rest_framework as filters
 
-from rest_framework.decorators import action
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework import views
 from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
 
+from apps.core.exceptions import ZenAlreadyExistsError
 from apps.core.filters import QueryZenFilter, ZenFilter
 from apps.core.models import QueryZen
 from apps.core.serializers import (ZenSerializer,
                                    CreateZenSerializer,
-                                   DeleteZenSerializer,
-                                   CollectionsSerializer,
                                    ExecuteZenSerializer)
 from apps.core.tasks import run_query
 
 
-class TransversalZenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+# GET /zen?collection=main&version=1
+class ZenFilterViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    Special view that breaks the REST pattern, it only accepts GET requests and has all kinds of
+    filters via query parameters.
+
+    Check ``QueryZenFilter.Meta.fields`` to see the available ones.
+    """
     queryset = QueryZen.objects.all()
     serializer_class = ZenSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = QueryZenFilter
 
 
-class CollectionsViewSet(viewsets.ModelViewSet):
-    queryset = QueryZen.objects.all()
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = ZenFilter
+class ZenViewSet(views.APIView):
+    def get(self, request, collection: str, name: str, version: str):
+        """
+        Get a Zen.
+        """
+        queryset = QueryZen.filter_by(collection=collection,
+                                      name=name,
+                                      version=version)
+        objects = get_object_or_404(queryset)
 
-    def _handle_request(self, request, collection_name, *args, **kwargs):
-        if self.request.method == http.HTTPMethod.GET:
-            return self._get_zens_given(collection_name, kwargs.get('zen_name'))
-        if self.request.method == http.HTTPMethod.PUT:
-            return self._create_zen(request, collection_name, kwargs.get('zen_name'))
-        if self.request.method == http.HTTPMethod.DELETE:
-            return self._delete_zen(request, collection_name, kwargs.get('zen_name'))
-        if self.request.method == http.HTTPMethod.POST:
-            return self._run_zen(request, collection_name, kwargs.get('zen_name'))
-        raise MethodNotAllowed(f'{self.request.method} is not allowed')
+        return Response(ZenSerializer(objects, many=False).data)
 
-    def get_serializer_class(self):
-        if self.request.method == http.HTTPMethod.GET:
-            return CreateZenSerializer
-        if self.request.method == http.HTTPMethod.PUT:
-            return CreateZenSerializer
-        if self.request.method == http.HTTPMethod.DELETE:
-            return DeleteZenSerializer
-        if self.request.method == http.HTTPMethod.POST:
-            return ExecuteZenSerializer
-
-    def _run_zen(self, request, collection_name, zen_name):
+    def post(self, request, collection, name, version):
+        """Runs a Zen in the backend."""
         serializer = ExecuteZenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         zen = get_object_or_404(
             QueryZen,
-            name=zen_name,
-            collection=collection_name,
-            version=serializer.data['version']
+            collection=collection,
+            name=name,
+            version=version,
         )
         # Todo: Handle if task backend is not online (test with no doing docker compose up)
         # Todo: Handle if Zen does not receive the params it needs to run
@@ -79,42 +71,42 @@ class CollectionsViewSet(viewsets.ModelViewSet):
             return Response(f'Running a Zen resulted in an uncaught exception: {e}',
                             status=status.HTTP_400_BAD_REQUEST)
 
-    def _delete_zen(self, request, collection_name, zen_name):
-        serializer = DeleteZenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        zen = get_object_or_404(
-            QueryZen,
-            name=zen_name,
-            collection=collection_name,
-            version=serializer.data['version']
-        )
-
-        zen.delete()
-        return Response(status=status.HTTP_200_OK)
-
-    def _get_zens_given(self, collection_name, zen_name):
-        queryset = self.filter_queryset(self.get_queryset())
-        queryset = queryset.filter(
-            collection=collection_name,
-            name=zen_name,
-        )
-        return Response(
-            QueryZenSerializer(queryset, many=True).data,
-        )
-
-    def _create_zen(self, request, collection_name, zen_name):
+    def put(self, request, collection: str, name: str, version: str):
+        """
+        Create a Zen.
+        """
         serializer = CreateZenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        zen = QueryZen.objects.create(
-            **serializer.validated_data,
-            **{'name': zen_name, 'collection': collection_name}
-        )
-        return Response(QueryZenSerializer(zen).data, status=status.HTTP_201_CREATED)
+        if version != 'latest':
+            # If version is not 'latest' (aka automatically handed by us),
+            # check that it does not exist. If 'latest', we'll pick the
+            # latest object and add one to its version, so we'll never collide.
+            queryset = QueryZen.filter_by(collection=collection,
+                                          name=name,
+                                          version=version)
+            print('hio')
+            if queryset.exists():
 
-    @action(detail=True,
-            methods=['get', 'put', 'delete', 'post'],
-            url_path='zen/(?P<zen_name>[^/.]+)')
-    def zen(self, request, pk, *args, **kwargs):
-        return self._handle_request(request, pk, *args, **kwargs)
+                raise ZenAlreadyExistsError()
+
+        zen = QueryZen(
+            collection=collection,
+            name=name,
+            version=version,
+            **serializer.validated_data
+        )
+        zen.save()
+        return Response(ZenSerializer(zen).data)
+
+    def delete(self, request, collection: str, name: str, version: str):
+        zen = get_object_or_404(
+            QueryZen,
+            collection=collection,
+            name=name,
+            version=version
+        )
+
+        zen.delete()
+
+        return Response([], status=status.HTTP_200_OK)
