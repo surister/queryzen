@@ -1,5 +1,3 @@
-import http
-
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
@@ -10,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
 
 from apps.core.exceptions import ZenAlreadyExistsError
-from apps.core.filters import QueryZenFilter, ZenFilter
+from apps.core.filters import QueryZenFilter
 from apps.core.models import Zen
 from apps.core.serializers import (ZenSerializer,
                                    CreateZenSerializer,
@@ -85,7 +83,6 @@ class ZenViewSet(views.APIView):
             queryset = Zen.filter_by(collection=collection,
                                      name=name,
                                      version=version)
-            print('hio')
             if queryset.exists():
 
                 raise ZenAlreadyExistsError()
@@ -106,7 +103,5 @@ class ZenViewSet(views.APIView):
             name=name,
             version=version
         )
-
         zen.delete()
-
         return Response([], status=status.HTTP_200_OK)
