@@ -1,4 +1,3 @@
-import celery.exceptions
 from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineException
 from apps.core.filters import QueryZenFilter
 from apps.core.models import Zen

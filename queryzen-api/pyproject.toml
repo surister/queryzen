@@ -21,6 +21,9 @@ sqlalchemy = "^2.0.37"
 httpx = "^0.28.1"
 
 
+[tool.poetry.group.dev.dependencies]
+pylint = "^3.3.4"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

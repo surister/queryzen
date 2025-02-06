@@ -59,6 +59,33 @@ def test_queryzen_default_collection(queryzen):
     assert q.collection == DEFAULT_COLLECTION
 
 
+def test_uncaught_api_error_is_reported(queryzen):
+    # All defined API error, like 409 for a Zen that already exists are handled
+    # by the client, if any uncaught one shows up, we raise it.
+    queryzen._client.create = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
+    queryzen._client.list = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
+    queryzen._client.get = lambda **_: QueryZenResponse(error='somerror', error_code=-1,
+                                                        data=[1])
+    queryzen._client.delete = lambda _: QueryZenResponse(error='somerror', error_code=-1)
+    queryzen._client.list = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
+
+    with pytest.raises(exceptions.UncaughtBackendError):
+        queryzen.create('s', 's')
+
+    with pytest.raises(exceptions.UncaughtBackendError):
+        queryzen.get('s')
+
+    with pytest.raises(exceptions.UncaughtBackendError):
+        queryzen.get_or_create('a', 'b')
+    # Delete is not implemented
+
+    with pytest.raises(exceptions.UncaughtBackendError):
+        queryzen.delete(Zen.empty())
+
+    with pytest.raises(exceptions.UncaughtBackendError):
+        queryzen.list()
+
+
 def test_queryzen_get_one(queryzen):
     """
     Test that we get one query zen.
@@ -71,30 +98,10 @@ def test_queryzen_get_one(queryzen):
     check_zen(q, name, version=1, query=query)
 
 
-def test_uncaught_api_error_is_reported(queryzen):
-    # All defined API error, like 409 for a Zen that already exists are handled
-    # by the client, if any uncaught one shows up, we raise it.
-    queryzen._client.create = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
-    queryzen._client.list = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
-    queryzen._client.get = lambda **_: QueryZenResponse(error='somerror', error_code=-1,
-                                                        data=[1])
-    queryzen._client.delete = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
-    queryzen._client.list = lambda **_: QueryZenResponse(error='somerror', error_code=-1)
-
-    with pytest.raises(exceptions.UncaughtBackendError):
-        queryzen.create('s', 's')
-
-    with pytest.raises(exceptions.UncaughtBackendError):
-        queryzen.get('s')
-
-    with pytest.raises(exceptions.UncaughtBackendError):
-        queryzen.get_or_create('a', 'b')
-    # Delete is not implemented
-    # with pytest.raises(UnknownError):
-    #     queryzen.delete('s', 's')
-
-    with pytest.raises(exceptions.UncaughtBackendError):
-        queryzen.list()
+def test_queryzen_get_parameter_validation(queryzen):
+    with pytest.raises(ValueError):
+        queryzen.get('n', version=None)
+        queryzen.get('n', version='test')
 
 
 def test_queryzen_get_one_unknown(queryzen):
@@ -261,6 +268,6 @@ def test_zen_run_query(queryzen):
     assert result.columns == ['col1', 'col2']
     assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE 'A%' OR col1 = 2;"
 
-# todo handle if database does not exist or there is no configured database
-# handle if parameters are not being sent
-# handle if query is raises error (wrong syntax) - or rather that database fails.
+# todo handle if database does not exist or there is no configured database.
+# todo handle if parameters are not being sent.
+# todo handle if query is raises error (wrong syntax) - or that the database fails.
