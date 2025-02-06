@@ -11,7 +11,8 @@ from .exceptions import (
     UncaughtBackendError,
     ZenDoesNotExistError,
     ZenAlreadyExists,
-    ExecutionEngineException
+    ExecutionEngineException,
+    MissingParametersException
 )
 from .types import AUTO, Rows, Columns, _AUTO
 from .constants import DEFAULT_COLLECTION
@@ -415,6 +416,8 @@ class QueryZen:
         )
 
         if response.error:
+            if response.error_code == 400:
+                raise MissingParametersException(response.error)
             if response.error_code == 503:
                 raise ExecutionEngineException(response.error)
             raise UncaughtBackendError(

@@ -1,4 +1,6 @@
-from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineException
+import re
+
+from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineException, MissingParametersException
 from apps.core.filters import QueryZenFilter
 from apps.core.models import Zen
 from apps.core.serializers import (
@@ -35,6 +37,19 @@ class ZenFilterViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class ZenViewSet(views.APIView):
+
+    def _validate_parameters_replacement(self, zen: Zen, parameters: dict) -> None:
+        """
+        Validate that given parameters and zen query parameters match.
+
+        Regex explanation:
+        (:) -> Search character :
+        (w+) -> Catch one or more letters, numbers... what is the param name
+        """
+        required_parameters = re.findall(r':(\w+)', zen.query)
+        if missing_params := [param for param in required_parameters if param not in parameters]:
+            raise MissingParametersException(f'Missing required parameters: {missing_params}')
+
     def get(self, request, collection: str, name: str, version: str):
         """
         Get a Zen.
@@ -57,6 +72,8 @@ class ZenViewSet(views.APIView):
             name=name,
             version=version,
         )
+
+        self._validate_parameters_replacement(zen, serializer.validated_data['parameters'])
         # Todo: Handle if Zen does not receive the params it needs to run
 
         is_engine_working, error_msg = is_execution_engine_working()
