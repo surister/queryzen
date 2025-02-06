@@ -261,6 +261,23 @@ def test_zen_run_query(queryzen):
     assert result.columns == ['col1', 'col2']
     assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE 'A%' OR col1 = 2;"
 
+
 # todo handle if database does not exist or there is no configured database
 # handle if parameters are not being sent
 # handle if query is raises error (wrong syntax) - or rather that database fails.
+
+
+def test_run_query_not_passing_required_params_raise_exception(queryzen):
+    """
+    Test that if user tries to execute a query with params and no params are found, the API raises an exception.
+    """
+    query = 'select * from mountain where height > :height AND country = :country'
+    name = 'mountain_view'
+
+    q = queryzen.create(name, query=query)
+
+    with pytest.raises(exceptions.MissingParametersException):
+        queryzen.run(q, database='crate')
+
+    with pytest.raises(exceptions.MissingParametersException):
+        queryzen.run(q, database='crate', **{'bad_parameter': 1})
