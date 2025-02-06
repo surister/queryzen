@@ -135,7 +135,7 @@ CELERY_IMPORTS = ('apps.core.tasks',)
 
 
 ZEN_DATABASES = {
-    'testing': SQLiteDatabase(
+    'sqlite': SQLiteDatabase(
         'tdd.sqlite'
     ),
     'crate': CrateDatabase()

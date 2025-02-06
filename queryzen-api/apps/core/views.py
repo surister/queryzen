@@ -1,3 +1,14 @@
+import celery.exceptions
+from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineException
+from apps.core.filters import QueryZenFilter
+from apps.core.models import Zen
+from apps.core.serializers import (
+    ZenSerializer,
+    CreateZenSerializer,
+    ExecuteZenSerializer
+)
+from apps.core.tasks import run_query
+
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
@@ -7,13 +18,7 @@ from rest_framework import views
 from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
 
-from apps.core.exceptions import ZenAlreadyExistsError
-from apps.core.filters import QueryZenFilter
-from apps.core.models import Zen
-from apps.core.serializers import (ZenSerializer,
-                                   CreateZenSerializer,
-                                   ExecuteZenSerializer)
-from apps.core.tasks import run_query
+from queryzen_api.celery import is_execution_engine_working
 
 
 # GET /zen?collection=main&version=1
@@ -53,19 +58,22 @@ class ZenViewSet(views.APIView):
             name=name,
             version=version,
         )
-        # Todo: Handle if task backend is not online (test with no doing docker compose up)
         # Todo: Handle if Zen does not receive the params it needs to run
 
+        is_engine_working, error_msg = is_execution_engine_working()
+        if not is_engine_working:
+            raise ExecutionEngineException(detail=error_msg)
         try:
             async_job = run_query.delay(
                 serializer.validated_data['database'],
                 zen.pk,
                 serializer.validated_data['parameters']
             )
-            query_result = async_job.get(timeout=getattr(settings, 'ZEN_TIMEOUT'))
-
+            timeout = serializer.validated_data.get('timeout', getattr(settings, 'ZEN_TIMEOUT'))
+            query_result = async_job.get(timeout)
             return Response(query_result)
         except Exception as e:
+            print(type(e))
             return Response(f'Running a Zen resulted in an uncaught exception: {e}',
                             status=status.HTTP_400_BAD_REQUEST)
 
@@ -84,7 +92,6 @@ class ZenViewSet(views.APIView):
                                      name=name,
                                      version=version)
             if queryset.exists():
-
                 raise ZenAlreadyExistsError()
 
         zen = Zen(
