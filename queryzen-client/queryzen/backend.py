@@ -67,7 +67,10 @@ class QueryZenClientABC(abc.ABC):
         """Create one ``Zen``"""
 
     @abc.abstractmethod
-    def get(self, name: str, version: str, collection: str) -> QueryZenResponse:
+    def get(self,
+            collection: str,
+            name: str,
+            version: str) -> QueryZenResponse:
         """Get a ``Zen``"""
 
     @abc.abstractmethod
