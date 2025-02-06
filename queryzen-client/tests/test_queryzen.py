@@ -77,7 +77,6 @@ def test_uncaught_api_error_is_reported(queryzen):
 
     with pytest.raises(exceptions.UncaughtBackendError):
         queryzen.get_or_create('a', 'b')
-    # Delete is not implemented
 
     with pytest.raises(exceptions.UncaughtBackendError):
         queryzen.delete(Zen.empty())
@@ -268,9 +267,9 @@ def test_zen_run_query(queryzen):
     assert result.columns == ['col1', 'col2']
     assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE 'A%' OR col1 = 2;"
 
-# todo handle if database does not exist or there is no configured database.
-# todo handle if parameters are not being sent.
-# todo handle if query is raises error (wrong syntax) - or that the database fails.
+# todo handle if database does not exist or there is no configured database
+# handle if parameters are not being sent
+# handle if query is raises error (wrong syntax) - or rather that database fails.
 
 
 def test_run_query_not_passing_required_params_raise_exception(queryzen):
