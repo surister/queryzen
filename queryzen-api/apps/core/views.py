@@ -1,6 +1,5 @@
 import re
 
-import celery.exceptions
 from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineException, MissingParametersException
 from apps.core.filters import QueryZenFilter
 from apps.core.models import Zen
