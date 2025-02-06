@@ -3,7 +3,7 @@ name: Lint backend
 on:
   push:
     paths:
-      - queryzen-api
+      - 'queryzen-api/**.py'
 
 jobs:
   build:

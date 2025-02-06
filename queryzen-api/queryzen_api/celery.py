@@ -1,3 +1,6 @@
+"""
+Celery app and task configuration, all celery related conf should be here.
+"""
 import os
 
 from celery import Celery
@@ -11,7 +14,7 @@ app = Celery('queryzen_api')
 # the configuration object to child processes.
 # - namespace='CELERY' means all celery-related configuration keys
 #   should have a `CELERY_` prefix.
-app.config_from_object(f'django.conf:settings', namespace='CELERY')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
@@ -22,7 +25,7 @@ def debug_task(self):
     print(f'Request: {self.request!r}')
 
 
-def is_execution_engine_working(ping_timeout: int = 2) -> (bool, str):
+def is_execution_engine_working(ping_timeout: int = 1) -> (bool, str):
     """
     Checks whether the execution engine (broker + celery) are up.
 
@@ -41,7 +44,7 @@ def is_execution_engine_working(ping_timeout: int = 2) -> (bool, str):
             return False, ('Zen could not be executed, no worker responded to ping.'
                            ' Check that there are there alive workers.')
 
-    except Exception as e:
+    except Exception as e: # pylint: disable=W0718 # TODO fix broad exception.
         return False, f'Broker could not be reached be reached: {repr(e)}'
 
     return True, None

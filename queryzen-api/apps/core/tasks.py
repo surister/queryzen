@@ -1,8 +1,9 @@
+# pylint: disable=C0114
 import datetime
 import logging
-import sqlite3
 
 from celery import shared_task
+
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
@@ -28,7 +29,7 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
         execution.state = Execution.State.VALID
         execution.query = query
         zen.state = Zen.State.VALID
-    except Exception as e:
+    except Exception as e: # pylint: disable=W0718
         error = str(e)
         execution.state = Execution.State.INVALID
         zen.state = Zen.State.INVALID

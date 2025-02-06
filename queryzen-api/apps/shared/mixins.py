@@ -1,3 +1,4 @@
+# pylint: disable=C0114
 import uuid
 
 from django.db import models

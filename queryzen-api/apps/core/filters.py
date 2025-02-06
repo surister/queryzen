@@ -1,3 +1,4 @@
+# pylint: disable=C0114
 from apps.core.models import Zen
 
 from django_filters import rest_framework as filters
