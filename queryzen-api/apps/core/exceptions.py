@@ -8,3 +8,7 @@ class ZenAlreadyExistsError(APIException):
 
 class ExecutionEngineException(APIException):
     status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+
+
+class MissingParametersException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST

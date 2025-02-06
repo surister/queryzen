@@ -33,6 +33,13 @@ class ExecutionEngineException(Exception):
     pass
 
 
+class MissingParametersException(Exception):
+    """
+    Raised when the worker or the broker are unavailable.
+    """
+    pass
+
+
 class UncaughtBackendError(Exception):
     """
     Raised when the backend returns an error code that we do not implicitly catch.
