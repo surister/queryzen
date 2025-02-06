@@ -22,7 +22,7 @@ def debug_task(self):
     print(f'Request: {self.request!r}')
 
 
-def is_execution_engine_working(ping_timeout: int = 5) -> (bool, str):
+def is_execution_engine_working(ping_timeout: int = 2) -> (bool, str):
     """
     Checks whether the execution engine (broker + celery) are up.
 
@@ -38,8 +38,8 @@ def is_execution_engine_working(ping_timeout: int = 5) -> (bool, str):
     try:
         result = app.control.inspect(timeout=ping_timeout).ping()
         if not result:
-            return False, (f'Zen could not be executed, no worker responded to ping.'
-                           f' Check that there are there alive workers.')
+            return False, ('Zen could not be executed, no worker responded to ping.'
+                           ' Check that there are there alive workers.')
 
     except Exception as e:
         return False, f'Broker could not be reached be reached: {repr(e)}'

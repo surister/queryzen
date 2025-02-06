@@ -7,8 +7,12 @@ import datetime
 import typing
 
 from .backend import QueryZenHttpClient, QueryZenClientABC
-from .exceptions import UncaughtBackendError, ZenDoesNotExistError, \
-    ZenAlreadyExists
+from .exceptions import (
+    UncaughtBackendError,
+    ZenDoesNotExistError,
+    ZenAlreadyExists,
+    ExecutionEngineException
+)
 from .types import AUTO, Rows, Columns, _AUTO
 from .constants import DEFAULT_COLLECTION
 from .table import make_table, ColumnCenter
@@ -411,6 +415,8 @@ class QueryZen:
         )
 
         if response.error:
+            if response.error_code == 503:
+                raise ExecutionEngineException(response.error)
             raise UncaughtBackendError(
                 response,
                 zen=zen,

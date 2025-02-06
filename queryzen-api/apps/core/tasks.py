@@ -37,7 +37,7 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
     execution.save()
 
     finished_at = datetime.datetime.now(datetime.UTC)
-    execution_time = (finished_at - executed_at).total_seconds() * 1000 # milliseconds
+    execution_time = (finished_at - executed_at).total_seconds() * 1000  # milliseconds
 
     response = ZenExecutionResponseSerializer(
         {

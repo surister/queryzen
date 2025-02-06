@@ -19,10 +19,17 @@ class ZenDoesNotExistError(Exception):
 
 class IncompatibleAPI(Exception):
     """
-    Raised when the library is nor marked to work against the backend that the queries are being
+    Raised when the library is not marked to work against the backend that the queries are being
     sent to.
     """
     # Todo add message
+    pass
+
+
+class ExecutionEngineException(Exception):
+    """
+    Raised when the worker or the broker are unavailable.
+    """
     pass
 
 
