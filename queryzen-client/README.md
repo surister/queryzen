@@ -1,5 +1,3 @@
-from apps.core.models import QueryZenfrom apps.core.models import QueryZenfrom apps.core.models import QueryZen
-
 # queryzen
 
 This is the canonical ``queryzen`` client (Python).d

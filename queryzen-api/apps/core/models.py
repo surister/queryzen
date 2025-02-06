@@ -1,18 +1,19 @@
+# pylint: disable=C0114
 from __future__ import annotations
 
 from django.db import models
 from django.db.models import QuerySet
+from django.utils.translation import gettext_lazy as _
 
 from apps.shared.mixins import UUIDMixin
 
-from django.utils.translation import gettext_lazy as _
-
 
 class Zen(UUIDMixin):
+    """A parametrized, versioned and named SQL query"""
     class State(models.TextChoices):
-        VALID = "VA", _("Valid")
-        INVALID = "IN", _("Invalid")
-        UNKNOWN = "UN", _("UNKNOWN")
+        VALID = 'VA', _('Valid')
+        INVALID = 'IN', _('Invalid')
+        UNKNOWN = 'UN', _('UNKNOWN')
 
     def save(self, *args, **kwargs):
         # self.version is either 'latest' or an integer.
@@ -57,8 +58,8 @@ class Zen(UUIDMixin):
 
 class Execution(UUIDMixin):
     class State(models.TextChoices):
-        VALID = "VA", _("Valid")
-        INVALID = "IN", _("Invalid")
+        VALID = 'VA', _('Valid')
+        INVALID = 'IN', _('Invalid')
 
     state = models.CharField(max_length=2, choices=State.choices)
     executed_at = models.DateTimeField(auto_now_add=True)

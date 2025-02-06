@@ -1,3 +1,2 @@
-from django.contrib import admin
-
+# pylint: disable=C0114
 # Register your models here.

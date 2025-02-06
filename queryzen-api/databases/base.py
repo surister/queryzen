@@ -1,3 +1,5 @@
+"""ABC for QueryZen Database drivers."""
+
 import abc
 import logging
 import sqlite3
@@ -7,7 +9,13 @@ import httpx
 logger = logging.getLogger(__name__)
 
 
+class DatabaseError(Exception):
+    # Todo move exception to right place and rename it.
+    pass
+
+
 class Database(abc.ABC):
+    """Base class for all Databases """
     connection = None
 
     @abc.abstractmethod
@@ -17,6 +25,7 @@ class Database(abc.ABC):
 
 
 class SQLiteDatabase(Database):
+    """Sqlite 3"""
     def __init__(self, database, *args, **kwargs):
         self.connection = sqlite3.connect(database, *args, **kwargs)
 
@@ -63,18 +72,19 @@ def safe_sql_replace(sql: str, parameters: dict) -> str:
 
         elif value is None:
             # Replace with NULL for None values
-            replacement = "NULL"
+            replacement = 'NULL'
 
         else:
-            raise ValueError(f"Unsupported parameter type: {type(value)}")
+            raise ValueError(f'Unsupported parameter type: {type(value)}')
 
-        placeholder = f":{key}"
+        placeholder = f':{key}'
         sql = sql.replace(placeholder, replacement)
 
     return sql
 
 
 class CrateDatabase(Database):
+    """CrateDB"""
     def execute(self, sql, parameters=None):
         sql = safe_sql_replace(sql, parameters)
         response = httpx.post('http://192.168.88.251:4200/_sql',
@@ -83,4 +93,4 @@ class CrateDatabase(Database):
         if response.is_success:
             return data.get('cols'), data.get('rows'), sql
         else:
-            raise Exception(response.text)
+            raise DatabaseError(response.text)

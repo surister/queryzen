@@ -1,3 +1,4 @@
+# pylint: disable=C0114
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -7,7 +8,7 @@ from apps.core.tests.factories import QueryZenFactory
 
 
 class QueryZenTestCase(TestCase):
-
+    """Django tests for QueryZen"""
     def setUp(self) -> None:
         # Populate testing db with some zens
         self.zens = [QueryZenFactory.create() for _ in range(10)]
@@ -40,7 +41,8 @@ class QueryZenTestCase(TestCase):
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 1
 
-        filter_through_version = f'{reverse('zens-list')}?version={q.version}&collection={q.collection}&name={q.name}'
+        filter_through_version = (f'{reverse('zens-list')}?version={q.version}'
+                                  f'&collection={q.collection}&name={q.name}')
 
         response = self.client.get(filter_through_version)
 
@@ -88,7 +90,7 @@ class QueryZenTestCase(TestCase):
         q = QueryZenFactory.create(
             name='testing_zen',
         )
-        q2 = QueryZenFactory.create(
+        QueryZenFactory.create(
             name='testing_zen',
         )
         url = reverse('collections-zen', args=[q.collection, q.name])
@@ -127,8 +129,8 @@ class QueryZenTestCase(TestCase):
 
     def test_create_new_queryzen_will_increase_version(self):
         """
-        When a new queryzen is created with the same name and collection than a previous one, it will increase the
-        version + 1
+        When a new queryzen is created with the same name and collection than a previous one,
+        it will increase the version + 1.
         """
         q = QueryZenFactory.create(
             name='testing_zen',  # default collection is main
@@ -157,14 +159,16 @@ class QueryZenTestCase(TestCase):
         Delete an existing zen
         """
 
-        zen_to_delete: Zen = QueryZenFactory.create(
-            name='deleting_zen',
+        zen_to_delete: Zen = QueryZenFactory.create(name='deleting_zen')
+
+        url = reverse('collections-zen',
+                      args=[zen_to_delete.collection, zen_to_delete.name]
         )
 
-        url = reverse('collections-zen', args=[zen_to_delete.collection, zen_to_delete.name])
-
         zens_before = Zen.objects.count()
-        response = self.client.delete(url, {'version': zen_to_delete.version}, content_type='application/json')
+        response = self.client.delete(url,
+                                      {'version': zen_to_delete.version},
+                                      content_type='application/json')
         zens_after = Zen.objects.count()
 
         assert response.status_code == status.HTTP_204_NO_CONTENT

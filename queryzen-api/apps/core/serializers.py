@@ -1,3 +1,6 @@
+"""
+DRF Serializers for apps.core views.
+"""
 from rest_framework import serializers
 
 from apps.core.models import Zen, Execution

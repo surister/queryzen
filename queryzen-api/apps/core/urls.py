@@ -1,7 +1,8 @@
+# pylint: disable=C0114
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from apps.core.views import ZenFilterViewSet, ZenViewSet
+from apps.core.views import ZenFilterViewSet, ZenView
 
 router = DefaultRouter()
 router.register(
@@ -10,5 +11,5 @@ router.register(
 )
 urlpatterns = router.urls
 urlpatterns.append(
-    path('collection/<str:collection>/zen/<str:name>/version/<str:version>/', ZenViewSet.as_view())
+    path('collection/<str:collection>/zen/<str:name>/version/<str:version>/', ZenView.as_view())
 )

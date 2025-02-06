@@ -1,6 +1,7 @@
+"""Faker Factories for QueryZen, used to generate fake data."""
 from factory import LazyAttribute
 from factory.django import DjangoModelFactory
-import factory
+
 from faker import Faker
 
 from apps.core.models import Zen
