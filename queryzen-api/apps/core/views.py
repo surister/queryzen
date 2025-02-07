@@ -1,4 +1,5 @@
 # pylint: disable=C0114
+import logging
 import re
 
 from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineError, MissingParametersError
@@ -19,6 +20,7 @@ from django_filters import rest_framework as filters
 from rest_framework import views
 from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
+
 
 # from queryzen_api.celery import is_execution_engine_working
 
@@ -58,7 +60,7 @@ class ZenView(views.APIView):
         if missing_params := [param for param in required_parameters if param not in parameters]:
             raise MissingParametersError(f'Missing required parameters: {missing_params}')
 
-    def get(self, request, collection: str, name: str, version: str): # pylint: disable=W0613
+    def get(self, request, collection: str, name: str, version: str):  # pylint: disable=W0613
         """
         Get a Zen.
         """
@@ -80,11 +82,10 @@ class ZenView(views.APIView):
             name=name,
             version=version,
         )
-
         self._validate_parameters_replacement(zen, serializer.validated_data['parameters'])
         # Todo: Handle if Zen does not receive the params it needs to run
 
-        is_engine_working, error_msg = True, ''#is_execution_engine_working()
+        is_engine_working, error_msg = True, ''  # is_execution_engine_working()
         if not is_engine_working:
             raise ExecutionEngineError(detail=error_msg)
         try:
@@ -96,9 +97,10 @@ class ZenView(views.APIView):
             timeout = serializer.validated_data.get('timeout', getattr(settings, 'ZEN_TIMEOUT'))
             query_result = async_job.get(timeout)
             return Response(query_result)
-        except Exception as e: # pylint: disable=W0718 TODO Fix exception (Make a better one)
+        except Exception as e:  # pylint: disable=W0718 TODO Fix exception (Make a better one)
+            logging.warning(e)
             return Response(f'Running a Zen resulted in an uncaught exception: {e}',
-                            status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_408_REQUEST_TIMEOUT)
 
     def put(self, request, collection: str, name: str, version: str):
         """
@@ -126,7 +128,7 @@ class ZenView(views.APIView):
         zen.save()
         return Response(ZenSerializer(zen).data)
 
-    def delete(self, request, collection: str, name: str, version: str): # pylint: disable=W0613
+    def delete(self, request, collection: str, name: str, version: str):  # pylint: disable=W0613
         zen = get_object_or_404(
             Zen,
             collection=collection,

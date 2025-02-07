@@ -224,6 +224,12 @@ def test_zen_run_basic(queryzen):
     assert len(zen.executions) == 2
 
 
+def test_zen_run_non_existing_zen(queryzen):
+    _, zen = queryzen.get_or_create('t', query='SELECT 1')
+    queryzen.run(zen, database='testing')
+    # _, zen = queryzen.get_or_create('t', query='SELECT 1')
+
+
 def test_zen_run(queryzen):
     _, zen = queryzen.get_or_create('t', query='SELECT 1')
 
@@ -266,6 +272,7 @@ def test_zen_run_query(queryzen):
     assert result.rows == [[1, 'Alice'], [2, 'Bob']]
     assert result.columns == ['col1', 'col2']
     assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE 'A%' OR col1 = 2;"
+
 
 # todo handle if database does not exist or there is no configured database
 # handle if parameters are not being sent

@@ -112,7 +112,7 @@ class QueryZenHttpClient(QueryZenClientABC):
     VERSION = 'version/'
 
     def __init__(self, client: httpx.Client = None):
-        self.client: httpx.Client = client or httpx.Client()
+        self.client: httpx.Client = client or httpx.Client(timeout=10)
         self.url: Url = Url(
             os.getenv('API_URL') or 'http://localhost:8000'
         )
