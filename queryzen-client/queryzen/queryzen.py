@@ -6,6 +6,7 @@ import dataclasses
 import datetime
 import typing
 
+from .sql import safe_sql_replace
 from .backend import QueryZenHttpClient, QueryZenClientABC
 from .exceptions import (
     UncaughtBackendError,
@@ -125,6 +126,25 @@ class Zen:
                    query='_',
                    description='-1',
                    created_at=datetime.datetime(year=1978, month=12, day=6))
+
+    def preview(self, **parameters) -> str:
+        """
+        Previews the SQL that will be computed given the parameters in QueryZen, if a parameter
+        is missing, it will not raise an exception, this is mainly for debugging purposes,
+        read ``run`` to see how missing parameters are handled.
+
+        Args:
+            parameters: The parameters that will be injected into the query.
+
+        Examples:
+            >>> zen = Zen(name='myzen', query='SELECT * FROM t WHERE val > :val')
+            >>> zen.preview(val=1)
+            'SELECT * FROM t WHERE val > 1'
+
+        Returns:
+            The query with the parameters.
+        """
+        return safe_sql_replace(self.query, parameters)
 
 
 class QueryZen:
