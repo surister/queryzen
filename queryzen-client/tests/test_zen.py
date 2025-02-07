@@ -52,14 +52,20 @@ def test_zen_to_dict():
                version=-1,
                query='_',
                description='-1',
-               created_at=t
-               ).to_dict() == {'collection': 'main',
-                               'created_at': t,
-                               'created_by': 'not_implemented',
-                               'description': '-1',
-                               'executions': [],
-                               'id': -1,
-                               'name': '_',
-                               'query': '_',
-                               'state': 'unknown',
-                               'version': -1}
+               created_at=t).to_dict() == {'collection': 'main',
+                                           'created_at': t,
+                                           'created_by': 'not_implemented',
+                                           'description': '-1',
+                                           'executions': [],
+                                           'id': -1,
+                                           'name': '_',
+                                           'query': '_',
+                                           'state': 'unknown',
+                                           'version': -1}
+
+
+def test_zen_preview():
+    zen = Zen.empty()
+    zen.query = 'SELECT * FROM system WHERE somedata > :intvalue OR uuid == :strvalue'
+    expected = "SELECT * FROM system WHERE somedata > 123 OR uuid == 'adsfasdfasfasdfads'"
+    assert zen.preview(intvalue=123, strvalue='adsfasdfasfasdfads') == expected
