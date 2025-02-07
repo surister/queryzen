@@ -39,7 +39,7 @@ def test_queryzen_create_version(queryzen):
 
     with pytest.raises(exceptions.ZenAlreadyExists):
         queryzen.create(name, query=query, version=1)
-    #
+
     queryzen.create(name, query=query, version=3)
     queryzen.create(name, query=query, version=4)
 
@@ -193,6 +193,26 @@ def test_queryzen_list_filters(queryzen):
     )
 
 
+def test_queryzen_list_advanced_filters(queryzen):
+    """Test aditional and more advanced filtering like filtering by children and gt/lt/contains"""
+
+    queryzen.create(collection='m', name='mountain_view', query='q', version=1)
+    queryzen.create(collection='m', name='mountain_view', query='q', version=2)
+    queryzen.create(collection='ma', name='mountain_view', query='q', version=1)
+    queryzen.create(collection='ma', name='pellizcola', query='q', version=1)
+    correct_query = queryzen.create(collection='ma', name='pellizcola',
+                                    query="select 'correct_query'", version=2)
+
+    queryzen.run(correct_query, database='testing')
+
+    r = queryzen.list(collection__contains='ma',
+                      name__contains='l',
+                      version__gt=1,
+                      executions__state='VA')
+
+    assert len(r) == 1
+
+
 def test_zen_delete(queryzen):
     name = 't'
     query = 'q'
@@ -266,6 +286,7 @@ def test_zen_run_query(queryzen):
     assert result.rows == [[1, 'Alice'], [2, 'Bob']]
     assert result.columns == ['col1', 'col2']
     assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE 'A%' OR col1 = 2;"
+
 
 # todo handle if database does not exist or there is no configured database
 # handle if parameters are not being sent
