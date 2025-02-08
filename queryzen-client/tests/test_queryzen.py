@@ -239,7 +239,7 @@ def test_zen_run_basic(queryzen):
     queryzen.run(zen)
     assert len(zen.executions) == 1
 
-    queryzen.run(zen, database='testing')
+    queryzen.run(zen)
     assert len(zen.executions) == 2
 
 
@@ -249,7 +249,7 @@ def test_zen_run_non_existing_zen(queryzen):
     queryzen.delete(zen)
 
     with pytest.raises(ZenDoesNotExistError):
-        queryzen.run(zen, database='testing')
+        queryzen.run(zen)
 
 
 def test_run_incorrect_query(queryzen):
@@ -282,7 +282,7 @@ def test_zen_run(queryzen):
 
     n_times = 10
     for _ in range(n_times):
-        queryzen.run(zen, database='testing')
+        queryzen.run(zen)
 
     assert len(zen.executions) == n_times + 1
 

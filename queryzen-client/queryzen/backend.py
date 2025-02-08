@@ -102,7 +102,7 @@ class QueryZenHttpClient(QueryZenClientABC):
     VERSION = 'version/'
 
     def __init__(self, client: httpx.Client = None):
-        self.client: httpx.Client = client or httpx.Client(timeout=constants.DEFAULT_HTTP_TIMEOUT)
+        self.client: httpx.Client = client or httpx.Client(timeout=int(constants.DEFAULT_HTTP_TIMEOUT))
         self.url: Url = Url(constants.BACKEND_URL or constants.LOCAL_URL)
 
     def make_url(self, collection: str, name: str, version: str) -> str:

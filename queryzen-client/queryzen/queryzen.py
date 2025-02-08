@@ -368,7 +368,7 @@ class QueryZen:
     def run(self,
             zen: Zen,
             database: str = constants.DEFAULT_DATABASE,
-            timeout: int = constants.DEFAULT_ZEN_EXECUTION_TIMEOUT,
+            timeout: int = int(constants.DEFAULT_ZEN_EXECUTION_TIMEOUT),
             **params):
         """Runs a zen with the given parameters.
 
