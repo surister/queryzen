@@ -3,10 +3,9 @@
 from os import getenv
 import logging
 
-from .exceptions import IncompatibleAPI
+from .exceptions import IncompatibleAPIError
 from .queryzen import QueryZen, Zen, AUTO
 from .constants import DEFAULT_COLLECTION
-
 
 
 def strtobool(val) -> bool:
@@ -67,15 +66,15 @@ if ENFORCE_COMPATABILITY:
         Package version {__version__!r} compatibility is untested for backend version
         {backend_version!r}, compatibility is only tested for {API_VERSION_COMPATIBLE!r},
         please update the package to the latest version.
-        
+
         You can turn this off by setting the env variable 'ENFORCE_COMPATABILITY' to 'false'.
-        
+
         If the package is in the latest version and this still triggers, there is a bug, please
         report this message in a github issue at:
         https://github.com/surister/queryzen/issues/new/choose
                 """
         if ENFORCE_COMPATABILITY_ACTION == 'raise_exception':
-            raise IncompatibleAPI(message)
+            raise IncompatibleAPIError(message)
         else:
             logging.warning(message)
 

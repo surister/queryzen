@@ -58,8 +58,8 @@ services:
     command: >
       bash -c "tail -f"
     environment:
-      - ENVIRONMENT=CI
-      - API_URL=http://api:8000
+#      - ENVIRONMENT=CI
+      - QUERYZEN_API_URL=http://api:8000
       - CELERY_BROKER_URL=redis://redis:6379/1
     depends_on:
       - redis

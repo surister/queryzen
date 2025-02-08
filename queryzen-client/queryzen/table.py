@@ -5,8 +5,7 @@ from .types import Columns, Rows, ColumnCenter
 
 
 def center_string(string: str, pad_length: int, direction: ColumnCenter = "left") -> str:
-    """
-    Centers a `string` to a given `direction`
+    """Centers a `string` to a given `direction`
 
     Args:
         string: The string to center.
@@ -26,8 +25,7 @@ def center_string(string: str, pad_length: int, direction: ColumnCenter = "left"
 
 
 def make_table(columns: Columns, rows: Rows, column_center: ColumnCenter = "left"):
-    """
-    Creates a table with the given `columns` and `rows`, a column direction can be customized.
+    """Creates a table with the given `columns` and `rows`, a column direction can be customized.
 
     Examples:
         >>> make_table(['a', 'b'], rows=[(1, 2), (3, 4)]) # ignore-doctest
