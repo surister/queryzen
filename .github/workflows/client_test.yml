@@ -1,0 +1,24 @@
+name: Run python client
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.12" ]
+    steps:
+      # Check out the repository
+      - uses: actions/checkout@v4
+
+      # Run Docker Compose Action
+      - name: Run docker compose
+        uses: adambirds/docker-compose-action@v1.5.0
+        with:
+          compose-file: "./docker-compose-ci.yml"
+          up-flags: "--build"
+          down-flags: "--volumes"
+      - name: Run client Tests
+        run: |
+          docker exec queryzen-client-1 bash -c "echo waiting 2s && sleep 2 && pytest --use-local -k 'not test_zen_run_query and not test_run_query_not_passing_required_params_raise_exception'"

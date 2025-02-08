@@ -1,4 +1,5 @@
 # pylint: disable=C0114
+import logging
 import re
 
 from django.conf import settings
@@ -79,7 +80,6 @@ class ZenView(views.APIView):
             name=name,
             version=version,
         )
-
         self._validate_parameters_replacement(zen, serializer.validated_data['parameters'])
         # Todo: Handle if Zen does not receive the params it needs to run
 
@@ -96,8 +96,9 @@ class ZenView(views.APIView):
             query_result = async_job.get(timeout)
             return Response(query_result)
         except Exception as e:  # pylint: disable=W0718 TODO Fix exception (Make a better one)
+            logging.warning(e)
             return Response(f'Running a Zen resulted in an uncaught exception: {e}',
-                            status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_408_REQUEST_TIMEOUT)
 
     def put(self, request, collection: str, name: str, version: str):
         """

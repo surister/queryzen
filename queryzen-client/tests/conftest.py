@@ -1,11 +1,16 @@
 # pylint: skip-file
+import logging
 
+import httpx
 import pytest
 import datetime
+
+import requests
 
 from queryzen import QueryZen
 from queryzen.backend import QueryZenResponse
 from queryzen.queryzen import QueryZenClientABC, Zen
+
 
 def filter_dataclasses(items: list, filters: dict[str, object]) -> list:
     return [item for item in items if all(getattr(item, k) == v for k, v in filters.items())]
@@ -101,31 +106,19 @@ def mocked_queryzen():
 
 @pytest.fixture
 def local_queryzen():
+    import os
+    base_url = f'{os.getenv('API_URL') or 'http://localhost:8000'}'
+    logging.info(base_url)
     """
       This QueryZen client is intended to use with a real backend instance being run locally.
       It will refresh the database after every test run.
-
     """
-
     qz = QueryZen()
-
-    # We copy the current state of the database before a test, run the test, which modifies the DB
-    # and then put everything back, albeit a bit dirty, it allows us to run the unit tests
-    # on the actual database (avoiding mocking).
-
-    # Risk: It depends on the monorepo nature of the project, not suitable for CI runs,
-    # it's helpful right now where we don't want to invest time creating a super-dupper
-    # mock class for our backend.
-
-    import pathlib, shutil
-    db_path = pathlib.Path(__file__).parent.parent.parent / 'queryzen-api'
-
-    shutil.copy2(db_path / 'db.sqlite3', db_path / 'tmp.db.sqlite3')
-
     yield qz
 
-    shutil.copy2(db_path / 'tmp.db.sqlite3', db_path / 'db.sqlite3')
-    (db_path / 'tmp.db.sqlite3').unlink()
+    response = httpx.get(f'{base_url}/_testing/clean_db', timeout=1)
+
+    assert response.status_code == 200
 
 
 @pytest.fixture
@@ -138,5 +131,6 @@ def queryzen(request) -> QueryZen:
 
 
 def pytest_addoption(parser):
-    parser.addoption("--use-local", action="store_true",
+    parser.addoption("--use-local",
+                     action="store_true",
                      help="Use local_queryzen instead of mocked_queryzen")

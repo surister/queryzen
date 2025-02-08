@@ -1,17 +1,4 @@
 services:
-  drf-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - '8000:8000'
-    profiles:
-      - api
-    volumes:
-      - ./:app/
-    command: >
-      bash -c "poetry run python manage.py migrate && poetry run python manage.py runserver 0.0.0.0:8000"
-
   workers:
     build:
       context: .

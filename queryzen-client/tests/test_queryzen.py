@@ -244,6 +244,12 @@ def test_zen_run_basic(queryzen):
     assert len(zen.executions) == 2
 
 
+def test_zen_run_non_existing_zen(queryzen):
+    _, zen = queryzen.get_or_create('t', query='SELECT 1')
+    queryzen.run(zen, database='testing')
+    # _, zen = queryzen.get_or_create('t', query='SELECT 1')
+
+
 def test_zen_run(queryzen):
     _, zen = queryzen.get_or_create('t', query='SELECT 1')
 

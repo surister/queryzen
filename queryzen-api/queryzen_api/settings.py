@@ -26,10 +26,9 @@ SECRET_KEY = 'django-insecure-fs+y^@*i1o&w1ehn)mhj0gh54@5q0xg_llb7h0@ubof+0pe25e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
-
 INSTALLED_APPS = [
     'apps.core',
 
@@ -44,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+if DEBUG:
+    INSTALLED_APPS.append('apps.testing')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -132,7 +134,6 @@ REST_FRAMEWORK = {
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
 CELERY_IMPORTS = ('apps.core.tasks',)
-
 
 ZEN_DATABASES = {
     'testing': SQLiteDatabase(
