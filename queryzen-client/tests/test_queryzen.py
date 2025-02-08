@@ -236,7 +236,7 @@ def test_zen_run_basic(queryzen):
     """
     _, zen = queryzen.get_or_create('t', query='SELECT 1')
 
-    queryzen.run(zen, database='testing')
+    queryzen.run(zen)
     assert len(zen.executions) == 1
 
     queryzen.run(zen, database='testing')
