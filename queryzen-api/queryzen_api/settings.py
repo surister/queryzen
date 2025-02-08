@@ -136,9 +136,8 @@ CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
 CELERY_IMPORTS = ('apps.core.tasks',)
 
 ZEN_DATABASES = {
-    'testing': SQLiteDatabase(
-        'tdd.sqlite'
-    ),
+    'default': SQLiteDatabase('tdd.sqlite'),
     'crate': CrateDatabase()
 }
+
 ZEN_TIMEOUT = 2

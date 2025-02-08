@@ -65,7 +65,7 @@ QueryZen.get
 QueryZen.create
 QueryZen.get_or_create
 QueryZen.delete
-QueryZen.list
+QueryZen.filter
 ```
 
 

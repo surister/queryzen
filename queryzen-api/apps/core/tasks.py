@@ -31,7 +31,9 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
         zen.state = Zen.State.VALID
     except Exception as e: # pylint: disable=W0718
         error = str(e)
+        print('we have error')
         execution.state = Execution.State.INVALID
+
         zen.state = Zen.State.INVALID
 
     zen.save()

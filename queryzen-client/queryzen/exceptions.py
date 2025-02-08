@@ -1,23 +1,18 @@
 # pylint: disable=C0114
 
-from queryzen.backend import QueryZenResponse
-
 
 class ZenAlreadyExists(Exception):
-    """
-    Raised if you try to create a ``Zen`` that already exists.
-    """
+    """Trying to create a ``Zen`` that already exists."""
     pass
 
 
 class ZenDoesNotExistError(Exception):
-    """
-    Raised if you try to get a ``Zen`` that does not exist.
+    """Trying to get a ``Zen`` that does not exist.
     """
     pass
 
 
-class IncompatibleAPI(Exception):
+class IncompatibleAPIError(Exception):
     """
     Raised when the library is not marked to work against the backend that the queries are being
     sent to.
@@ -26,26 +21,27 @@ class IncompatibleAPI(Exception):
     pass
 
 
-class ExecutionEngineException(Exception):
-    """
-    Raised when the worker or the broker are unavailable.
-    """
+class ExecutionEngineError(Exception):
+    """Workers or the broker is unavailable."""
     pass
 
 
-class MissingParametersException(Exception):
-    """
-    Raised when the worker or the broker are unavailable.
-    """
+class MissingParametersError(Exception):
+    """Trying to run a Query without the needed parameters"""
+    pass
+
+
+class DatabaseDoesNotExistError(Exception):
+    """Trying to run a zen to a database that does not exist"""
     pass
 
 
 class UncaughtBackendError(Exception):
-    """
-    Raised when the backend returns an error code that we do not implicitly catch.
+    """Backend returns an error code that we do not implicitly catch.
+    User is never meant to get this.
     """
 
-    def __init__(self, response: QueryZenResponse, zen: 'Zen' = None, context: str = None):
+    def __init__(self, response: 'QueryZenResponse', zen: 'Zen' = None, context: str = None):
         self.message = f"""
         Error from backend not caught gracefully, this is a bug, please report this entire
         message in a Github Issue:

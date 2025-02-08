@@ -2,15 +2,17 @@
 
 
 def safe_sql_replace(sql: str, parameters: dict) -> str:
-    """
-    Replaces :parameter placeholders in an SQL statement with values from a dictionary.
+    """Replaces :parameter placeholders in an SQL statement with values from a dictionary.
+    # todo add example to docstring
+    It is resilient against injections; currently only both integers,
+    string and null values can be used.
 
     Args:
         sql: The SQL statement with :parameter placeholders.
         parameters: A dictionary containing the parameter names and values.
 
     Raises:
-        `ValueError` if the values are not integer, string or null
+        ``ValueError``: if the values are not integer, string or null.
 
     Returns:
         The SQL statement with placeholders replaced by values.
@@ -34,7 +36,7 @@ def safe_sql_replace(sql: str, parameters: dict) -> str:
             replacement = 'NULL'
 
         else:
-            raise ValueError(f'Unsupported parameter type: {type(value)}')
+            raise ValueError(f'unsupported parameter type: {type(value)}')
 
         placeholder = f':{key}'
         sql = sql.replace(placeholder, replacement)

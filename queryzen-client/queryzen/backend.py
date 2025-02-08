@@ -7,12 +7,12 @@ Implement QueryZenClientABC to make a new client.
 import abc
 import dataclasses
 import datetime
-import os
 import urllib
 from typing import Any
 
 import httpx
 
+from . import constants
 from .constants import DEFAULT_COLLECTION
 from .types import _AUTO, AUTO
 
@@ -32,14 +32,12 @@ class Url(str):
 
 @dataclasses.dataclass
 class QueryZenResponse:
-    """
-    Response from the backend.
-    """
+    """Represents a response from the backend"""
     error_code: int | None = None
     error: str | None = None
     started_at: datetime.datetime = None
     finished_at: datetime.datetime = None
-    execution_time: float = None
+    execution_time: float = None  # The execution time of the query in milliseconds.
     data: list[dict] = dataclasses.field(default_factory=list)
 
     @property
@@ -52,51 +50,43 @@ class QueryZenResponse:
 
 
 class QueryZenClientABC(abc.ABC):
-    """
-    Abstract class for a QueryZen client.
-    """
+    """Abstract class for a QueryZen client."""
 
     @abc.abstractmethod
     def make_response(self, response) -> QueryZenResponse:
-        """
-        Maps the response from the client to the general Response class ``QueryZenResponse``
+        """Abc method to map the response from the client to the response class ``QueryZenResponse``
         """
 
     @abc.abstractmethod
     def create(self, *, collection, name, version, description, query) -> QueryZenResponse:
-        """Create one ``Zen``"""
+        """Abc method to create one ``Zen``"""
 
     @abc.abstractmethod
     def get(self,
             collection: str,
             name: str,
             version: str) -> QueryZenResponse:
-        """Get a ``Zen``"""
+        """Abc method to get a ``Zen``"""
 
     @abc.abstractmethod
-    def list(self, **filters) -> QueryZenResponse:
-        """Get all ``Zen`` and filter them by ``filters``"""
+    def filter(self, **filters) -> QueryZenResponse:
+        """Abc method to get all ``Zen`` and filter them by ``filters``"""
 
     @abc.abstractmethod
-    def delete(
-            self,
-            zen: 'Zen',
-    ) -> QueryZenResponse:
+    def delete(self,
+               zen: 'Zen') -> QueryZenResponse:
         """Abc method for deleting a ``Zen``"""
 
     @abc.abstractmethod
-    def run(
-            self,
+    def run(self,
             name: str,
             version: int,
+            database: str,
+            timeout: int,
             collection: str = DEFAULT_COLLECTION,
             **params: dict
-    ) -> QueryZenResponse:
-        """
-        Run a ``Zen``with the given params.
-
-        TODO: Add parameters like 'timeout'
-        """
+            ) -> QueryZenResponse:
+        """Abc method for running a ``Zen``"""
 
 
 class QueryZenHttpClient(QueryZenClientABC):
@@ -112,14 +102,21 @@ class QueryZenHttpClient(QueryZenClientABC):
     VERSION = 'version/'
 
     def __init__(self, client: httpx.Client = None):
-        self.client: httpx.Client = client or httpx.Client(timeout=10)
-        self.url: Url = Url(
-            os.getenv('API_URL') or 'http://localhost:8000'
-        )
+        self.client: httpx.Client = (client
+                                     or httpx.Client(timeout=int(constants.DEFAULT_HTTP_TIMEOUT)))
+        self.url: Url = Url(constants.BACKEND_URL or constants.LOCAL_URL)
 
     def make_url(self, collection: str, name: str, version: str) -> str:
-        """
-        Makes a valid QueryZen REST url.
+        # todo make test
+        """Creates a valid QueryZen REST url
+
+        Args:
+            collection: The collection
+            name: The name
+            version: The name
+
+        Returns:
+            A fqdn that is valid to run HTTP requests against.
         """
         return (self.url /
                 self.COLLECTIONS /
@@ -128,8 +125,7 @@ class QueryZenHttpClient(QueryZenClientABC):
                 name /
                 self.VERSION /
                 version /
-                ''
-                )
+                '')
 
     def make_response(self, response: httpx.Response) -> QueryZenResponse:
         """
@@ -159,8 +155,7 @@ class QueryZenHttpClient(QueryZenClientABC):
                version: _AUTO = AUTO,
                description: str = '',
                query: str) -> QueryZenResponse:
-        """
-        Creates a ``Zen`` via PUT request to the backend.
+        """Creates a ``Zen`` via PUT request to the backend.
 
         The version is automatically handled by QueryZen, it is an integer that is auto-incremented
         e.g. 1, 2, 3
@@ -181,10 +176,8 @@ class QueryZenHttpClient(QueryZenClientABC):
         )
         return self.make_response(response)
 
-    def list(self, **filters) -> QueryZenResponse:
-        response = httpx.get(
-            self.url / self.MAIN_ENDPOINT / '?' + urllib.parse.urlencode(filters)
-        )
+    def filter(self, **filters) -> QueryZenResponse:
+        response = httpx.get(self.url / self.MAIN_ENDPOINT / '?' + urllib.parse.urlencode(filters))
         return self.make_response(response)
 
     def get(self,
@@ -198,23 +191,18 @@ class QueryZenHttpClient(QueryZenClientABC):
         return self.make_response(response)
 
     def delete(self, zen: 'Zen') -> QueryZenResponse:
-        response = self.client.delete(
-            self.make_url(zen.collection, zen.name, zen.version)
-        )
+        response = self.client.delete(self.make_url(zen.collection, zen.name, zen.version))
         return self.make_response(response)
 
     def run(self,
             name: str,
             version: int,
             collection: str = DEFAULT_COLLECTION,
-            **params: dict
-            ) -> QueryZenResponse:
-        response = self.client.post(
-            self.make_url(collection, name, str(version)),
-            json={
-                'version': version,
-                'parameters': params,
-                'database': params.get('database')
-            }
-        )
+            **params: dict) -> QueryZenResponse:
+        response = self.client.post(self.make_url(collection, name, str(version)),
+                                    json={
+                                        'version': version,
+                                        'parameters': params,
+                                        'database': params.get('database')
+                                    })
         return self.make_response(response)

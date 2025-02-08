@@ -11,7 +11,8 @@ from rest_framework import views
 from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
 
-from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineError, MissingParametersError
+from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineError, \
+    MissingParametersError, DatabaseDoesNotExistError
 from apps.core.filters import QueryZenFilter
 from apps.core.models import Zen
 from apps.core.serializers import (
@@ -25,8 +26,7 @@ from apps.core.tasks import run_query
 
 # GET /zen?collection=main&version=1
 class ZenFilterViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """
-    Special view that breaks the REST pattern, it only accepts GET requests and has all kinds of
+    """Special view that breaks the REST pattern, it only accepts GET requests and has all kinds of
     filters via query parameters.
 
     Check ``QueryZenFilter.Meta.fields`` to see the available ones.
@@ -38,8 +38,7 @@ class ZenFilterViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class ZenView(views.APIView):
-    """
-    View for handling Zen lifetimes. It follows the REST pattern.
+    """View for handling Zen lifetimes. It follows the REST pattern.
     GET: Get a Zen.
     POST: Run a Zen.
     PUT: Create a Zen.
@@ -47,8 +46,7 @@ class ZenView(views.APIView):
     """
 
     def _validate_parameters_replacement(self, zen: Zen, parameters: dict) -> None:
-        """
-        Validate that given parameters and zen query parameters match.
+        """Validate that given parameters and zen query parameters match.
 
         Regex explanation:
         (:) -> Search character :
@@ -59,14 +57,11 @@ class ZenView(views.APIView):
             raise MissingParametersError(f'Missing required parameters: {missing_params}')
 
     def get(self, request, collection: str, name: str, version: str):  # pylint: disable=W0613
-        """
-        Get a Zen.
-        """
+        """Get a Zen."""
         queryset = Zen.filter_by(collection=collection,
                                  name=name,
                                  version=version)
         objects = get_object_or_404(queryset)
-
         return Response(ZenSerializer(objects, many=False).data)
 
     def post(self, request, collection, name, version):
@@ -74,21 +69,23 @@ class ZenView(views.APIView):
         serializer = ExecuteZenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        zen = get_object_or_404(
-            Zen,
-            collection=collection,
-            name=name,
-            version=version,
-        )
+        zen = get_object_or_404(Zen,
+                                collection=collection,
+                                name=name,
+                                version=version)
         self._validate_parameters_replacement(zen, serializer.validated_data['parameters'])
-        # Todo: Handle if Zen does not receive the params it needs to run
 
         is_engine_working, error_msg = True, ''  # is_execution_engine_working()
         if not is_engine_working:
             raise ExecutionEngineError(detail=error_msg)
+
+        requested_database = serializer.validated_data['database']
+        if not settings.ZEN_DATABASES.get(requested_database):
+            raise DatabaseDoesNotExistError(f'The asked database {repr(requested_database)}'
+                                            f' is not configured in the backed.')
         try:
             async_job = run_query.delay(
-                serializer.validated_data['database'],
+                requested_database,
                 zen.pk,
                 serializer.validated_data['parameters']
             )

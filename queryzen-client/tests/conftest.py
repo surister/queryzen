@@ -7,7 +7,7 @@ import datetime
 
 import requests
 
-from queryzen import QueryZen
+from queryzen import QueryZen, constants
 from queryzen.backend import QueryZenResponse
 from queryzen.queryzen import QueryZenClientABC, Zen
 
@@ -17,6 +17,7 @@ def filter_dataclasses(items: list, filters: dict[str, object]) -> list:
 
 
 class MockQueryZenBackendClient(QueryZenClientABC):
+    # THIS CLASS IS VERY OUTDATED, DONT USE,
     def __init__(self):
         self.zens = []
 
@@ -53,7 +54,7 @@ class MockQueryZenBackendClient(QueryZenClientABC):
             data=[]
         )
 
-    def list(self, **filters) -> 'QueryZenResponse':
+    def filter(self, **filters) -> 'QueryZenResponse':
         if not filters:
             print(list(map(lambda x: x.to_dict(), self.zens)))
             zens = list(map(lambda x: x.to_dict(), self.zens))
@@ -106,26 +107,25 @@ def mocked_queryzen():
 
 @pytest.fixture
 def local_queryzen():
-    import os
-    base_url = f'{os.getenv('API_URL') or 'http://localhost:8000'}'
-    logging.info(base_url)
+    """This QueryZen client is intended to use with a real backend instance being run locally.
+
+    It will refresh the database after every test run.
     """
-      This QueryZen client is intended to use with a real backend instance being run locally.
-      It will refresh the database after every test run.
-    """
+    response = httpx.get(f'{constants.BACKEND_URL}/_testing/clean_db', timeout=1)
+    assert response.status_code == 200
+
     qz = QueryZen()
     yield qz
 
-    response = httpx.get(f'{base_url}/_testing/clean_db', timeout=1)
 
-    assert response.status_code == 200
 
 
 @pytest.fixture
 def queryzen(request) -> QueryZen:
     # We either use mocked_queryzen or local_queryzen depending on chosen setting.
     use_local = request.config.getoption("--use-local")  # Get a CLI option
-    queryzen = 'local_queryzen' if use_local else 'mocked_queryzen'
+    use_mocked = request.config.getoption("--use-mocked")
+    queryzen = 'mocked_queryzen' if use_mocked else 'local_queryzen'
     print(f'💡💡💡 IMPORTANT: Using {queryzen} fixture')
     return request.getfixturevalue(queryzen)
 
@@ -134,3 +134,6 @@ def pytest_addoption(parser):
     parser.addoption("--use-local",
                      action="store_true",
                      help="Use local_queryzen instead of mocked_queryzen")
+    parser.addoption("--use-mocked",
+                     action="store_true",
+                     help="Use mocked_queryzen instead of local_queryzen")
