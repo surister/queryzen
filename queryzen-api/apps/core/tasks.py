@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 
 from apps.core.models import Zen, Execution
 from apps.core.serializers import ZenExecutionResponseSerializer
-from databases.base import Database
+from databases.base import Database, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -29,18 +29,26 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
         execution.state = Execution.State.VALID
         execution.query = query
         zen.state = Zen.State.VALID
-    except Exception as e: # pylint: disable=W0718
+    # except DatabaseError as e:  # pylint: disable=W0718
+    #     error = str(e)
+    #     execution.state = Execution.State.INVALID
+    #     zen.state = Zen.State.INVALID
+    #     execution.error = error
+    except Exception as e:  # pylint: disable=W0718
         error = str(e)
         print('we have error')
         execution.state = Execution.State.INVALID
 
         zen.state = Zen.State.INVALID
+        execution.error = error
 
     zen.save()
-    execution.save()
 
     finished_at = datetime.datetime.now(datetime.UTC)
     execution_time = (finished_at - executed_at).total_seconds() * 1000  # milliseconds
+
+    execution.execution_time_in_ms = execution_time
+    execution.save()
 
     response = ZenExecutionResponseSerializer(
         {

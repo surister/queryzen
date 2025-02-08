@@ -341,3 +341,30 @@ def test_run_query_not_passing_required_params_crate(queryzen):
 
     with pytest.raises(exceptions.MissingParametersError):
         queryzen.run(q, database='crate', bad_parameter=1)
+
+
+def test_get_stats_from_a_zen(queryzen):
+    """
+    Test that a zen that has been run at least one time return some precious stats from the executions.
+    """
+    _, zen = queryzen.get_or_create('t', query='SELECT 1')
+
+    queryzen.run(zen)
+
+    stats = queryzen.stats(zen)
+    assert stats is not None
+    assert stats.last_execution is not None
+
+
+def test_get_stats_from_a_zen_that_has_not_been_run_return_empty_stats(queryzen):
+    """
+    Test that a zen that has never been executed cannot return stats.
+    """
+    _, zen = queryzen.get_or_create('t', query='SELECT 1')
+
+    stats = queryzen.stats(zen)
+
+    assert stats is not None
+    assert stats.last_execution is None
+    assert len(stats.errors) == 0
+    assert stats.total_executions == 0

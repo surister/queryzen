@@ -88,6 +88,12 @@ class QueryZenClientABC(abc.ABC):
             ) -> QueryZenResponse:
         """Abc method for running a ``Zen``"""
 
+    @abc.abstractmethod
+    def stats(self, name: str, version: int, collection: str = DEFAULT_COLLECTION, **params: dict):
+        """
+        Return availaible stats for a ``Zen``
+        """
+
 
 class QueryZenHttpClient(QueryZenClientABC):
     """
@@ -97,6 +103,7 @@ class QueryZenHttpClient(QueryZenClientABC):
 
     It uses httpx to make the http requests.
     """
+
     MAIN_ENDPOINT = 'zen/'
     COLLECTIONS = 'collection/'
     VERSION = 'version/'
@@ -201,4 +208,10 @@ class QueryZenHttpClient(QueryZenClientABC):
                                         'version': version,
                                         'parameters': params,
                                         'database': params.get('database')})
+        return self.make_response(response)
+
+    def stats(self, name: str, version: int, collection: str = DEFAULT_COLLECTION, **params: dict):
+        response = self.client.get(
+            self.make_url(collection, name, version) + 'stats/',  # TODO  make_url receives an str but version it's an int
+        )
         return self.make_response(response)

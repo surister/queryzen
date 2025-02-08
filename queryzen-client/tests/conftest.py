@@ -1,11 +1,8 @@
 # pylint: skip-file
-import logging
 
 import httpx
 import pytest
 import datetime
-
-import requests
 
 from queryzen import QueryZen, constants
 from queryzen.backend import QueryZenResponse
@@ -116,8 +113,6 @@ def local_queryzen():
 
     qz = QueryZen()
     yield qz
-
-
 
 
 @pytest.fixture

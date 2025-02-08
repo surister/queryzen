@@ -22,6 +22,20 @@ from .table import make_table, ColumnCenter
 
 
 @dataclasses.dataclass
+class FailedZenExecution:
+    """
+    Represent (id, error) pair that a execution can return. Used in stats to give the user a more
+    clear view of all failed executions.
+
+    Args:
+        id: Execution id
+        error: reason, if possible, why it has failed or the error that has occurred
+    """
+    id: str
+    error: str
+
+
+@dataclasses.dataclass
 class ZenExecution:
     """
     Represents the execution of a Zen in a Zen backend. If backend does not return row_count,
@@ -63,6 +77,21 @@ class ZenExecution:
 
     def iter_cols(self):
         pass
+
+
+@dataclasses.dataclass
+class ZenStats:
+    """
+    Represent stats
+    """
+    total_executions: int
+    failed_executions: int
+    successful_executions: int
+    average_execution_time_ms: float
+    median_execution_time_ms: float
+    slowest_execution: ZenExecution
+    last_execution: ZenExecution
+    errors: list[FailedZenExecution]
 
 
 @dataclasses.dataclass
@@ -429,7 +458,41 @@ class QueryZen:
                                  executed_at=response.get_from_data('executed_at'),
                                  finished_at=response.get_from_data('finished_at'),
                                  execution_duration_ms=response.get_from_data('execution_time_ms'),
-                                 error=response.get_from_data('error'), # execution error
+                                 error=response.get_from_data('error'),  # execution error
                                  query=response.get_from_data('query'))
         zen.executions.append(execution)
         return execution
+
+    def stats(self, zen: Zen) -> ZenStats:
+        """
+        Gets all available statistics from a given zen.
+
+        Examples:
+            >>>from queryzen import QueryZen
+
+            >>>qz = QueryZen()
+
+            >>>zen = qz.create('z', 'select 1')
+
+            >>>stats = qz.stats(zen)
+
+            >>>print(stats)
+        """
+        response = self._client.stats(
+            name=zen.name,
+            collection=zen.collection,
+            version=zen.version
+        )
+
+        stats = ZenStats(
+            total_executions=response.get_from_data('total_executions'),
+            failed_executions=response.get_from_data('failed_executions'),
+            successful_executions=response.get_from_data('successful_executions'),
+            average_execution_time_ms=response.get_from_data('average_execution_time_ms'),
+            median_execution_time_ms=response.get_from_data('median_execution_time_ms'),
+            slowest_execution=response.get_from_data('slowest_execution'),
+            last_execution=response.get_from_data('last_execution'),
+            errors=response.get_from_data('errors'),
+        )
+
+        return stats

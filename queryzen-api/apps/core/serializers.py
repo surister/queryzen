@@ -46,3 +46,20 @@ class ZenExecutionResponseSerializer(serializers.Serializer):
     executed_at = serializers.DateTimeField()
     finished_at = serializers.DateTimeField()
     query = serializers.CharField()
+
+
+class FailedZenExecutionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Execution
+        fields = ('id', 'error')
+
+
+class ZenStatsSerializer(serializers.Serializer):
+    total_executions = serializers.IntegerField(read_only=True, min_value=0)
+    failed_executions = serializers.IntegerField(read_only=True, min_value=0)
+    successful_executions = serializers.IntegerField(read_only=True, min_value=0)
+    average_execution_time_ms = serializers.FloatField(read_only=True, min_value=0)
+    median_execution_time_ms = serializers.FloatField(read_only=True, min_value=0)
+    slowest_execution = ExecutionSerializer(read_only=True)
+    last_execution = ExecutionSerializer(read_only=True)
+    errors = FailedZenExecutionSerializer(many=True)

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Avg
 from django.utils.translation import gettext_lazy as _
 
 from apps.shared.mixins import UUIDMixin
@@ -10,6 +10,7 @@ from apps.shared.mixins import UUIDMixin
 
 class Zen(UUIDMixin):
     """A parametrized, versioned and named SQL query"""
+
     class State(models.TextChoices):
         VALID = 'VA', _('Valid')
         INVALID = 'IN', _('Invalid')
@@ -52,6 +53,21 @@ class Zen(UUIDMixin):
             queryset = queryset.filter(version=version)
         return queryset
 
+    @property
+    def last_run(self) -> Execution:
+        """Return last execution of the Zen."""
+        return self.executions.order_by('-executed_at').first()
+
+    @property
+    def average_execution_time(self) -> float:
+        return self.executions.aggregate(
+            Avg('execution_time_in_ms')
+        ).get('execution_time_in_ms__avg', 0)
+
+    @property
+    def failed_executions(self) -> int:
+        return self.executions.filter(state=Execution.State.INVALID).count()
+
     class Meta:
         unique_together = ('collection', 'name', 'version')
 
@@ -65,3 +81,5 @@ class Execution(UUIDMixin):
     executed_at = models.DateTimeField(auto_now_add=True)
     zen = models.ForeignKey(to=Zen, on_delete=models.CASCADE, related_name='executions')
     query = models.TextField()
+    execution_time_in_ms = models.FloatField()
+    error = models.TextField(null=True)

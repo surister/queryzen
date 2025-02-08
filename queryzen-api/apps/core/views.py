@@ -2,6 +2,17 @@
 import logging
 import re
 
+from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineError, \
+    MissingParametersError, DatabaseDoesNotExistError
+from apps.core.filters import QueryZenFilter
+from apps.core.models import Zen, Execution
+from apps.core.serializers import (
+    ZenSerializer,
+    CreateZenSerializer,
+    ExecuteZenSerializer, ZenStatsSerializer
+)
+from apps.core.tasks import run_query
+
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
@@ -11,16 +22,9 @@ from rest_framework import views
 from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
 
-from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineError, \
-    MissingParametersError, DatabaseDoesNotExistError
-from apps.core.filters import QueryZenFilter
-from apps.core.models import Zen
-from apps.core.serializers import (
-    ZenSerializer,
-    CreateZenSerializer,
-    ExecuteZenSerializer
-)
-from apps.core.tasks import run_query
+from statistics import median
+
+
 # from queryzen_api.celery import is_execution_engine_working
 
 
@@ -127,3 +131,30 @@ class ZenView(views.APIView):
                                 version=version)
         zen.delete()
         return Response([], status=status.HTTP_200_OK)
+
+
+class ZenStatsAPIView(views.APIView):
+
+    def get(self, request, collection: str, name: str, version: str):
+        zen = get_object_or_404(
+            Zen,
+            collection=collection,
+            name=name,
+            version=version
+        )
+
+        response_data = ZenStatsSerializer(
+            {
+                'total_executions': zen.executions.count(),
+                'failed_executions': zen.failed_executions,
+                'successful_executions': zen.executions.count() - zen.failed_executions,
+                'average_execution_time_ms': zen.average_execution_time,
+                'median_execution_time_ms': median(zen.executions.values_list('execution_time_in_ms',
+                                                                              flat=True)) if zen.executions.exists() else 0,
+                'slowest_execution': zen.executions.order_by('-execution_time_in_ms').first(),
+                'last_execution': zen.executions.order_by('-executed_at').first(),
+                'errors': zen.executions.filter(state=Execution.State.INVALID)
+            }
+        )
+
+        return Response(response_data.data)

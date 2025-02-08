@@ -26,6 +26,7 @@ class Database(abc.ABC):
 
 class SQLiteDatabase(Database):
     """Sqlite 3"""
+
     def __init__(self, database, *args, **kwargs):
         self.connection = sqlite3.connect(database, *args, **kwargs)
 
@@ -33,13 +34,16 @@ class SQLiteDatabase(Database):
         """
         Executes a SQL statement and returns the resulting cursor.
         """
-        cursor = self.connection.cursor()
-        result = cursor.execute(sql, parameters)
-        rows = result.fetchall()
-        columns = [x for xs in cursor.description for x in xs if x is not None]
-        cursor.close()
-
-        return columns, rows, 'unknown'
+        sql = safe_sql_replace(sql, parameters)
+        try:
+            cursor = self.connection.cursor()
+            result = cursor.execute(sql)
+            rows = result.fetchall()
+            columns = [x for xs in cursor.description for x in xs if x is not None]
+            cursor.close()
+            return columns, rows, sql
+        except sqlite3.OperationalError as e:
+            raise DatabaseError(str(e))
 
 
 def safe_sql_replace(sql: str, parameters: dict) -> str:
@@ -85,6 +89,7 @@ def safe_sql_replace(sql: str, parameters: dict) -> str:
 
 class CrateDatabase(Database):
     """CrateDB"""
+
     def execute(self, sql, parameters=None):
         sql = safe_sql_replace(sql, parameters)
         response = httpx.post('http://192.168.88.251:4200/_sql',

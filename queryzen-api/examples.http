@@ -2,10 +2,10 @@
 GET http://localhost:8000/zen
 
 ### Get all zens given collection and zen name
-GET http://localhost:8000/collections/production/zen/state_filter/
+GET http://localhost:8000//collection/main/zen/testing_parameters_validation/version/1/stats/
 
 ### Create a new zen
-PUT http://localhost:8000/collections/production/zen/state_filter
+PUT http://localhost:8000/collections/main/zen/testing_parameters_validation
 Content-Type: application/json
 
 {
