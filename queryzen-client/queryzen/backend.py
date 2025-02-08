@@ -74,7 +74,7 @@ class QueryZenClientABC(abc.ABC):
         """Get a ``Zen``"""
 
     @abc.abstractmethod
-    def list(self, **filters) -> list[QueryZenResponse]:
+    def list(self, **filters) -> QueryZenResponse:
         """Get all ``Zen`` and filter them by ``filters``"""
 
     @abc.abstractmethod
@@ -185,7 +185,6 @@ class QueryZenHttpClient(QueryZenClientABC):
         response = httpx.get(
             self.url / self.MAIN_ENDPOINT / '?' + urllib.parse.urlencode(filters)
         )
-
         return self.make_response(response)
 
     def get(self,
@@ -211,7 +210,7 @@ class QueryZenHttpClient(QueryZenClientABC):
             **params: dict
             ) -> QueryZenResponse:
         response = self.client.post(
-            self.make_url(collection, name, version),
+            self.make_url(collection, name, str(version)),
             json={
                 'version': version,
                 'parameters': params,

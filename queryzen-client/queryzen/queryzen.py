@@ -275,15 +275,14 @@ class QueryZen:
 
     def list(self, **filters) -> list[Zen]:
         """
-        Lists all ``Zen``, accepts additional filters like `name`, `collection`, `version`
-        # todo add execution filter
+        Lists all ``Zen``, accepts advanced filters like `name`, `collection`, `version`, `state`,
+        `executions`, ... see [TODO ADD doc tutorial] to read more about advanced filtering.
 
         This method uses a special filtering endpoint that is different from the REST endpoints we
-        use, it offers special filtering options like filtering by execution sub parameters,
-        see examples for use cases.
+        use, it offers special filtering options like filtering by execution sub parameters.
 
         It does not raise Exceptions, if you want to be extra safe,
-        use QueryZen.get or QueryZen.get_or_create
+        use ``QueryZen.get`` or ``QueryZen.get_or_create``
 
         Args:
             filters: The filters that will be used.
@@ -293,11 +292,12 @@ class QueryZen:
             ```
             qz = QueryZen()
 
-            zens = qz.list(name='mountain', executions__status='VALID')
+            zens = qz.list(name='mountain', executions__state='IN') # Invalid
             if zens:
                 do_something_with_zens(zens)
-            # Will return all ``Zen``s with name 'mountain' whose execution status is valid
-            # todo check wording on this
+
+            # Will return all ``Zen``s with name 'mountain' who has at least one execution that was
+            invalid.
             ```
 
         Returns:

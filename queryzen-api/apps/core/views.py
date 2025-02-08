@@ -2,16 +2,6 @@
 import logging
 import re
 
-from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineError, MissingParametersError
-from apps.core.filters import QueryZenFilter
-from apps.core.models import Zen
-from apps.core.serializers import (
-    ZenSerializer,
-    CreateZenSerializer,
-    ExecuteZenSerializer
-)
-from apps.core.tasks import run_query
-
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
@@ -21,7 +11,15 @@ from rest_framework import views
 from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
 
-
+from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineError, MissingParametersError
+from apps.core.filters import QueryZenFilter
+from apps.core.models import Zen
+from apps.core.serializers import (
+    ZenSerializer,
+    CreateZenSerializer,
+    ExecuteZenSerializer
+)
+from apps.core.tasks import run_query
 # from queryzen_api.celery import is_execution_engine_working
 
 

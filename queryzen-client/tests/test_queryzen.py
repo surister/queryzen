@@ -39,7 +39,7 @@ def test_queryzen_create_version(queryzen):
 
     with pytest.raises(exceptions.ZenAlreadyExists):
         queryzen.create(name, query=query, version=1)
-    #
+
     queryzen.create(name, query=query, version=3)
     queryzen.create(name, query=query, version=4)
 
@@ -191,6 +191,26 @@ def test_queryzen_list_filters(queryzen):
     assert not all(
         map(lambda z: z.collection == collection, result)
     )
+
+
+def test_queryzen_list_advanced_filters(queryzen):
+    """Test aditional and more advanced filtering like filtering by children and gt/lt/contains"""
+
+    queryzen.create(collection='m', name='mountain_view', query='q', version=1)
+    queryzen.create(collection='m', name='mountain_view', query='q', version=2)
+    queryzen.create(collection='ma', name='mountain_view', query='q', version=1)
+    queryzen.create(collection='ma', name='pellizcola', query='q', version=1)
+    correct_query = queryzen.create(collection='ma', name='pellizcola',
+                                    query="select 'correct_query'", version=2)
+
+    queryzen.run(correct_query, database='testing')
+
+    r = queryzen.list(collection__contains='ma',
+                      name__contains='l',
+                      version__gt=1,
+                      executions__state='VA')
+
+    assert len(r) == 1
 
 
 def test_zen_delete(queryzen):
