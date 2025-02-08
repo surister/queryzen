@@ -438,8 +438,10 @@ class QueryZen:
         if response.error:
             if response.error_code == 400:
                 raise MissingParametersException(response.error)
-            if response.error_code == 503:
+            if response.error_code == 503 or response.error_code == 408:
                 raise ExecutionEngineException(response.error)
+            if response.error_code == 404:
+                raise ZenDoesNotExistError('You are trying to run a Zen that does not exist')
             raise UncaughtBackendError(
                 response,
                 zen=zen,

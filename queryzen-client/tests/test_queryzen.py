@@ -9,6 +9,7 @@ import pytest
 from queryzen import Zen, DEFAULT_COLLECTION
 from queryzen.backend import QueryZenResponse
 from queryzen import exceptions
+from queryzen.exceptions import ZenDoesNotExistError
 from queryzen.queryzen import ZenExecution
 
 
@@ -246,8 +247,10 @@ def test_zen_run_basic(queryzen):
 
 def test_zen_run_non_existing_zen(queryzen):
     _, zen = queryzen.get_or_create('t', query='SELECT 1')
-    queryzen.run(zen, database='testing')
-    # _, zen = queryzen.get_or_create('t', query='SELECT 1')
+    queryzen.delete(zen)
+
+    with pytest.raises(ZenDoesNotExistError):
+        queryzen.run(zen, database='testing')
 
 
 def test_zen_run(queryzen):
