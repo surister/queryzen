@@ -243,6 +243,31 @@ def test_zen_run_basic(queryzen):
     assert len(zen.executions) == 2
 
 
+def test_zen_run_executions(queryzen):
+    """
+    Test the properties of executions when running queries.
+    """
+    _, zen = queryzen.get_or_create('t', query='SELECT 1')
+    assert len(zen.executions) == 0
+
+    execution = queryzen.run(zen)
+
+    assert len(zen.executions) == 1
+    assert execution == zen.executions[0]
+    assert not execution.error
+    assert execution.rows
+    assert execution.has_data()
+    assert not execution.is_error
+
+    zen = queryzen.get('t')
+
+    # Right now we don't cache results so executions.rows and execution.columns are empty from api
+    # but the rest should be identical.
+    execution.rows = []
+    execution.columns = []
+    assert zen.executions[0] == execution
+
+
 def test_zen_run_non_existing_zen(queryzen):
     """Try to run a Zen that does not exist."""
     _, zen = queryzen.get_or_create('t', query='SELECT 1')
