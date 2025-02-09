@@ -8,7 +8,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from apps.core.models import Zen, Execution
-from apps.core.serializers import ZenExecutionResponseSerializer
+from apps.core.serializers import ZenExecutionResponseSerializer, ExecutionSerializer
 from databases.base import Database
 
 logger = logging.getLogger(__name__)
@@ -27,31 +27,25 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
     try:
         columns, rows, query = db_instance.execute(zen.query, parameters)
         execution.state = Execution.State.VALID
-        execution.query = query
+        execution.row_count = len(rows)
         zen.state = Zen.State.VALID
-    except Exception as e: # pylint: disable=W0718
-        error = str(e)
-        print('we have error')
+    except Exception as e:  # pylint: disable=W0718
+        execution.error = str(e)
+        execution.row_count = 0
         execution.state = Execution.State.INVALID
-
         zen.state = Zen.State.INVALID
+
+    execution.query = query
+    execution.parameters = str(parameters)
+    finished_at = datetime.datetime.now(datetime.UTC)
+
+    execution_time = (finished_at - executed_at).total_seconds() * 1000  # milliseconds
+    execution.finished_at = finished_at
+    execution.total_time = execution_time
+    execution.rows = rows
+    execution.columns = columns
 
     zen.save()
     execution.save()
 
-    finished_at = datetime.datetime.now(datetime.UTC)
-    execution_time = (finished_at - executed_at).total_seconds() * 1000  # milliseconds
-
-    response = ZenExecutionResponseSerializer(
-        {
-            'id': execution.pk,
-            'columns': columns,
-            'rows': rows,
-            'execution_time_ms': execution_time,
-            'error': error if error else None,
-            'executed_at': executed_at,
-            'finished_at': finished_at,
-            'query': query
-        }
-    )
-    return response.data
+    return ZenExecutionResponseSerializer(execution).data

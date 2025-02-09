@@ -11,15 +11,15 @@ from rest_framework import views
 from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status
 
-from apps.core.exceptions import ZenAlreadyExistsError, ExecutionEngineError, \
-    MissingParametersError, DatabaseDoesNotExistError
+from apps.core.exceptions import (ZenAlreadyExistsError,
+                                  ExecutionEngineError,
+                                  MissingParametersError,
+                                  DatabaseDoesNotExistError, ZenDoesNotExistError)
 from apps.core.filters import QueryZenFilter
 from apps.core.models import Zen
-from apps.core.serializers import (
-    ZenSerializer,
-    CreateZenSerializer,
-    ExecuteZenSerializer
-)
+from apps.core.serializers import (ZenSerializer,
+                                   CreateZenSerializer,
+                                   ExecuteZenSerializer)
 from apps.core.tasks import run_query
 # from queryzen_api.celery import is_execution_engine_working
 
@@ -81,9 +81,11 @@ class ZenView(views.APIView):
             raise ExecutionEngineError(detail=error_msg)
 
         requested_database = serializer.validated_data['database']
+
         if not settings.ZEN_DATABASES.get(requested_database):
             raise DatabaseDoesNotExistError(f'The asked database {repr(requested_database)}'
                                             f' is not configured in the backed.')
+
         try:
             async_job = run_query.delay(requested_database,
                                         zen.pk,

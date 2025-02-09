@@ -62,6 +62,11 @@ class Execution(UUIDMixin):
         INVALID = 'IN', _('Invalid')
 
     state = models.CharField(max_length=2, choices=State.choices)
-    executed_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField()
+    total_time = models.IntegerField()
     zen = models.ForeignKey(to=Zen, on_delete=models.CASCADE, related_name='executions')
     query = models.TextField()
+    error = models.TextField()
+    row_count = models.SmallIntegerField()
+    parameters = models.TextField()
