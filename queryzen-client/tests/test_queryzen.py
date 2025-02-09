@@ -97,6 +97,14 @@ def test_queryzen_get_one(queryzen):
     check_zen(q, name, version=1, query=query)
 
 
+def test_queryzen_get_latest(queryzen):
+    name = 'mountain_view'
+    query = 'select 1'
+    queryzen.create(name, query=query)
+    queryzen.create(name, query=query)
+    queryzen.get(name=name) # Does not raise exception (as we only return one), it was a bug.
+
+
 def test_queryzen_get_parameter_validation(queryzen):
     with pytest.raises(ValueError):
         queryzen.get('n', version=None)

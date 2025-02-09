@@ -62,8 +62,13 @@ class ZenView(views.APIView):
         queryset = Zen.filter_by(collection=collection,
                                  name=name,
                                  version=version)
-        objects = get_object_or_404(queryset)
-        return Response(ZenSerializer(objects, many=False).data)
+
+        obj = queryset.first()
+
+        if not obj:
+            raise ZenDoesNotExistError()
+
+        return Response(ZenSerializer(obj, many=False).data)
 
     def post(self, request, collection, name, version):
         """Runs a Zen in the backend."""
