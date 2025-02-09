@@ -55,6 +55,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./queryzen-client:/app
+      - /tmp:/tmp
     command: >
       bash -c "tail -f"
     environment:
