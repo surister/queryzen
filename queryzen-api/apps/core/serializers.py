@@ -21,7 +21,12 @@ class ExecuteZenSerializer(serializers.Serializer):
 class ExecutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Execution
-        fields = '__all__'
+        exclude = ('zen',)
+
+
+class ZenExecutionResponseSerializer(ExecutionSerializer):
+    columns = serializers.JSONField(read_only=True)
+    rows = serializers.JSONField(read_only=True)
 
 
 class ZenSerializer(serializers.ModelSerializer):

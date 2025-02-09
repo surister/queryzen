@@ -97,6 +97,14 @@ def test_queryzen_get_one(queryzen):
     check_zen(q, name, version=1, query=query)
 
 
+def test_queryzen_get_latest(queryzen):
+    name = 'mountain_view'
+    query = 'select 1'
+    queryzen.create(name, query=query)
+    queryzen.create(name, query=query)
+    queryzen.get(name=name) # Does not raise exception (as we only return one), it was a bug.
+
+
 def test_queryzen_get_parameter_validation(queryzen):
     with pytest.raises(ValueError):
         queryzen.get('n', version=None)
@@ -241,6 +249,31 @@ def test_zen_run_basic(queryzen):
 
     queryzen.run(zen)
     assert len(zen.executions) == 2
+
+
+def test_zen_run_executions(queryzen):
+    """
+    Test the properties of executions when running queries.
+    """
+    _, zen = queryzen.get_or_create('t', query='SELECT 1')
+    assert len(zen.executions) == 0
+
+    execution = queryzen.run(zen)
+
+    assert len(zen.executions) == 1
+    assert execution == zen.executions[0]
+    assert not execution.error
+    assert execution.rows
+    assert execution.has_data()
+    assert not execution.is_error
+
+    zen = queryzen.get('t')
+
+    # Right now we don't cache results so executions.rows and execution.columns are empty from api
+    # but the rest should be identical.
+    execution.rows = []
+    execution.columns = []
+    assert zen.executions[0] == execution
 
 
 def test_zen_run_non_existing_zen(queryzen):

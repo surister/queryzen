@@ -32,19 +32,22 @@ class ZenExecution:
         rows: The rows of the response.
         columns: The columns of the response.
         row_count: How many rows there are.
-        executed_at: The time the query was executed in UTC.
+        started_at: The time the query was executed in UTC.
         finished_at: The time the query finished running in UTC.
-        execution_duration_ms: The milliseconds it took the query to run.
+        total_time: Time in ms that took for the query to run.
         query: The query that produced this result.
     """
-    rows: Rows = dataclasses.field(repr=False)
-    columns: Columns
+    id: str
     row_count: int
-    executed_at: datetime.datetime
+    state: str
+    started_at: datetime.datetime
     finished_at: datetime.datetime
-    execution_duration_ms: int
+    total_time: int
+    parameters: list[tuple]
     query: str
     error: str = ''
+    rows: Rows = dataclasses.field(repr=False, default_factory=list)
+    columns: Columns = dataclasses.field(default_factory=list)
 
     @property
     def is_error(self):
@@ -57,6 +60,10 @@ class ZenExecution:
         return make_table(columns=self.columns if self.columns else ['error'],
                           rows=self.rows if self.rows else [(self.error,), ],
                           column_center=column_center)
+
+    def to_dict(self) -> dict:
+        """Transform the instance into a dictionary"""
+        return dataclasses.asdict(self)
 
     def iter_rows(self):
         return iter(self.rows)
@@ -182,6 +189,16 @@ class QueryZen:
             version: The version of the zen, if AUTO is set, it will take the latest one and add one
             collection: The collection of the Zen, defaults to ``DEFAULT_COLLECTION``
             description: The description of the Zen.
+
+        Raises:
+            ZenAlreadyExists: If you try to create a Zen that already exists, use default version
+            to avoid this.
+
+            UncaughtBackendError: If the backend returns an uncaught error, the user
+            is never meant to get this.
+
+        Returns:
+            The created Zen.
         """
         response = self._client.create(collection=collection,
                                        name=name,
@@ -264,8 +281,11 @@ class QueryZen:
             raise UncaughtBackendError(response=response,
                                        zen=Zen.empty(),
                                        context='Getting a Zen')
+        executions = [ZenExecution(**kw) for kw in response.data[0].pop('executions')]
 
-        return Zen(**response.data[0])
+        zen = Zen(**response.data[0])
+        zen.executions = executions
+        return zen
 
     def filter(self, **filters) -> list[Zen]:
         """Filters all ``Zen``.
@@ -421,15 +441,18 @@ class QueryZen:
             raise UncaughtBackendError(response,
                                        zen=zen,
                                        context='Backend returned ok but did not send data back')
-        execution = ZenExecution(rows=response.get_from_data('rows'),
+        execution = ZenExecution(id=response.get_from_data('id'),
+                                 rows=response.get_from_data('rows'),
                                  columns=response.get_from_data('columns'),
                                  row_count=len(response.get_from_data('rows'))
                                  if not hasattr(response.data[0], 'row_count')
                                  else response.get_from_data('row_count'),
-                                 executed_at=response.get_from_data('executed_at'),
+                                 state=response.get_from_data('state'),
+                                 started_at=response.get_from_data('started_at'),
                                  finished_at=response.get_from_data('finished_at'),
-                                 execution_duration_ms=response.get_from_data('execution_time_ms'),
-                                 error=response.get_from_data('error'), # execution error
+                                 total_time=response.get_from_data('total_time'),
+                                 parameters=response.get_from_data('parameters'),
+                                 error=response.get_from_data('error'),  # execution error
                                  query=response.get_from_data('query'))
         zen.executions.append(execution)
         return execution
