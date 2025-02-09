@@ -12,10 +12,8 @@ class QueryZenFilter(filters.FilterSet):
 
     class Meta:
         model = Zen
-        fields = {
-            'name': ['exact', 'contains'],
-            'collection': ['exact', 'contains'],
-            'version': ['exact', 'gt', 'lt'],
-            'state': ['exact'],
-            'executions__state': ['exact']
-        }
+        fields = {'name': ['exact', 'contains'],
+                  'collection': ['exact', 'contains'],
+                  'version': ['exact', 'gt', 'lt'],
+                  'state': ['exact'],
+                  'executions__state': ['exact']}

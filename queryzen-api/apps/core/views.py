@@ -54,7 +54,8 @@ class ZenView(views.APIView):
         """
         required_parameters = re.findall(r':(\w+)', zen.query)
         if missing_params := [param for param in required_parameters if param not in parameters]:
-            raise MissingParametersError(f'Missing required parameters: {missing_params}')
+            raise MissingParametersError(f'The Zen requires parameters'
+                                         f' that were not supplied: {missing_params!r}')
 
     def get(self, request, collection: str, name: str, version: str):  # pylint: disable=W0613
         """Get a Zen."""
@@ -84,11 +85,9 @@ class ZenView(views.APIView):
             raise DatabaseDoesNotExistError(f'The asked database {repr(requested_database)}'
                                             f' is not configured in the backed.')
         try:
-            async_job = run_query.delay(
-                requested_database,
-                zen.pk,
-                serializer.validated_data['parameters']
-            )
+            async_job = run_query.delay(requested_database,
+                                        zen.pk,
+                                        serializer.validated_data['parameters'])
             timeout = serializer.validated_data.get('timeout', getattr(settings, 'ZEN_TIMEOUT'))
             query_result = async_job.get(timeout)
             return Response(query_result)
@@ -114,21 +113,17 @@ class ZenView(views.APIView):
             if queryset.exists():
                 raise ZenAlreadyExistsError()
 
-        zen = Zen(
-            collection=collection,
-            name=name,
-            version=version,
-            **serializer.validated_data
-        )
+        zen = Zen(collection=collection,
+                  name=name,
+                  version=version,
+                  **serializer.validated_data)
         zen.save()
         return Response(ZenSerializer(zen).data)
 
     def delete(self, request, collection: str, name: str, version: str):  # pylint: disable=W0613
-        zen = get_object_or_404(
-            Zen,
-            collection=collection,
-            name=name,
-            version=version
-        )
+        zen = get_object_or_404(Zen,
+                                collection=collection,
+                                name=name,
+                                version=version)
         zen.delete()
         return Response([], status=status.HTTP_200_OK)
