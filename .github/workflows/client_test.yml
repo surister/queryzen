@@ -21,4 +21,9 @@ jobs:
           down-flags: "--volumes"
       - name: Run client Tests
         run: |
-          docker exec queryzen-client-1 bash -c "echo waiting 2s && sleep 2 && pytest --use-local -k 'not test_zen_run_query_crate and not test_run_query_not_passing_required_params_crate'"
+          docker exec queryzen-client-1 bash -c "echo waiting 2s && sleep 2 && pytest --cov-report=term-missing:skip-covered --junitxml=/tmp/pytest.xml --cov=queryzen tests/ --use-local -k 'not test_zen_run_query_crate and not test_run_query_not_passing_required_params_crate'" | tee /tmp/pytest-coverage.txt
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: /tmp/pytest-coverage.txt
+          junitxml-path: /tmp/pytest.xml

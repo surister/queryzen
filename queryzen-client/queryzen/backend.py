@@ -183,11 +183,8 @@ class QueryZenHttpClient(QueryZenClientABC):
     def get(self,
             collection: str,
             name: str,
-            version: str,
-            ) -> QueryZenResponse:
-        response = self.client.get(
-            self.make_url(collection, name, version),
-        )
+            version: str,) -> QueryZenResponse:
+        response = self.client.get(self.make_url(collection, name, version))
         return self.make_response(response)
 
     def delete(self, zen: 'Zen') -> QueryZenResponse:
@@ -203,6 +200,5 @@ class QueryZenHttpClient(QueryZenClientABC):
                                     json={
                                         'version': version,
                                         'parameters': params,
-                                        'database': params.get('database')
-                                    })
+                                        'database': params.get('database')})
         return self.make_response(response)
