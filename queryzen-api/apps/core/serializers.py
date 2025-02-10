@@ -7,9 +7,11 @@ from apps.core.models import Zen, Execution
 
 
 class CreateZenSerializer(serializers.ModelSerializer):
+    default_parameters = serializers.JSONField(read_only=False, required=False)
+
     class Meta:
         model = Zen
-        fields = ('description', 'query')
+        fields = ('description', 'query', 'default_parameters')
 
 
 class ExecuteZenSerializer(serializers.Serializer):
@@ -40,14 +42,3 @@ class ZenSerializer(serializers.ModelSerializer):
 class CollectionsSerializer(serializers.Serializer):
     collection = serializers.CharField()
     zen_count = serializers.IntegerField(min_value=0)
-
-
-class ZenExecutionResponseSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
-    columns = serializers.JSONField(read_only=True)
-    rows = serializers.JSONField(read_only=True)
-    execution_time_ms = serializers.IntegerField()
-    error = serializers.CharField(allow_blank=True)
-    executed_at = serializers.DateTimeField()
-    finished_at = serializers.DateTimeField()
-    query = serializers.CharField()

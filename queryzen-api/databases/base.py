@@ -39,7 +39,7 @@ class SQLiteDatabase(Database):
         columns = [x for xs in cursor.description for x in xs if x is not None]
         cursor.close()
 
-        return columns, rows, 'unknown'
+        return columns, rows, 'not_implemented'
 
 
 def safe_sql_replace(sql: str, parameters: dict) -> str:

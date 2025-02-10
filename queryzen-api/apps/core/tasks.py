@@ -1,5 +1,6 @@
 # pylint: disable=C0114
 import datetime
+import json
 import logging
 
 from celery import shared_task
@@ -8,7 +9,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from apps.core.models import Zen, Execution
-from apps.core.serializers import ZenExecutionResponseSerializer, ExecutionSerializer
+from apps.core.serializers import ZenExecutionResponseSerializer
 from databases.base import Database
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,6 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
     execution = Execution(zen=zen)
     db_instance: Database = getattr(settings, 'ZEN_DATABASES').get(database)
 
-    error: str | None = None
     columns = rows = []
     query = ''
     try:
@@ -36,7 +36,7 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
         zen.state = Zen.State.INVALID
 
     execution.query = query
-    execution.parameters = str(parameters)
+    execution.parameters = json.dumps(parameters)
     finished_at = datetime.datetime.now(datetime.UTC)
 
     execution_time = (finished_at - executed_at).total_seconds() * 1000  # milliseconds
@@ -47,5 +47,5 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
 
     zen.save()
     execution.save()
-
+    print(ZenExecutionResponseSerializer(execution).data)
     return ZenExecutionResponseSerializer(execution).data

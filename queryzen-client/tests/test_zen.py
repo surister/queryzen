@@ -55,6 +55,7 @@ def test_zen_to_dict():
                created_at=t).to_dict() == {'collection': 'main',
                                            'created_at': t,
                                            'created_by': 'not_implemented',
+                                           'default_parameters': {},
                                            'description': '-1',
                                            'executions': [],
                                            'id': -1,

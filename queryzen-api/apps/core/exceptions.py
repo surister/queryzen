@@ -19,5 +19,9 @@ class MissingParametersError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
 
 
+class ParametersMissmatchError(APIException):
+    status_code = status.HTTP_409_CONFLICT
+
+
 class DatabaseDoesNotExistError(APIException):
     status_code = status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE
