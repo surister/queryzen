@@ -6,6 +6,7 @@ import logging
 from .exceptions import IncompatibleAPIError
 from .queryzen import QueryZen, Zen, AUTO
 from .constants import DEFAULT_COLLECTION
+from .types import Default
 
 
 def strtobool(val) -> bool:
@@ -82,5 +83,6 @@ __all__ = [
     'QueryZen',
     'Zen',
     'DEFAULT_COLLECTION',
-    'AUTO'
+    'AUTO',
+    'Default'
 ]

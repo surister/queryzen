@@ -1,15 +1,12 @@
 # pylint: disable=C0114
 
 
-class ZenAlreadyExists(Exception):
+class ZenAlreadyExistsError(Exception):
     """Trying to create a ``Zen`` that already exists."""
-    pass
 
 
 class ZenDoesNotExistError(Exception):
-    """Trying to get a ``Zen`` that does not exist.
-    """
-    pass
+    """Trying to get a ``Zen`` that does not exist."""
 
 
 class IncompatibleAPIError(Exception):
@@ -18,22 +15,26 @@ class IncompatibleAPIError(Exception):
     sent to.
     """
     # Todo add message
-    pass
 
 
 class ExecutionEngineError(Exception):
     """Workers or the broker is unavailable."""
-    pass
 
 
 class MissingParametersError(Exception):
     """Trying to run a Query without the needed parameters"""
-    pass
+
+
+class ParametersMissmatchError(Exception):
+    """Trying to pass parameters to a query that does not have them"""
 
 
 class DatabaseDoesNotExistError(Exception):
     """Trying to run a zen to a database that does not exist"""
-    pass
+
+
+class DefaultValueDoesNotExistError(ValueError):
+    """Trying to create a default value with two values """
 
 
 class UncaughtBackendError(Exception):

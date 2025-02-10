@@ -7,14 +7,14 @@ from django.shortcuts import get_object_or_404
 
 from django_filters import rest_framework as filters
 
-from rest_framework import views
 from rest_framework.response import Response
-from rest_framework import mixins, viewsets, status
+from rest_framework import mixins, viewsets, status, views
 
 from apps.core.exceptions import (ZenAlreadyExistsError,
                                   ExecutionEngineError,
-                                  MissingParametersError,
-                                  DatabaseDoesNotExistError, ZenDoesNotExistError)
+                                  DatabaseDoesNotExistError,
+                                  ZenDoesNotExistError,
+                                  MissingParametersError)
 from apps.core.filters import QueryZenFilter
 from apps.core.models import Zen
 from apps.core.serializers import (ZenSerializer,
@@ -46,16 +46,25 @@ class ZenView(views.APIView):
     """
 
     def _validate_parameters_replacement(self, zen: Zen, parameters: dict) -> None:
-        """Validate that given parameters and zen query parameters match.
+        """Validates that the required parameters to run the query are given by the user
+        or present in `default_parameters`
 
         Regex explanation:
         (:) -> Search character :
         (w+) -> Catch one or more letters, numbers... what is the param name
         """
         required_parameters = re.findall(r':(\w+)', zen.query)
-        if missing_params := [param for param in required_parameters if param not in parameters]:
+
+        missing_parameters = []
+
+        default_parameters_names = list(map(lambda k: k.get('name'), zen.default_parameters))
+        for param in required_parameters:
+            if param not in parameters and param not in default_parameters_names:
+                missing_parameters.append(param)
+
+        if missing_parameters:
             raise MissingParametersError(f'The Zen requires parameters'
-                                         f' that were not supplied: {missing_params!r}')
+                                         f' that were not supplied: {missing_parameters!r}')
 
     def get(self, request, collection: str, name: str, version: str):  # pylint: disable=W0613
         """Get a Zen."""
@@ -79,9 +88,13 @@ class ZenView(views.APIView):
                                 collection=collection,
                                 name=name,
                                 version=version)
-        self._validate_parameters_replacement(zen, serializer.validated_data['parameters'])
+
+        # Parameters to be passed to the task.
+        parameters = zen.get_parameters(serializer.validated_data['parameters'])
+        zen.validate_parameters(parameters)
 
         is_engine_working, error_msg = True, ''  # is_execution_engine_working()
+
         if not is_engine_working:
             raise ExecutionEngineError(detail=error_msg)
 
@@ -94,7 +107,7 @@ class ZenView(views.APIView):
         try:
             async_job = run_query.delay(requested_database,
                                         zen.pk,
-                                        serializer.validated_data['parameters'])
+                                        parameters)
             timeout = serializer.validated_data.get('timeout', getattr(settings, 'ZEN_TIMEOUT'))
             query_result = async_job.get(timeout)
             return Response(query_result)

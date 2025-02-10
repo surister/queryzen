@@ -7,6 +7,7 @@ Implement QueryZenClientABC to make a new client.
 import abc
 import dataclasses
 import datetime
+import typing
 import urllib
 from typing import Any
 
@@ -14,7 +15,7 @@ import httpx
 
 from . import constants
 from .constants import DEFAULT_COLLECTION
-from .types import _AUTO, AUTO
+from .types import _AUTO, AUTO, Default
 
 
 class Url(str):
@@ -58,7 +59,14 @@ class QueryZenClientABC(abc.ABC):
         """
 
     @abc.abstractmethod
-    def create(self, *, collection, name, version, description, query) -> QueryZenResponse:
+    def create(self,
+               *,
+               collection,
+               name,
+               version,
+               description,
+               query,
+               default: Default | dict[str: typing.Any]) -> QueryZenResponse:
         """Abc method to create one ``Zen``"""
 
     @abc.abstractmethod
@@ -84,8 +92,7 @@ class QueryZenClientABC(abc.ABC):
             database: str,
             timeout: int,
             collection: str = DEFAULT_COLLECTION,
-            **params: dict
-            ) -> QueryZenResponse:
+            **parameters: dict) -> QueryZenResponse:
         """Abc method for running a ``Zen``"""
 
 
@@ -154,7 +161,8 @@ class QueryZenHttpClient(QueryZenClientABC):
                collection: str = DEFAULT_COLLECTION,
                version: _AUTO = AUTO,
                description: str = '',
-               query: str) -> QueryZenResponse:
+               query: str,
+               default: 'Default') -> QueryZenResponse:
         """Creates a ``Zen`` via PUT request to the backend.
 
         The version is automatically handled by QueryZen, it is an integer that is auto-incremented
@@ -166,13 +174,19 @@ class QueryZenHttpClient(QueryZenClientABC):
             collection: The name of the collection, default is ``DEFAULT_COLLECTION``
             description: The description of the ``Zen``
             query: The query of the ``Zen``
+            default: The default values to be sent, always a dict of {name: value}
         """
+
+        payload = {
+            'description': description,
+            'query': query,
+        }
+        if default:
+            payload['default_parameters'] = default.to_dict()
+
         response = self.client.put(
             self.make_url(collection, name, version),
-            json={
-                'description': description,
-                'query': query
-            }
+            json=payload
         )
         return self.make_response(response)
 
@@ -183,7 +197,7 @@ class QueryZenHttpClient(QueryZenClientABC):
     def get(self,
             collection: str,
             name: str,
-            version: str,) -> QueryZenResponse:
+            version: str) -> QueryZenResponse:
         response = self.client.get(self.make_url(collection, name, version))
         return self.make_response(response)
 
@@ -194,11 +208,14 @@ class QueryZenHttpClient(QueryZenClientABC):
     def run(self,
             name: str,
             version: int,
+            database: str = None,
+            timeout: int = None,
             collection: str = DEFAULT_COLLECTION,
-            **params: dict) -> QueryZenResponse:
+            parameters: dict = None) -> QueryZenResponse:
         response = self.client.post(self.make_url(collection, name, str(version)),
                                     json={
                                         'version': version,
-                                        'parameters': params,
-                                        'database': params.get('database')})
+                                        'timeout': timeout,
+                                        'parameters': parameters,
+                                        'database': database})
         return self.make_response(response)

@@ -4,19 +4,23 @@ TODO: Add docstring explaining what's in the file.
 
 import dataclasses
 import datetime
+import json
 import typing
 
 from . import constants
-from .sql import safe_sql_replace
+from .sql import safe_sql_replace, parse_parameters
 from .backend import QueryZenHttpClient, QueryZenClientABC
 from .exceptions import (
     UncaughtBackendError,
     ZenDoesNotExistError,
-    ZenAlreadyExists,
+    ZenAlreadyExistsError,
     ExecutionEngineError,
-    MissingParametersError, DatabaseDoesNotExistError
+    MissingParametersError,
+    DatabaseDoesNotExistError,
+    DefaultValueDoesNotExistError,
+    ParametersMissmatchError
 )
-from .types import AUTO, Rows, Columns, _AUTO
+from .types import AUTO, Rows, Columns, _AUTO, Default, ZenState
 from .constants import DEFAULT_COLLECTION
 from .table import make_table, ColumnCenter
 
@@ -43,11 +47,18 @@ class ZenExecution:
     started_at: datetime.datetime
     finished_at: datetime.datetime
     total_time: int
-    parameters: list[tuple]
     query: str
     error: str = ''
+    parameters: dict = dataclasses.field(default_factory=dict)
     rows: Rows = dataclasses.field(repr=False, default_factory=list)
     columns: Columns = dataclasses.field(default_factory=list)
+
+    def __post_init__(self):
+        if isinstance(self.parameters, str):
+            try:
+                self.parameters = json.loads(self.parameters)
+            except json.JSONDecodeError as e:
+                raise ValueError('cannot json.loads parameters') from e
 
     @property
     def is_error(self):
@@ -74,19 +85,17 @@ class ZenExecution:
 
 @dataclasses.dataclass
 class Zen:
-    """
-    A ``Zen`` is a named and versioned SQL query that lives in a QueryZen backend.
-    """
+    """A ``Zen`` is a named and versioned SQL query that lives in a QueryZen backend"""
     id: int
     name: str
     version: int
     query: str
     description: str
     created_at: datetime.datetime
+    default_parameters: dict = dataclasses.field(default_factory=dict)
     collection: str = dataclasses.field(default_factory=lambda: DEFAULT_COLLECTION)
     created_by: str = dataclasses.field(default_factory=lambda: 'not_implemented')
-    state: typing.Literal['valid', 'invalid', 'unknown'] = dataclasses.field(
-        default_factory=lambda: 'unknown')
+    state: ZenState = dataclasses.field(default_factory=lambda: 'unknown')
     executions: list[ZenExecution] = dataclasses.field(default_factory=list)  # Improve typing
 
     def to_dict(self) -> dict:
@@ -94,8 +103,7 @@ class Zen:
         return dataclasses.asdict(self)
 
     def difference(self, other: 'Zen', compare: list[str] = None) -> dict[str: tuple]:
-        """
-        Returns a dictionary with the difference between 'Zen's, it only
+        """Returns a dictionary with the difference between 'Zen's, it only
         compares name, version and query. You can specify which fields to compare in the
         ``compare`` parameter.
 
@@ -123,8 +131,7 @@ class Zen:
 
     @classmethod
     def empty(cls):
-        """
-        Returns an empty Zen, used for testing and debugging or when you just need an empty Zen.
+        """Returns an empty Zen, used for testing and debugging or when you just need an empty Zen.
 
         Integer values are -1 and string values are '_', anything else might be a -1 even
         """
@@ -136,8 +143,7 @@ class Zen:
                    created_at=datetime.datetime(year=1978, month=12, day=6))
 
     def preview(self, **parameters) -> str:
-        """
-        Previews the SQL that will be computed given the parameters in QueryZen, if a parameter
+        """Previews the SQL that will be computed given the parameters in QueryZen, if a parameter
         is missing, it will not raise an exception, this is mainly for debugging purposes,
         read ``run`` to see how missing parameters are handled.
 
@@ -156,8 +162,7 @@ class Zen:
 
 
 class QueryZen:
-    """
-    QueryZen client.
+    """QueryZen client.
 
     # Todo add examples from README.md
     Examples:
@@ -180,7 +185,8 @@ class QueryZen:
                query: str,
                description: str = None,
                collection: str = DEFAULT_COLLECTION,
-               version: _AUTO | int = AUTO) -> Zen:
+               version: _AUTO | int = AUTO,
+               default: Default | dict[str: typing.Any] = None) -> Zen:
         """Creates a Zen.
 
         Args:
@@ -189,6 +195,7 @@ class QueryZen:
             version: The version of the zen, if AUTO is set, it will take the latest one and add one
             collection: The collection of the Zen, defaults to ``DEFAULT_COLLECTION``
             description: The description of the Zen.
+            default: Default values for the query parameters.
 
         Raises:
             ZenAlreadyExists: If you try to create a Zen that already exists, use default version
@@ -200,15 +207,34 @@ class QueryZen:
         Returns:
             The created Zen.
         """
+
+        if default:
+            parameters = parse_parameters(query)
+
+            if isinstance(default, dict):
+                default = Default(**default)
+            elif isinstance(default, Default):
+                pass
+            else:
+                raise ValueError(f'default has to be {dict!r} or {Default!r},'
+                                 f' not {type(default)!r}')
+
+            has_all, missing = default.missing_parameters(parameters)
+
+            if not has_all:
+                raise DefaultValueDoesNotExistError(f'default received a parameter'
+                                                    f' that is not in the query: {missing!r}')
+
         response = self._client.create(collection=collection,
                                        name=name,
                                        version=version,
                                        query=query,
-                                       description=description)
+                                       description=description,
+                                       default=default)
 
         if response.error:
             if response.error_code == 409:
-                raise ZenAlreadyExists()
+                raise ZenAlreadyExistsError()
 
             raise UncaughtBackendError(response=response,
                                        zen=Zen(id=-1,
@@ -231,7 +257,6 @@ class QueryZen:
                                                description=description),
                                        context='When creating a Zen, the JSON representation '
                                                'of the object was not returned')
-
         return Zen(**response.data[0])
 
     def get(self,
@@ -252,7 +277,7 @@ class QueryZen:
             >>> qz = QueryZen()
             >>> try:
             >>>     zen = qz.get(name='myzen', version=23)
-            >>> except ZenDoesNotExist:
+            >>> except ZenDoesNotExistError:
             >>>     handle_zen_not_existing()
 
         Raises:
@@ -399,7 +424,7 @@ class QueryZen:
             timeout: Time in seconds the backend will take until returning a timeout error
                 default time is 30 seconds, if you expect your queries to take more,
                  increase the value.
-            params: Parameters to send to the backend.
+            params: Parameters to send to the backend for the query.
 
         Backend Parameters:
             Todo: Add. (There are currently none)
@@ -419,11 +444,14 @@ class QueryZen:
                                     version=zen.version,
                                     database=database,
                                     timeout=timeout,
-                                    **params)
+                                    parameters=params)
 
         if response.error:
             if response.error_code == 400:
                 raise MissingParametersError(response.error)
+
+            if response.error_code == 409:
+                raise ParametersMissmatchError(response.error)
 
             if response.error_code == 503 or response.error_code == 408:
                 raise ExecutionEngineError(response.error)

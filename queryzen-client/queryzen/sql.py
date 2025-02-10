@@ -1,4 +1,9 @@
 # pylint: disable=C0114
+import re
+
+
+def parse_parameters(query: str, separator: str = ':') -> list[str]:
+    return re.findall(rf'{separator}(\w+)', query)
 
 
 def safe_sql_replace(sql: str, parameters: dict) -> str:
