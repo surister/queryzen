@@ -27,6 +27,9 @@ jobs:
         with:
           pytest-coverage-path: /tmp/pytest-coverage.txt
           junitxml-path: /tmp/pytest.xml
+      - name: Debug
+        run: |
+          ls /tmp/
       - name: Run sonar scan
         uses: sonarsource/sonarqube-scan-action@v4
         env:
