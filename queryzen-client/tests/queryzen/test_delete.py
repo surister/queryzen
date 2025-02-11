@@ -1,6 +1,6 @@
 import pytest
 
-from queryzen import exceptions
+from queryzen import exceptions, Zen
 
 
 def test_zen_delete(queryzen):
@@ -8,8 +8,7 @@ def test_zen_delete(queryzen):
     query = 'q'
 
     with pytest.raises(exceptions.ZenDoesNotExistError):
-        # Make sure it does not exist
-        queryzen.get(name)
+        queryzen.delete(Zen.empty())
 
     created, zen = queryzen.get_or_create(name, query)
     assert created and zen

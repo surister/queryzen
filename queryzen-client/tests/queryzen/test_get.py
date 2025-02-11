@@ -31,6 +31,15 @@ def test_get_parameter_validation(queryzen):
         queryzen.get('n', version='test')
 
 
+def test_get_version(queryzen):
+    name = 'mountain_view'
+    queryzen.create(name, query='1')
+    queryzen.create(name, query='2')
+    queryzen.create(name, query='3')
+    assert queryzen.get(name, version=1).query == '1'
+    assert queryzen.get(name, version=2).query == '2'
+    assert queryzen.get(name, version=3).query == '3'
+
 def test_get_one_unknown(queryzen):
     """
     Test that if we request a Zen, and it does not exist, an exception is raised.

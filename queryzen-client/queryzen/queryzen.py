@@ -114,15 +114,15 @@ class Zen:
         {'name': ('name1', 'name2'), ...}
 
         """
+        if not isinstance(other, Zen):
+            raise TypeError('Can only check between Zen instances')
+
         if not compare:
             compare = ['name', 'description', 'version']
 
         difference = {}
         s = self.to_dict()
         o = other.to_dict()
-
-        if not isinstance(other, Zen):
-            raise TypeError('Can only check between Zen instances')
 
         for key in compare:
             if not o[key] == s[key]:
@@ -213,11 +213,9 @@ class QueryZen:
 
             if isinstance(default, dict):
                 default = Default(**default)
-            elif isinstance(default, Default):
-                pass
-            else:
-                raise ValueError(f'default has to be {dict!r} or {Default!r},'
-                                 f' not {type(default)!r}')
+            elif not isinstance(default, Default):
+                raise ValueError(f'default has to be {dict!r}'
+                                 f' or {Default!r}, not {type(default)!r}')
 
             has_all, missing = default.missing_parameters(parameters)
 
