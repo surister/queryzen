@@ -27,6 +27,10 @@ jobs:
         with:
           pytest-coverage-path: /tmp/pytest-coverage.txt
           junitxml-path: /tmp/pytest.xml
+      - name: Correct 
+        run: | 
+          cp /tmp/coverage.xml .
+          sed -i 's|<source>/|<source>|' coverage.xml
       - name: Run sonar scan
         uses: sonarsource/sonarqube-scan-action@v4
         env:

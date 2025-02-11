@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - .:/queryzen-api
     environment:
       CELERY_BROKER_URL: redis://redis:6379/1
     command: poetry run celery -A queryzen_api worker -l INFO
