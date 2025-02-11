@@ -45,6 +45,7 @@ def test_default_collection(queryzen):
 
 
 def test_extra_default(queryzen):
+    """Test default values are in the query"""
     with pytest.raises(exceptions.DefaultValueDoesNotExistError):
         queryzen.create(collection='m1',
                         name='mountain_view1',
@@ -54,3 +55,14 @@ def test_extra_default(queryzen):
                         name='mountain_view1',
                         query='select1 (1 + :val - :val2) as r',
                         default=Default(val=1, two=2))
+
+    queryzen.create(collection='m1',
+                    name='mountain_view1',
+                    query='select1 (1 + :val - :val2) as r',
+                    default=Default(val=1, val2=2))
+
+
+def test_bad_default_type(queryzen):
+    """Default has to be either dict or Default"""
+    with pytest.raises(ValueError):
+        queryzen.create('t', query='t', default=1)

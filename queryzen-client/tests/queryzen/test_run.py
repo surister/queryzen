@@ -114,15 +114,15 @@ def test_run_query_databases(queryzen):
 
 
 def test_run_query(queryzen):
-    query = "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE :startswith OR col1 = :id;"
+    query = "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE column2 LIKE :startswith OR column1 = :id;"
     _, zen = queryzen.get_or_create('t', query=query)
 
     result = queryzen.run(zen, id=2, startswith='A%')
-
     assert result.rows == [[1, 'Alice'], [2, 'Bob']]
-    assert result.columns == ['col1', 'col2']
+    assert result.columns == ['column1', 'column2']
     # assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE 'A%' OR col1 = 2;"
     # todo fix .query
+
 
 def test_run_bad_parameters(queryzen):
     """Test that if user tries to execute a query with

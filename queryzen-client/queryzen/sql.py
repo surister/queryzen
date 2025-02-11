@@ -6,21 +6,26 @@ def parse_parameters(query: str, separator: str = ':') -> list[str]:
     return re.findall(rf'{separator}(\w+)', query)
 
 
-def safe_sql_replace(sql: str, parameters: dict) -> str:
+def safe_sql_replace(sql: str, parameters: dict, char_delimiter: str = ':') -> str:
     """Replaces :parameter placeholders in an SQL statement with values from a dictionary.
-    # todo add example to docstring
+
     It is resilient against injections; currently only both integers,
     string and null values can be used.
 
     Args:
         sql: The SQL statement with :parameter placeholders.
         parameters: A dictionary containing the parameter names and values.
+        char_delimiter: The character to identify what to replace, defaults to ':', e.g. ':value'
 
     Raises:
         ``ValueError``: if the values are not integer, string or null.
 
     Returns:
         The SQL statement with placeholders replaced by values.
+
+    Examples:
+        >>> safe_sql_replace('select :val, :val1, :val2', {'val': 't', 'val1': 2, 'val2': "to"})
+        select 't', 2, 'to'
     """
     for key, value in parameters.items():
 
@@ -43,7 +48,6 @@ def safe_sql_replace(sql: str, parameters: dict) -> str:
         else:
             raise ValueError(f'unsupported parameter type: {type(value)}')
 
-        placeholder = f':{key}'
-        sql = sql.replace(placeholder, replacement)
-
+        to_replace = char_delimiter + key
+        sql = re.sub(rf'(?<!\w){to_replace}(?!\w)', replacement, sql)
     return sql

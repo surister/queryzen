@@ -9,7 +9,8 @@ from .constants import DEFAULT_COLLECTION
 from .types import Default
 
 
-def strtobool(val) -> bool:
+# Deprecated distutils.utils.strtobool
+def strtobool(val: str) -> bool:
     """Convert a string representation of truth to true (1) or false (0).
     True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
     are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
@@ -17,6 +18,9 @@ def strtobool(val) -> bool:
     """
     if isinstance(val, bool):
         return val
+
+    if not isinstance(val, (bool, str)):
+        raise TypeError(f'type should be bool or str, not {type(val)!r}')
 
     val = val.lower()
     if val in ('y', 'yes', 't', 'true', 'on', '1'):
