@@ -183,3 +183,16 @@ def test_use_defaults(queryzen):
     # Use two params.
     result = queryzen.run(zen, val1=29, val2=5)
     assert result.rows[0][0] == 25
+
+def test_zen_sets_state_after_run(queryzen):
+    """Test that after running a Zen, the state is correctly updated"""
+
+    zen = queryzen.create('t', 'select 1/:val')
+    assert zen.state == 'UN'
+
+    queryzen.run(zen, val=1)
+    assert zen.state == 'VA'
+
+    zen = queryzen.create('t', 'select 1/')
+    queryzen.run(zen)
+    assert zen.state == 'IN'
