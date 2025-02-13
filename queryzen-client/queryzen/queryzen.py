@@ -481,4 +481,8 @@ class QueryZen:
                                  error=response.get_from_data('error'),  # execution error
                                  query=response.get_from_data('query'))
         zen.executions.append(execution)
+
+        # Update state.
+        zen.state = execution.state
+
         return execution
