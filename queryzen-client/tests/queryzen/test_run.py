@@ -196,7 +196,6 @@ def test_zen_sets_state_after_run(queryzen):
     queryzen.run(zen)
     assert zen.state == 'IN'
 
-
 def test_zen_several_queries(queryzen):
     """Test that multiple queries in sequence work.
 
