@@ -108,7 +108,7 @@ def test_run_query_databases(queryzen):
     zen = queryzen.create('t', 'select 1')
 
     queryzen.run(zen)  # Should not fail (if default is configured in the database)
-
+    queryzen.run(zen, database='default')
     with pytest.raises(exceptions.DatabaseDoesNotExistError):
         queryzen.run(zen, database="DB_THAT_DOES_NOT_EXIST_12312312")
 
@@ -120,8 +120,7 @@ def test_run_query(queryzen):
     result = queryzen.run(zen, id=2, startswith='A%')
     assert result.rows == [[1, 'Alice'], [2, 'Bob']]
     assert result.columns == ['column1', 'column2']
-    # assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE col2 LIKE 'A%' OR col1 = 2;"
-    # todo fix .query
+    assert result.query == "SELECT * FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE column2 LIKE 'A%' OR column1 = 2;"
 
 
 def test_run_bad_parameters(queryzen):
@@ -174,7 +173,7 @@ def test_use_defaults(queryzen):
     result = queryzen.run(zen)
     assert result.rows[0][0] == 2
     assert OrderedDict(**result.parameters) == OrderedDict(**default_params)
-    assert result.query == 'not_implemented'  # todo fix when it is impl 'select (1 + 2 - 1) as r'
+    assert result.query == 'select (1 + 2 - 1) as r'
 
     # Use partial only one default and one param.
     result = queryzen.run(zen, val2=5)
@@ -183,6 +182,7 @@ def test_use_defaults(queryzen):
     # Use two params.
     result = queryzen.run(zen, val1=29, val2=5)
     assert result.rows[0][0] == 25
+
 
 def test_zen_sets_state_after_run(queryzen):
     """Test that after running a Zen, the state is correctly updated"""
