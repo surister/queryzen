@@ -196,3 +196,29 @@ def test_zen_sets_state_after_run(queryzen):
     zen = queryzen.create('t', 'select 1/')
     queryzen.run(zen)
     assert zen.state == 'IN'
+
+
+def test_zen_several_queries(queryzen):
+    """Test that multiple queries in sequence work.
+
+    Also test that data is properly assigned to the responses in the API.
+    """
+    queries = [
+        'create table if not exists t (a vachar)',
+        "insert into t values ('one')",
+    ]
+
+    for query in queries:
+        q = queryzen.create('t', query=query)
+        r = queryzen.run(q)
+        assert not r.is_error
+
+    q = queryzen.create('t', 'select * from t')
+    r = queryzen.run(q)
+    assert r.rows[0][0] == 'one'
+
+def test_other_database(queryzen):
+    """Test other database than default"""
+    q = queryzen.create('t', "select country, mountain, height from sys.summits where mountain = :mountain")
+    r = queryzen.run(q, mountain='Mont Blanc', database='crate')
+    assert r.rows[0][2] == 4808

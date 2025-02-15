@@ -20,14 +20,18 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
     executed_at = datetime.datetime.now(datetime.UTC)
     zen = get_object_or_404(Zen, pk=pk)
     execution = Execution(zen=zen)
-    db_instance: Database = getattr(settings, 'ZEN_DATABASES').get(database)
+    database: Database = getattr(settings, 'ZEN_DATABASES').get(database)
 
     columns = rows = []
     query = ''
+
     try:
-        columns, rows, query = db_instance.execute(zen.query, parameters)
+        result = database._execute_query(zen.query, parameters)
+        rows = result.rows
+        columns = result.columns
         execution.state = Execution.State.VALID
-        execution.row_count = len(rows)
+        execution.row_count = result.row_count
+        query = result.query
         zen.state = Zen.State.VALID
     except Exception as e:  # pylint: disable=W0718
         execution.error = str(e)

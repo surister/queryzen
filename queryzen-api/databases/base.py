@@ -1,8 +1,10 @@
 """ABC for QueryZen Database drivers."""
 
 import abc
+import dataclasses
 import logging
 import re
+
 import sqlite3
 
 import httpx
@@ -15,14 +17,36 @@ class DatabaseError(Exception):
     pass
 
 
+@dataclasses.dataclass
+class DatabaseResponse:
+    """Represents a Response from a Database call"""
+    rows: list
+    columns: list
+    query: str
+    query: str
+    row_count: int = 0
+
+
 class Database(abc.ABC):
     """Base class for all Databases """
     connection = None
 
+    def prepare_query(self, query: str, parameters):
+        """Prepares the query with parameters."""
+        return safe_sql_replace(query, parameters)
+
+    def _execute_query(self, query: str, parameters: dict) -> DatabaseResponse:
+        """Prepares the context and calls run_query"""
+        query = self.prepare_query(query, parameters)
+        context = dict(raw_query=query, parameters=dict)
+        return self.run_query(context, query)
+
     @abc.abstractmethod
-    def execute(self, sql, parameters=None):
-        """Overrides this method to implement your own database operations."""
+    def run_query(self, context, query) -> DatabaseResponse:
+        """The method for Database drivers to implement."""
         pass
+
+"""Overrides this method to implement your own database operations."""
 
 
 class SQLiteDatabase(Database):
@@ -31,17 +55,22 @@ class SQLiteDatabase(Database):
     def __init__(self, database, *args, **kwargs):
         self.connection = sqlite3.connect(database, *args, **kwargs)
 
-    def execute(self, sql, parameters=None) -> tuple:
+    def run_query(self, context, query) -> DatabaseResponse:
         """
         Executes a SQL statement and returns the resulting cursor.
         """
+        columns = []
         cursor = self.connection.cursor()
-        result = cursor.execute(sql, parameters)
+        result = cursor.execute(query)
         rows = result.fetchall()
-        columns = [x for xs in cursor.description for x in xs if x is not None]
+        if cursor.description:
+            columns = [x for xs in cursor.description for x in xs if x is not None]
         cursor.close()
 
-        return columns, rows, 'not_implemented'
+        return DatabaseResponse(columns=columns,
+                                rows=rows,
+                                query=query,
+                                row_count=len(rows))
 
 
 def safe_sql_replace(sql: str, parameters: dict, char_delimiter: str = ':') -> str:
@@ -94,12 +123,15 @@ def safe_sql_replace(sql: str, parameters: dict, char_delimiter: str = ':') -> s
 class CrateDatabase(Database):
     """CrateDB"""
 
-    def execute(self, sql, parameters=None):
-        sql = safe_sql_replace(sql, parameters)
-        response = httpx.post('http://192.168.88.251:4200/_sql',
-                              json={'stmt': sql})
+    def run_query(self, context, query):
+        response = httpx.post('http://crate:4200/_sql',
+                              json={'stmt': query})
+
         data = response.json()
         if response.is_success:
-            return data.get('cols'), data.get('rows'), sql
+            return DatabaseResponse(columns=data.get('cols'),
+                                    rows=data.get('rows'),
+                                    query=query,
+                                    row_count=data.get('rowcount'))
         else:
             raise DatabaseError(response.text)
