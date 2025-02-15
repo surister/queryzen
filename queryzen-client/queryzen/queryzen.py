@@ -68,8 +68,15 @@ class ZenExecution:
         return self.row_count > 0
 
     def as_table(self, column_center: ColumnCenter = 'left'):
-        return make_table(columns=self.columns if self.columns else ['error'],
-                          rows=self.rows if self.rows else [(self.error,), ],
+        if not self.rows:
+            if self.is_error:
+                _rows = [(self.error,), ]
+            else:
+                _rows = (['' for _ in range(len(self.columns))],)
+        else:
+            _rows = self.rows
+        return make_table(columns=self.columns or ['no data'] if not self.is_error else ['error'],
+                          rows=_rows,
                           column_center=column_center)
 
     def to_dict(self) -> dict:
