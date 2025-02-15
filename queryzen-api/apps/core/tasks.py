@@ -26,7 +26,7 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
     query = ''
 
     try:
-        result = database._execute_query(zen.query, parameters)
+        result = database.execute_query(zen.query, parameters)
         rows = result.rows
         columns = result.columns
         execution.state = Execution.State.VALID

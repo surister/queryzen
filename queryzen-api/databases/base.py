@@ -35,8 +35,10 @@ class Database(abc.ABC):
         """Prepares the query with parameters."""
         return safe_sql_replace(query, parameters)
 
-    def _execute_query(self, query: str, parameters: dict) -> DatabaseResponse:
-        """Prepares the context and calls run_query"""
+    def execute_query(self, query: str, parameters: dict) -> DatabaseResponse:
+        """Prepares the context and calls run_query, if you are implementing a Driver, do not
+        touch this one
+        """
         query = self.prepare_query(query, parameters)
         context = dict(raw_query=query, parameters=dict)
         return self.run_query(context, query)
@@ -45,7 +47,6 @@ class Database(abc.ABC):
     def run_query(self, context, query) -> DatabaseResponse:
         """The method for Database drivers to implement."""
         pass
-
 
 
 class SQLiteDatabase(Database):
@@ -72,50 +73,65 @@ class SQLiteDatabase(Database):
                                 row_count=len(rows))
 
 
-def safe_sql_replace(sql: str, parameters: dict, char_delimiter: str = ':') -> str:
-    """Replaces :parameter placeholders in an SQL statement with values from a dictionary.
+def safe_sql_replace(sql: str,
+                     parameters: dict,
+                     char_delimiter: str = ':',
+                     quote_ident_with: str = '"') -> str:
+    """Replaces parameters in an SQL statement with values from a dictionary.
 
-    It is resilient against injections; currently only both integers,
-    string and null values can be used.
+    Supports integers, strings, and null values while ensuring proper escaping.
+    Supports special function 'IDENT', to quote identities.
 
     Args:
         sql: The SQL statement with :parameter placeholders.
-        parameters: A dictionary containing the parameter names and values.
-        char_delimiter: The character to identify what to replace, defaults to ':', e.g. ':value'
+        parameters: Dictionary containing parameter names and values.
+        char_delimiter: Character prefix for placeholders (default: ':').
+        quote_ident_with: Character for quoting IDENT values (default: '"').
 
     Raises:
-        ``ValueError``: if the values are not integer, string or null.
+        ValueError: If an unsupported data type is encountered.
 
     Returns:
         The SQL statement with placeholders replaced by values.
 
     Examples:
-        >>> safe_sql_replace('select :val, :val1, :val2', {'val': 't', 'val1': 2, 'val2': "to"})
-        select 't', 2, 'to'
+        >>> safe_sql_replace('select IDENT(:col) FROM tbl1 t WHERE t.value =
+        ... :var1 and t.name = :var2', {'col': 'col1', 'var1': 1, 'var2': 'somename'})
+        select "col1" FROM tbl1 t WHERE t.value = 1 and t.name = 'somecol'
     """
-    for key, value in parameters.items():
 
-        # Ensure the value is properly escaped
+    def format_value(value):
+        """Formats the value inside the string depending on type."""
         if isinstance(value, str):
             # Escape single quotes.
             value = value.replace("'", "''")
 
             # Wrap the value in single quotes
             replacement = f"'{value}'"
+            return replacement
 
-        elif isinstance(value, (int, float)):
-            # Use the value directly for numbers
-            replacement = str(value)
+        if isinstance(value, (int, float)):
+            return str(value)
 
-        elif value is None:
-            # Replace with NULL for None values
-            replacement = 'NULL'
+        if value is None:
+            return 'NULL'
 
-        else:
-            raise ValueError(f'unsupported parameter type: {type(value)}')
+        raise ValueError(f'unsupported parameter type: {type(value)}')
 
+    for key, value in parameters.items():
+        replacement = format_value(value)
         to_replace = char_delimiter + key
-        sql = re.sub(rf'(?<!\w){to_replace}(?!\w)', replacement, sql)
+
+        # Replace FIELD(:value) with quoted value
+        sql = re.sub(rf'IDENT\({to_replace}\)',
+                     replacement.replace("'", quote_ident_with),
+                     sql)
+
+        # Replace :value with actual value
+        sql = re.sub(rf'(?<!\w){to_replace}(?!\w)',
+                     replacement,
+                     sql)
+
     return sql
 
 
