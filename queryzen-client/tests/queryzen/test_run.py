@@ -183,6 +183,21 @@ def test_use_defaults(queryzen):
     result = queryzen.run(zen, val1=29, val2=5)
     assert result.rows[0][0] == 25
 
+
+def test_all_replacement(queryzen):
+    """Test a query with all types of parameters: :value (string and int) and FIELD """
+    query = ("SELECT IDENT(:col) FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie'))"
+             " as t WHERE column2 LIKE :startswith OR column1 = :id LIMIT 1")
+    zen = queryzen.create(name='t', query=query)
+    result = queryzen.run(zen, col='column2', id=2, startswith='C%')
+
+    assert result.rows[0][0] == 'Bob'
+    assert result.query == """SELECT "column2" FROM (VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')) as t WHERE column2 LIKE 'C%' OR column1 = 2 LIMIT 1"""
+
+    result = queryzen.run(zen, col='column1', id=2, startswith='A%')
+    assert result.rows[0][0] == 1
+
+
 def test_zen_sets_state_after_run(queryzen):
     """Test that after running a Zen, the state is correctly updated"""
 
@@ -195,6 +210,7 @@ def test_zen_sets_state_after_run(queryzen):
     zen = queryzen.create('t', 'select 1/')
     queryzen.run(zen)
     assert zen.state == 'IN'
+
 
 def test_zen_several_queries(queryzen):
     """Test that multiple queries in sequence work.
@@ -215,8 +231,10 @@ def test_zen_several_queries(queryzen):
     r = queryzen.run(q)
     assert r.rows[0][0] == 'one'
 
+
 def test_other_database(queryzen):
     """Test other database than default"""
-    q = queryzen.create('t', "select country, mountain, height from sys.summits where mountain = :mountain")
+    q = queryzen.create('t',
+                        "select country, mountain, height from sys.summits where mountain = :mountain")
     r = queryzen.run(q, mountain='Mont Blanc', database='crate')
     assert r.rows[0][2] == 4808
