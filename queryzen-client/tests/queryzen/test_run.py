@@ -183,7 +183,6 @@ def test_use_defaults(queryzen):
     result = queryzen.run(zen, val1=29, val2=5)
     assert result.rows[0][0] == 25
 
-
 def test_zen_sets_state_after_run(queryzen):
     """Test that after running a Zen, the state is correctly updated"""
 

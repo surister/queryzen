@@ -1,13 +1,21 @@
 services:
   workers:
+    working_dir: /app/
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - .:/queryzen-api
+      - .:/app
     environment:
       CELERY_BROKER_URL: redis://redis:6379/1
-    command: poetry run celery -A queryzen_api worker -l INFO
+    command: >
+      bash -c "celery -A queryzen_api worker -l INFO"
+    healthcheck:
+      test: [ "CMD", "poetry", "run", "celery", "-A", "queryzen_api", "status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 
   redis:
     image: redis:7.4
@@ -16,6 +24,11 @@ services:
       - '6379:6379'
     volumes:
       - ./dev/redis/:/data
+  crate:
+    image: crate:latest
+    ports:
+      - "4200"
+
 
   flower:
     image: mher/flower

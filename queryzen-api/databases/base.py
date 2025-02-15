@@ -46,7 +46,6 @@ class Database(abc.ABC):
         """The method for Database drivers to implement."""
         pass
 
-"""Overrides this method to implement your own database operations."""
 
 
 class SQLiteDatabase(Database):

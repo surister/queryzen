@@ -10,16 +10,14 @@ import typing
 from . import constants
 from .sql import safe_sql_replace, parse_parameters
 from .backend import QueryZenHttpClient, QueryZenClientABC
-from .exceptions import (
-    UncaughtBackendError,
-    ZenDoesNotExistError,
-    ZenAlreadyExistsError,
-    ExecutionEngineError,
-    MissingParametersError,
-    DatabaseDoesNotExistError,
-    DefaultValueDoesNotExistError,
-    ParametersMissmatchError
-)
+from .exceptions import (UncaughtBackendError,
+                         ZenDoesNotExistError,
+                         ZenAlreadyExistsError,
+                         ExecutionEngineError,
+                         MissingParametersError,
+                         DatabaseDoesNotExistError,
+                         DefaultValueDoesNotExistError,
+                         ParametersMissmatchError)
 from .types import AUTO, Rows, Columns, _AUTO, Default, ZenState
 from .constants import DEFAULT_COLLECTION
 from .table import make_table, ColumnCenter
@@ -70,13 +68,13 @@ class ZenExecution:
     def as_table(self, column_center: ColumnCenter = 'left'):
         if not self.rows:
             if self.is_error:
-                _rows = [(self.error,), ]
+                rows = [(self.error,), ]
             else:
-                _rows = (['' for _ in range(len(self.columns))],)
+                rows = (['' for _ in range(len(self.columns))],)
         else:
-            _rows = self.rows
+            rows = self.rows
         return make_table(columns=self.columns or ['no data'] if not self.is_error else ['error'],
-                          rows=_rows,
+                          rows=rows,
                           column_center=column_center)
 
     def to_dict(self) -> dict:
@@ -150,7 +148,7 @@ class Zen:
                    created_at=datetime.datetime(year=1978, month=12, day=6))
 
     def preview(self, **parameters) -> str:
-        """Previews the SQL that will be computed given the parameters in QueryZen, if a parameter
+        """Previews the SQL that would be run given the parameters in QueryZen, if a parameter
         is missing, it will not raise an exception, this is mainly for debugging purposes,
         read ``run`` to see how missing parameters are handled.
 
@@ -280,10 +278,10 @@ class QueryZen:
 
         Example:
             >>> qz = QueryZen()
-            >>> try:
-            >>>     zen = qz.get(name='myzen', version=23)
-            >>> except ZenDoesNotExistError:
-            >>>     handle_zen_not_existing()
+            ... try:
+            ...     zen = qz.get(name='myzen', version=23)
+            ... except ZenDoesNotExistError:
+            ...     handle_zen_not_existing()
 
         Raises:
             ``ZenDoesNotExistError``: if the ``Zen`` does not exist.
@@ -334,10 +332,11 @@ class QueryZen:
             >>>qz = QueryZen()
             >>>zens = qz.filter(name='mountain', collection_contains='prod', executions__state='IN')
             >>>if zens:
-            >>>    do_something_with_zens(zens)
-            # Will return all ``Zen``s with name 'mountain' who has at least one execution that was
-            invalid.
-            ```
+            ...    do_something_with_zens(zens)
+
+            # Will return all ``Zen``s with name 'mountain'
+            # who has at least one execution that was invalid.
+
         Returns:
              A list of ``Zen``, empty list if none is found.
         """
@@ -348,9 +347,7 @@ class QueryZen:
                                        zen=Zen.empty(),
                                        context='Listing Zens')
 
-        return [
-            Zen(**data) for data in response.data
-        ]
+        return [Zen(**data) for data in response.data]
 
     def get_or_create(self,
                       name: str,
@@ -395,10 +392,10 @@ class QueryZen:
 
             # Delete a Zen by version.
             >>>try:
-            >>>    zen = qz.get('z', version=3)
-            >>>    qz.delete(zen)
-            >>>except ZenDoesNotExistError:
-            >>>    pass
+            ...    zen = qz.get('z', version=3)
+            ...    qz.delete(zen)
+            ...except ZenDoesNotExistError:
+            ...    pass
 
         Returns:
             Nothing.

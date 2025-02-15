@@ -51,5 +51,4 @@ def run_query(database: str, pk: str, parameters: dict | None = None):
 
     zen.save()
     execution.save()
-    print(ZenExecutionResponseSerializer(execution).data)
     return ZenExecutionResponseSerializer(execution).data
