@@ -149,4 +149,4 @@ class CrateDatabase(Database):
                                     query=query,
                                     row_count=data.get('rowcount'))
         else:
-            raise DatabaseError(response.text)
+            raise DatabaseError(response.json().get('error').get('message'))

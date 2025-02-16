@@ -213,9 +213,8 @@ class QueryZenHttpClient(QueryZenClientABC):
             collection: str = DEFAULT_COLLECTION,
             parameters: dict = None) -> QueryZenResponse:
         response = self.client.post(self.make_url(collection, name, str(version)),
-                                    json={
-                                        'version': version,
-                                        'timeout': timeout,
-                                        'parameters': parameters,
-                                        'database': database})
+                                    json={'version': version,
+                                          'timeout': timeout,
+                                          'parameters': parameters,
+                                          'database': database})
         return self.make_response(response)

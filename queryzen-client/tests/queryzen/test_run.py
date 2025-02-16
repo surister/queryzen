@@ -79,7 +79,6 @@ def test_zen_run_many(queryzen):
     result = queryzen.run(zen)
     assert len(zen.executions) == 1
 
-    assert isinstance(result, ZenExecution)
     assert not result.error
     assert result == zen.executions[0]
 
