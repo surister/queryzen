@@ -1,7 +1,14 @@
+import pytest
+
 from queryzen import Zen
 from queryzen.sql import safe_sql_replace
 
 
+def test_sql_replaces_raises():
+    with pytest.raises(ValueError):
+        safe_sql_replace("select :v", {'v': object})
+
+        
 def test_sql_replace_values():
     result = safe_sql_replace('SELECT * FROM products WHERE id = :val',
                               {'val': '10; DROP members--'})

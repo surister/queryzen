@@ -77,15 +77,52 @@ class ZenExecution:
                           rows=rows,
                           column_center=column_center)
 
+    def as_polars(self) -> 'polars.DataFrame':
+        try:
+            import polars  # pylint: disable=C0415
+        except ImportError as e:
+            raise ImportError('polars is needed to use `as_polars`,'
+                              ' try installing it with `pip install polars`') from e
+        return polars.from_records(self.rows, orient='row', schema=self.columns)
+
     def to_dict(self) -> dict:
         """Transform the instance into a dictionary"""
         return dataclasses.asdict(self)
 
+    def row_at(self, i: int) -> list:
+        """Returns the row number i.
+
+        Raises:
+            Index error if row i does not exist.
+
+        Returns:
+            The at position i
+        """
+
+        return self.rows[i]
+
     def iter_rows(self):
+        """Iterate over rows
+
+        Returns:
+            An iterator of rows.
+        """
         return iter(self.rows)
 
-    def iter_cols(self):
-        pass
+    def iter_cols(self) -> list[list]:
+        """Iterate over columns, it copies items so it is not the most memory efficient.
+
+        Returns:
+            A generator of columnar values.
+        """
+        for i in range(len(self.columns)):
+            col = []
+            for j in range(self.row_count):
+                col.append(self.rows[j][i])
+            yield col
+
+    def __iter__(self):
+        return self.iter_rows()
 
 
 @dataclasses.dataclass
@@ -109,7 +146,7 @@ class Zen:
 
     def difference(self, other: 'Zen', compare: list[str] = None) -> dict[str: tuple]:
         """Returns a dictionary with the difference between 'Zen's, it only
-        compares name, version and query. You can specify which fields to compare in the
+        compares name, version and query. You can specify which fields to compare with the
         ``compare`` parameter.
 
         >>> Zen.empty().difference(Zen.empty())
@@ -284,7 +321,7 @@ class QueryZen:
             ...     handle_zen_not_existing()
 
         Raises:
-            ``ZenDoesNotExistError``: if the ``Zen`` does not exist.
+            ZenDoesNotExistError: if the ``Zen`` does not exist.
 
             If you don't want to manually handle if the query exists,
             check ``QueryZen.get_or_create``
@@ -401,7 +438,7 @@ class QueryZen:
             Nothing.
 
         Raises:
-            ``ZenDoesNotExistError`` If the zen being deleted does not exist.
+            ZenDoesNotExistError: If the zen being deleted does not exist.
         """
         response = self._client.delete(zen)
 
