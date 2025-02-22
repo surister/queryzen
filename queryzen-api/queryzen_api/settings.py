@@ -21,10 +21,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fs+y^@*i1o&w1ehn)mhj0gh54@5q0xg_llb7h0@ubof+0pe25e'
+test_token = 'django-insecure-fs+y^@*i1o&w1ehn)mhj0gh54@5q0xg_llb7h0@ubof+0pe25e'
+SECRET_KEY = os.getenv('DJANGO_KEY',
+                       test_token)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('BUILD_ENV', True)
+DEBUG = not DEBUG == 'production'
+
+if len(SECRET_KEY) <= 20:
+    raise ValueError('DJANGO_KEY has to be bigger than 20 characters')
+
+if not DEBUG and SECRET_KEY == test_token:
+    raise ValueError('Configuration error, app is running in production mode and was not provided '
+                     'a token, set DJANGO_KEY to a safe 20+ character key.')
 
 ALLOWED_HOSTS = ['*']
 
@@ -131,6 +141,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
 }
+
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
 CELERY_IMPORTS = ('apps.core.tasks',)
