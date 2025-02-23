@@ -36,6 +36,17 @@ if not DEBUG and SECRET_KEY == test_token:
     raise ValueError('Configuration error, app is running in production mode and was not provided '
                      'a token, set DJANGO_KEY to a safe 20+ character key.')
 
+###################################################################################
+# DEBUG IS ALREADY SET AND VALIDATED AT THIS POINT, IF YOU WANT TO ADD            #
+#                                                                                 #
+# MORE FEATURES DEPENDING IF WE ARE IN PROD OR NOT, USE DEBUG variable, example:  #
+#                                                                                 #
+# if not DEBUG:                                                                   #
+#     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = (                              #
+#             "rest_framework.renderers.JSONRenderer",                            #
+#         )                                                                       #
+###################################################################################
+
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -141,6 +152,10 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
 }
+if not DEBUG:
+    REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = (
+        "rest_framework.renderers.JSONRenderer",
+    )
 
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
