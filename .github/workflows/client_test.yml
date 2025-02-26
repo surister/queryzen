@@ -1,4 +1,4 @@
-name: Run python client
+name: 📝🐍 Test Python client
 
 on:
   pull_request:
