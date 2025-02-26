@@ -10,13 +10,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: 'queryzen_client'
+          sparse-checkout: 'queryzen-client'
           sparse-checkout-cone-mode: false
+
+      - name: debug
+        run: |
+            ls
+            dir
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
       - name: Install the project
-        working-directory: 'queryzen_client'
+        working-directory: 'queryzen-client'
         run: uv sync
 
       - name: Set VERSION from tag
@@ -26,12 +31,12 @@ jobs:
           echo $RELEASE_VERSION
           echo ${{ env.RELEASE_VERSION }}
       - name: Set VERSION to project
-        working-directory: 'queryzen_client'
+        working-directory: 'queryzen-client'
         run: |
           sed -i -E "s/^version = \".*\"/version = \"${{ env.RELEASE_VERSION }}\"/" pyproject.toml
           cat pyproject.toml
 
       - name: Build
-        working-directory: 'queryzen_client'
+        working-directory: 'queryzen-client'
         # For example, using `pytest`
-        run: uv run build
+        run: uv build
