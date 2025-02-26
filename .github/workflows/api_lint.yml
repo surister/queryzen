@@ -1,9 +1,9 @@
-name: Lint python client
+name: 🔦🔌 Lint API
 
 on:
   push:
     paths:
-      - 'queryzen-client/**.py'
+      - 'queryzen-api/**.py'
 
 jobs:
   build:
@@ -23,4 +23,4 @@ jobs:
           pip install pylint pytest
       - name: Lint code
         run: |
-          pylint --rc-file queryzen-client/pylintrc queryzen-client 
+          pylint --rc-file queryzen-api/pylintrc queryzen-api

@@ -1,4 +1,4 @@
-name: Docker build
+name: 📦🔌 Build and Release client in Docker
 
 on:
   release:
@@ -13,9 +13,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_SURISTER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_SURISTER_PAT }}
       - uses: actions/checkout@v4
-      - name: Set env
+
+      - name: Set VERSION from tag
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
-      - name: Test
+      - name: Echo VERSION From tag
         run: |
           echo $RELEASE_VERSION
           echo ${{ env.RELEASE_VERSION }}
