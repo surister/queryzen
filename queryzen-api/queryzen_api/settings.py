@@ -22,8 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 test_token = 'django-insecure-fs+y^@*i1o&w1ehn)mhj0gh54@5q0xg_llb7h0@ubof+0pe25e'
-SECRET_KEY = os.getenv('DJANGO_KEY',
-                       test_token)
+SECRET_KEY = os.getenv('DJANGO_KEY', test_token) # # pylint: disable=W1508
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('BUILD_ENV', True)
@@ -153,8 +152,8 @@ REST_FRAMEWORK = {
     ),
 }
 if not DEBUG:
-    REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = (
-        "rest_framework.renderers.JSONRenderer",
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
+        'rest_framework.renderers.JSONRenderer',
     )
 
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
