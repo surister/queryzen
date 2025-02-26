@@ -1,0 +1,37 @@
+name: 📦🐍 Build and Release Python client
+on:
+  release:
+
+jobs:
+  build:
+    name: python
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: 'queryzen_client'
+          sparse-checkout-cone-mode: false
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        working-directory: 'queryzen_client'
+        run: uv sync
+
+      - name: Set VERSION from tag
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+      - name: Echo VERSION From tag
+        run: |
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
+      - name: Set VERSION to project
+        working-directory: 'queryzen_client'
+        run: |
+          sed -i -E "s/^version = \".*\"/version = \"${{ env.RELEASE_VERSION }}\"/" pyproject.toml
+          cat pyproject.toml
+
+      - name: Build
+        working-directory: 'queryzen_client'
+        # For example, using `pytest`
+        run: uv run build
