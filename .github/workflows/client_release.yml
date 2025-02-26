@@ -9,9 +9,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          sparse-checkout: 'queryzen_client'
-          sparse-checkout-cone-mode: false
 
       - name: debug
         run: |
