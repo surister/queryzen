@@ -1,6 +1,6 @@
 name: 📦🐍 Build and Release Python client
 on:
-  release:
+  workflow_call:
 
 jobs:
   build:
@@ -13,10 +13,6 @@ jobs:
           sparse-checkout: 'queryzen-client'
           sparse-checkout-cone-mode: false
 
-      - name: debug
-        run: |
-            ls
-            dir
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 

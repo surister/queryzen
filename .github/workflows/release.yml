@@ -1,0 +1,10 @@
+on:
+  release:
+    types: [published]
+
+jobs:
+  api_release:
+    uses: ./.github/workflows/api_release.yml
+
+  client_release:
+    uses: ./.github/workflows/client_release.yml
