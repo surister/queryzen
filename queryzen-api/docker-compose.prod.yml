@@ -16,10 +16,9 @@ services:
     depends_on:
       # - postgres
       - redis
-
     env_file:
-      - ./.envs/test/django/.django.env
-
+      - path: ./.envs/prod/django/.django.env
+        required: false
     command: [ /start ]
 
   worker:
@@ -27,7 +26,8 @@ services:
     volumes:
       - ./db.sqlite3:/app/db.sqlite3
     env_file:
-      - ./.envs/prod/django/.django.env
+      - path: ./.envs/prod/django/.django.env
+        required: false
     healthcheck:
       test: [ "CMD", "uv" , "run", "celery", "inspect", "ping" ]
       interval: 30s
@@ -49,7 +49,8 @@ services:
   flower:
     image: mher/flower
     env_file:
-      - ./.envs/prod/django/.django.env
+      - path: ./.envs/prod/django/.django.env
+        required: false
     ports:
       - '5555:5555'
     healthcheck:
