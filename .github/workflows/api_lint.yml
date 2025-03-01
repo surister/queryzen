@@ -1,7 +1,9 @@
 name: 🔦🔌 Lint API
 
 on:
-  push:
+  pull_request:
+    branches:
+      - master
     paths:
       - 'queryzen-api/**.py'
 
