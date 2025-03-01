@@ -1,7 +1,7 @@
 name: 📦🔌 Build and Release client in Docker
 
 on:
-  release:
+  workflow_call:
 
 jobs:
   docker:
@@ -16,7 +16,7 @@ jobs:
 
       - name: Set VERSION from tag
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
-      - name: Echo VERSION From tag
+      - name: Echo Version from tag
         run: |
           echo $RELEASE_VERSION
           echo ${{ env.RELEASE_VERSION }}
