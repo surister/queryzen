@@ -3,7 +3,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 LABEL author = github.com/surister
 
-# Use the system Python environment
+ARG BUILD_ENVIRONMENT=development
+ARG APP_HOME=/app
+
 ENV UV_PROJECT_ENVIRONMENT="/usr/local/"
 
 COPY . .

@@ -1,0 +1,21 @@
+include:
+  - docker-compose.prod.yml
+
+services:
+  crate:
+    image: crate:latest
+    ports:
+      - "4200"
+
+  client:
+    image: ghcr.io/astral-sh/uv:bookworm-slim
+    working_dir: /app
+    volumes:
+      - ../queryzen-client:/app
+      - /tmp:/tmp
+    command: >
+      bash -c "tail -f"
+    environment:
+      - BUILD_ENV=CI
+      - QUERYZEN_API_URL=http://django:80
+      - CELERY_BROKER_URL=redis://redis:6379/1

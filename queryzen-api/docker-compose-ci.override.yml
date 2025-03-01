@@ -1,0 +1,12 @@
+services:
+  django:
+    environment:
+      - BUILD_ENV=CI
+      - DJANGO_KEY="abcdefghijklñjasdofhadpfhasfoashfpoasdf123"
+      - CELERY_BROKER_URL=redis://redis:6379/1
+
+  worker:
+    environment:
+      - BUILD_ENV=CI
+      - DJANGO_KEY="abcdefghijklñjasdofhadpfhasfoashfpoasdf123"
+      - CELERY_BROKER_URL=redis://redis:6379/1
