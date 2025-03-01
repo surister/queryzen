@@ -1,0 +1,58 @@
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/prod/django/Dockerfile
+    image: queryzen_prod_django
+    ports:
+      - '8000:80'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:80/_healthcheck" ]
+      interval: 1m
+      timeout: 10s
+      retries: 2
+    volumes:
+      - ./db.sqlite3:/app/db.sqlite3
+    depends_on:
+      # - postgres
+      - redis
+    env_file:
+      - ./.envs/prod/django/.django.env
+    command: [ /start ]
+
+  worker:
+    image: queryzen_prod_django
+    command: /start-celeryworker
+    volumes:
+      - ./db.sqlite3:/app/db.sqlite3
+    env_file:
+      - ./.envs/prod/django/.django.env
+    healthcheck:
+      test: [ "CMD", "uv" , "run", "celery", "inspect", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7.4
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  flower:
+    image: mher/flower
+    env_file:
+      - ./.envs/prod/django/.django.env
+    ports:
+      - '5555:5555'
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:5555/healthcheck" ]
+      interval: 1m
+      timeout: 10s
+      retries: 2
+    depends_on:
+      - worker
+      - redis

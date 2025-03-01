@@ -24,6 +24,7 @@ services:
       - '6379:6379'
     volumes:
       - ./dev/redis/:/data
+
   crate:
     image: crate:latest
     ports:

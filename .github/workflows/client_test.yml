@@ -1,4 +1,4 @@
-name: Run python client
+name: 📝🐍 Test Python client
 
 on:
   pull_request:
@@ -7,7 +7,6 @@ on:
     paths:
       - 'queryzen-api/**.py'
       - 'queryzen-client/**.py'
-
 
 jobs:
   build:
@@ -43,4 +42,3 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
