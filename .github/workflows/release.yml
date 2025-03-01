@@ -5,6 +5,9 @@ on:
 jobs:
   api_release:
     uses: ./.github/workflows/api_release.yml
+    secrets:
+      DOCKERHUB_SURISTER_PAT: ${{ secrets.DOCKERHUB_SURISTER_PAT }}
+      DOCKERHUB_SURISTER_USERNAME: ${{ secrets.DOCKERHUB_SURISTER_USERNAME }}
 
   client_release:
     uses: ./.github/workflows/client_release.yml
