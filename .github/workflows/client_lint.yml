@@ -1,7 +1,9 @@
 name: 🔦🐍 Lint Python client
 
 on:
-  push:
+  pull_request:
+    branches:
+      - master
     paths:
       - 'queryzen-client/**.py'
 
