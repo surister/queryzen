@@ -22,12 +22,22 @@ jobs:
       - name: Run docker compose
         uses: adambirds/docker-compose-action@v1.5.0
         with:
-          compose-file: "./docker-compose-ci.yml"
+          compose-file: |
+            ./queryzen-api/docker-compose-ci.yml
+            ./queryzen-api/docker-compose-ci.override.yml
           up-flags: "--build"
           down-flags: "--volumes"
+      - name: Run migrations
+        run: |
+          docker exec queryzen-api-django-1 bash -c "echo waiting 1s && sleep 1 && uv run python manage.py migrate"
+
       - name: Run client Tests
         run: |
-          docker exec queryzen-client-1 bash -c "echo waiting 2s && sleep 2 && pytest --cov-report=term-missing:skip-covered --cov-report=xml:/tmp/coverage.xml --junitxml=/tmp/pytest.xml --cov=queryzen tests/ --use-local -k 'not test_zen_run_query_crate and not test_run_query_not_passing_required_params_crate'" | tee /tmp/pytest-coverage.txt
+          docker exec queryzen-api-client-1 bash -c "echo waiting 2s && sleep 1 && uv run pytest --cov-report=term-missing:skip-covered --cov-report=xml:/tmp/coverage.xml --junitxml=/tmp/pytest.xml --cov=queryzen tests/" | tee /tmp/pytest-coverage.txt
+      - name: Debug
+        run: |
+          docker logs queryzen-api-django-1 
+          docker logs queryzen-api-worker-1
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
