@@ -36,3 +36,7 @@ jobs:
         working-directory: 'queryzen-client'
         # For example, using `pytest`
         run: uv build
+
+      - name: Upload
+        working-directory: 'queryzen-client'
+        run: uv publish
