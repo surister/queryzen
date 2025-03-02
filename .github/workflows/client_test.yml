@@ -33,7 +33,7 @@ jobs:
 
       - name: Run client Tests
         run: |
-          docker exec queryzen-api-client-1 bash -c "echo waiting 2s && sleep 1 && uv run pytest --cov-report=term-missing:skip-covered --cov-report=xml:/tmp/coverage.xml --junitxml=/tmp/pytest.xml --cov=queryzen tests/" | tee /tmp/pytest-coverage.txt
+          docker exec queryzen-api-client-1 bash -c "echo waiting 1s && sleep 1 && uv run pytest --cov-report=term-missing:skip-covered --cov-report=xml:/tmp/coverage.xml --junitxml=/tmp/pytest.xml --cov=queryzen tests/" | tee /tmp/pytest-coverage.txt
       - name: Debug
         run: |
           docker logs queryzen-api-django-1 
@@ -43,7 +43,7 @@ jobs:
         with:
           pytest-coverage-path: /tmp/pytest-coverage.txt
           junitxml-path: /tmp/pytest.xml
-      - name: Correct 
+      - name: Setup coverage result for sonar
         run: | 
           cp /tmp/coverage.xml .
           sed -i 's|<source>/|<source>|' coverage.xml
