@@ -6,4 +6,8 @@ set -o nounset
 
 >&2 echo 'Running pre-start hook'
 
+if [ "$BUILD_ENV" = "CI" ]; then
+    uv run python manage.py migrate
+fi
+
 exec "$@"
