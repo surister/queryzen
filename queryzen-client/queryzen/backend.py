@@ -95,6 +95,13 @@ class QueryZenClientABC(abc.ABC):
             **parameters: dict) -> QueryZenResponse:
         """Abc method for running a ``Zen``"""
 
+    @abc.abstractmethod
+    def stats(self,
+              collection: str,
+              name: str,
+              version: str) -> QueryZenResponse:
+        """Abc method for getting stats from ``Zen``"""
+
 
 class QueryZenHttpClient(QueryZenClientABC):
     """
@@ -217,4 +224,13 @@ class QueryZenHttpClient(QueryZenClientABC):
                                           'timeout': timeout,
                                           'parameters': parameters,
                                           'database': database})
+        return self.make_response(response)
+
+    def stats(self,
+              collection: str,
+              name: str,
+              version: str) -> QueryZenResponse:
+
+        response = self.client.get(f'{self.make_url(collection, name, version)}stats/')
+
         return self.make_response(response)

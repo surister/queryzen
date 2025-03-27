@@ -19,8 +19,10 @@ from apps.core.filters import QueryZenFilter
 from apps.core.models import Zen
 from apps.core.serializers import (ZenSerializer,
                                    CreateZenSerializer,
-                                   ExecuteZenSerializer)
+                                   ExecuteZenSerializer, StatisticsSerializer)
 from apps.core.tasks import run_query
+
+
 # from queryzen_api.celery import is_execution_engine_working
 
 
@@ -147,3 +149,61 @@ class ZenView(views.APIView):
                                 version=version)
         zen.delete()
         return Response([], status=status.HTTP_200_OK)
+
+
+class StatisticsView(views.APIView):
+    """View to retrieve statistical execution time metrics for a given Zen version."""
+
+    def get(self, request, collection: str, name: str, version: str):  # pylint: disable=W0613
+        """
+        Get statistics from a Zen version.
+
+        Available statistics:
+        - min_execution_time_in_ms
+        - max_execution_time_in_ms
+        - mean_execution_time_in_ms
+        - mode_execution_time_in_ms
+        - median_execution_time_in_ms
+        - variance
+        - standard_deviation
+        - range
+        """
+
+        queryset = Zen.filter_by(collection=collection,
+                                 name=name,
+                                 version=version)
+
+        obj: Zen | None = queryset.first()
+        if not obj:
+            raise ZenDoesNotExistError()
+
+        if not obj.executions.count():
+            metrics = StatisticsSerializer(
+                {
+                    'min_execution_time_in_ms': None,
+                    'max_execution_time_in_ms': None,
+                    'mean_execution_time_in_ms': None,
+                    'mode_execution_time_in_ms': None,
+                    'median_execution_time_in_ms': None,
+                    'variance': None,
+                    'standard_deviation': None,
+                    'range': None,
+                }
+            )
+        else:
+            executions = obj.executions.order_by('total_time')
+
+            metrics = StatisticsSerializer(
+                {
+                    'min_execution_time_in_ms': executions.first().total_time,
+                    'max_execution_time_in_ms': executions.last().total_time,
+                    'mean_execution_time_in_ms': obj.mean_execution_time_in_ms,
+                    'mode_execution_time_in_ms': obj.mode_execution_time_in_ms,
+                    'median_execution_time_in_ms': obj.median_execution_time_in_ms,
+                    'variance': obj.variance,
+                    'standard_deviation': obj.standard_deviation,
+                    'range': executions.last().total_time - executions.first().total_time,
+                }
+            )
+
+        return Response(metrics.data, status=status.HTTP_200_OK)
