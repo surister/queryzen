@@ -126,6 +126,36 @@ class ZenExecution:
 
 
 @dataclasses.dataclass
+class ZenStatistic:
+    """
+    A data class representing statistical metrics for execution time analysis.
+    If a Zen has no executions, all metrics will return None.
+    Attributes:
+        min_execution_time_in_ms (int | None): The minimum execution time in milliseconds.
+        max_execution_time_in_ms (int | None): The maximum execution time in milliseconds.
+        mean_execution_time_in_ms (float | None): The mean (average) execution time in milliseconds.
+        mode_execution_time_in_ms (int | None): The most frequently occurring execution
+         time in milliseconds.
+        median_execution_time_in_ms (int | None): The median execution time in milliseconds.
+        variance (float | None): The statistical variance of execution times.
+        standard_deviation (float | None): The standard deviation of execution times.
+        range (float | None): The difference between max and min execution times.
+    """
+    min_execution_time_in_ms: int | None
+    max_execution_time_in_ms: int | None
+    mean_execution_time_in_ms: float | None
+    mode_execution_time_in_ms: int | None
+    median_execution_time_in_ms: int | None
+    variance: float | None
+    standard_deviation: float | None
+    range: float | None
+
+    def to_dict(self) -> dict:
+        """Transform the instance into a dictionary"""
+        return dataclasses.asdict(self)
+
+
+@dataclasses.dataclass
 class Zen:
     """A ``Zen`` is a named and versioned SQL query that lives in a QueryZen backend"""
     id: int
@@ -221,6 +251,13 @@ class QueryZen:
 
     def __init__(self, client: QueryZenClientABC | None = None):
         self._client: QueryZenClientABC = client or QueryZenHttpClient()
+
+    def _normalize_version(self, version):
+        if not isinstance(version, (int, _AUTO)):
+            raise ValueError('zen version should be an integer')
+        if isinstance(version, int):
+            version = str(version)
+        return version
 
     def create(self,
                name: str,
@@ -329,11 +366,7 @@ class QueryZen:
         Returns:
             ``Zen`` if it exists.
         """
-        if not isinstance(version, (int, _AUTO)):
-            raise ValueError('zen version should be an integer')
-
-        if isinstance(version, int):
-            version = str(version)
+        version = self._normalize_version(version)
 
         response = self._client.get(name=name,
                                     version=version,
@@ -527,3 +560,20 @@ class QueryZen:
         zen.state = execution.state
 
         return execution
+
+    def stats(self,
+              name: str,
+              collection=DEFAULT_COLLECTION,
+              version: _AUTO | int = AUTO,
+              ) -> ZenStatistic:
+
+        version = self._normalize_version(version)
+        response = self._client.stats(collection, name, version)
+
+        if response.error:
+            if response.error_code == 404:
+                raise ZenDoesNotExistError(
+                    'You are trying to get stats from a zen that does not exist'
+                )
+
+        return ZenStatistic(**response.data[0])  # Statistics always return one element

@@ -42,3 +42,35 @@ class ZenSerializer(serializers.ModelSerializer):
 class CollectionsSerializer(serializers.Serializer):
     collection = serializers.CharField()
     zen_count = serializers.IntegerField(min_value=0)
+
+
+class StatisticsSerializer(serializers.Serializer):
+    """Statistics serializer for Zen executions"""
+    min_execution_time_in_ms = serializers.IntegerField(
+        min_value=0,
+        read_only=True,
+        allow_null=True
+    )
+    max_execution_time_in_ms = serializers.IntegerField(
+        min_value=0,
+        read_only=True,
+        allow_null=True
+    )
+    mean_execution_time_in_ms = serializers.FloatField(
+        min_value=0,
+        read_only=True,
+        allow_null=True
+    )
+    mode_execution_time_in_ms = serializers.IntegerField(
+        min_value=0,
+        read_only=True,
+        allow_null=True
+    )
+    median_execution_time_in_ms = serializers.IntegerField(
+        min_value=0,
+        read_only=True,
+        allow_null=True
+    )
+    variance = serializers.FloatField(min_value=0, read_only=True)
+    standard_deviation = serializers.FloatField(min_value=0, read_only=True)
+    range = serializers.FloatField(min_value=0, read_only=True)
