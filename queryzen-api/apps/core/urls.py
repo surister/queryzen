@@ -2,7 +2,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from apps.core.views import ZenFilterViewSet, ZenView
+from apps.core.views import ZenFilterViewSet, ZenView, StatisticsView
 
 router = DefaultRouter()
 router.register(
@@ -10,6 +10,13 @@ router.register(
     basename='zens'
 )
 urlpatterns = router.urls
+base_path = 'collection/<str:collection>/zen/<str:name>/version/<str:version>/'
 urlpatterns.append(
-    path('collection/<str:collection>/zen/<str:name>/version/<str:version>/', ZenView.as_view())
+    path(base_path, ZenView.as_view())
+)
+urlpatterns.append(
+    path(
+        f'{base_path}stats/',
+        StatisticsView.as_view()
+    )
 )
