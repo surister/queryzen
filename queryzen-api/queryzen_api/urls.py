@@ -19,6 +19,7 @@ from django.http import HttpResponse
 from django.urls import include, path
 
 urlpatterns = [
+    path('', include('apps.authentication.urls')),
     path('', include('apps.core.urls')),
     path('_healthcheck', lambda r: HttpResponse()),
 ]

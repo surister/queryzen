@@ -15,6 +15,7 @@ dependencies = [
     "redis>=5.2.1,<6",
     "sqlalchemy>=2.0.37,<3",
     "httpx>=0.28.1,<0.29",
+    "djangorestframework-simplejwt>=5.5.0",
 ]
 
 [dependency-groups]

@@ -48,6 +48,9 @@ if not DEBUG and SECRET_KEY == test_token:
 
 ALLOWED_HOSTS = ['*']
 
+# Custom auth user
+AUTH_USER_MODEL = 'authentication.User'
+
 # Application definition
 INSTALLED_APPS = [
     'apps.core',
@@ -55,6 +58,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'django_celery_results',
+    'rest_framework_simplejwt',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -62,6 +66,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'apps.authentication',
 ]
 
 if DEBUG:
@@ -150,6 +156,9 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
 }
 if not DEBUG:
     REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
