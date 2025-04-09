@@ -50,8 +50,3 @@ jobs:
         run: | 
           cp /tmp/coverage.xml .
           sed -i 's|<source>/|<source>|' coverage.xml
-      - name: Run sonar scan
-        uses: sonarsource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
