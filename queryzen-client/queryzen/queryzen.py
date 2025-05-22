@@ -131,21 +131,21 @@ class ZenStatistic:
     A data class representing statistical metrics for execution time analysis.
     If a Zen has no executions, all metrics will return None.
     Attributes:
-        min_execution_time_in_ms (int | None): The minimum execution time in milliseconds.
-        max_execution_time_in_ms (int | None): The maximum execution time in milliseconds.
-        mean_execution_time_in_ms (float | None): The mean (average) execution time in milliseconds.
-        mode_execution_time_in_ms (int | None): The most frequently occurring execution
+        min_execution_time_ms (int | None): The minimum execution time in milliseconds.
+        max_execution_time_ms (int | None): The maximum execution time in milliseconds.
+        mean_execution_time_ms (float | None): The mean (average) execution time in milliseconds.
+        mode_execution_time_ms (int | None): The most frequently occurring execution
          time in milliseconds.
-        median_execution_time_in_ms (int | None): The median execution time in milliseconds.
+        median_execution_time_ms (int | None): The median execution time in milliseconds.
         variance (float | None): The statistical variance of execution times.
         standard_deviation (float | None): The standard deviation of execution times.
         range (float | None): The difference between max and min execution times.
     """
-    min_execution_time_in_ms: int | None
-    max_execution_time_in_ms: int | None
-    mean_execution_time_in_ms: float | None
-    mode_execution_time_in_ms: int | None
-    median_execution_time_in_ms: int | None
+    min_execution_time_ms: int | None
+    max_execution_time_ms: int | None
+    mean_execution_time_ms: float | None
+    mode_execution_time_ms: int | None
+    median_execution_time_ms: int | None
     variance: float | None
     standard_deviation: float | None
     range: float | None
@@ -252,7 +252,23 @@ class QueryZen:
     def __init__(self, client: QueryZenClientABC | None = None):
         self._client: QueryZenClientABC = client or QueryZenHttpClient()
 
-    def _normalize_version(self, version):
+    def _validate_version(self, version) -> str:
+        """
+            Validate the input `version` value.
+
+            This method ensures that the provided `version` is either an integer or a special
+            sentinel value `_AUTO`. If it is an integer, it will be converted to a string.
+            Otherwise, a `ValueError` is raised.
+
+        Args:
+            version: The version value to validate. Must be of type `int` or `_AUTO`.
+
+        Returns:
+            str: The version as a string, if it's a valid integer.
+
+        Raises:
+            ValueError: If `version` is not an integer or `_AUTO`.
+        """
         if not isinstance(version, (int, _AUTO)):
             raise ValueError('zen version should be an integer')
         if isinstance(version, int):
@@ -366,7 +382,7 @@ class QueryZen:
         Returns:
             ``Zen`` if it exists.
         """
-        version = self._normalize_version(version)
+        version = self._validate_version(version)
 
         response = self._client.get(name=name,
                                     version=version,
@@ -566,8 +582,25 @@ class QueryZen:
               collection=DEFAULT_COLLECTION,
               version: _AUTO | int = AUTO,
               ) -> ZenStatistic:
+        """
+        Return zen statistics.
 
-        version = self._normalize_version(version)
+        Args:
+            name: The name of the ``Zen``
+            collection: The collection of the `Zen`, defaults to ``DEFAULT_COLLECTION``.
+            version: The version of the `Zen`, defaults to 'AUTO'.
+
+        Raises:
+            ZenDoesNotExistError: if the ``Zen`` does not exist.
+
+            If you don't want to manually handle if the query exists,
+            check ``QueryZen.get_or_create``
+
+        Returns:
+            ``ZenStatistic`` if it exists or ``None``.
+        """
+
+        version = self._validate_version(version)
         response = self._client.stats(collection, name, version)
 
         if response.error:

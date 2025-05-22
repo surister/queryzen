@@ -46,31 +46,52 @@ class CollectionsSerializer(serializers.Serializer):
 
 class StatisticsSerializer(serializers.Serializer):
     """Statistics serializer for Zen executions"""
-    min_execution_time_in_ms = serializers.IntegerField(
+    min_execution_time_ms = serializers.IntegerField(
         min_value=0,
         read_only=True,
         allow_null=True
     )
-    max_execution_time_in_ms = serializers.IntegerField(
+    max_execution_time_ms = serializers.IntegerField(
         min_value=0,
         read_only=True,
         allow_null=True
     )
-    mean_execution_time_in_ms = serializers.FloatField(
+    mean_execution_time_ms = serializers.FloatField(
         min_value=0,
         read_only=True,
         allow_null=True
     )
-    mode_execution_time_in_ms = serializers.IntegerField(
+    mode_execution_time_ms = serializers.IntegerField(
+        min_value=0,
+        read_only=True,
+        allow_null=True,
+    )
+    median_execution_time_ms = serializers.IntegerField(
         min_value=0,
         read_only=True,
         allow_null=True
     )
-    median_execution_time_in_ms = serializers.IntegerField(
-        min_value=0,
-        read_only=True,
-        allow_null=True
-    )
-    variance = serializers.FloatField(min_value=0, read_only=True)
-    standard_deviation = serializers.FloatField(min_value=0, read_only=True)
-    range = serializers.FloatField(min_value=0, read_only=True)
+    variance = serializers.FloatField(min_value=0, read_only=True, allow_null=True)
+    standard_deviation = serializers.FloatField(min_value=0, read_only=True, allow_null=True)
+    range = serializers.FloatField(min_value=0, read_only=True, allow_null=True)
+
+    def to_representation(self, instance):
+        if instance is None:
+            return {field_name: None for field_name in self.fields}
+        return super().to_representation(instance)
+
+    @classmethod
+    def from_execution(cls, obj, executions):
+        return cls(
+            instance={
+                'min_execution_time_ms': executions.first().total_time,
+                'max_execution_time_ms': executions.last().total_time,
+                'mean_execution_time_ms': obj.mean_execution_time_in_ms,
+                'mode_execution_time_ms': obj.mode_execution_time_in_ms,
+                'median_execution_time_ms': obj.median_execution_time_in_ms,
+                'variance': obj.variance,
+                'standard_deviation': obj.standard_deviation,
+                'range': executions.last().total_time - executions.first()
+                .total_time,
+            }
+        )

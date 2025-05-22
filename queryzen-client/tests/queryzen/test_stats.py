@@ -1,7 +1,6 @@
 import pytest
 
 from queryzen import exceptions
-from tests.shared import check_zen
 
 
 def test_get_stats_without_executions_return_none(queryzen):
