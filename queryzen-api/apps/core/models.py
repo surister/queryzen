@@ -94,15 +94,15 @@ class Zen(UUIDMixin):
                                          f' parameter(s) to run: {list(missing_parameters)}')
 
     @property
-    def mean_execution_time_in_ms(self) -> float:
+    def mean_execution_time_ms(self) -> float:
         return statistics.mean(self.executions.values_list('total_time', flat=True))
 
     @property
-    def mode_execution_time_in_ms(self) -> int:
+    def mode_execution_time_ms(self) -> int:
         return statistics.mode(self.executions.values_list('total_time', flat=True))
 
     @property
-    def median_execution_time_in_ms(self) -> int:
+    def median_execution_time_ms(self) -> int:
         return statistics.median(self.executions.values_list('total_time', flat=True))
 
     @property

@@ -159,11 +159,11 @@ class StatisticsView(views.APIView):
         Get statistics from a Zen version.
 
         Available statistics:
-        - min_execution_time_in_ms
-        - max_execution_time_in_ms
-        - mean_execution_time_in_ms
-        - mode_execution_time_in_ms
-        - median_execution_time_in_ms
+        - min_execution_time_ms
+        - max_execution_time_ms
+        - mean_execution_time_ms
+        - mode_execution_time_ms
+        - median_execution_time_ms
         - variance
         - standard_deviation
         - range

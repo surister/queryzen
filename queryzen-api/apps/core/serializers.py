@@ -82,13 +82,14 @@ class StatisticsSerializer(serializers.Serializer):
 
     @classmethod
     def from_execution(cls, obj, executions):
+        # TODO: Revisit this in the future
         return cls(
             instance={
                 'min_execution_time_ms': executions.first().total_time,
                 'max_execution_time_ms': executions.last().total_time,
-                'mean_execution_time_ms': obj.mean_execution_time_in_ms,
-                'mode_execution_time_ms': obj.mode_execution_time_in_ms,
-                'median_execution_time_ms': obj.median_execution_time_in_ms,
+                'mean_execution_time_ms': obj.mean_execution_time_ms,
+                'mode_execution_time_ms': obj.mode_execution_time_ms,
+                'median_execution_time_ms': obj.median_execution_time_ms,
                 'variance': obj.variance,
                 'standard_deviation': obj.standard_deviation,
                 'range': executions.last().total_time - executions.first()
