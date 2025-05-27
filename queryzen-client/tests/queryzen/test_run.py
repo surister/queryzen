@@ -102,7 +102,6 @@ def test_run_parameters(queryzen):
     assert result.rows == [[1, 'Alice'], [2, 'Bob']]
     assert result.columns == ['column1', 'column2']
 
-
 def test_run_query_databases(queryzen):
     zen = queryzen.create('t', 'select 1')
 
