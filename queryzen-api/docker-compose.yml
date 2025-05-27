@@ -8,6 +8,7 @@ services:
       - .:/app
     environment:
       CELERY_BROKER_URL: redis://redis:6379/1
+      POSTGRES_HOST: postgres
     command: >
       bash -c "celery -A queryzen_api worker -l INFO"
     healthcheck:
@@ -15,7 +16,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-
 
   redis:
     image: redis:7.4
