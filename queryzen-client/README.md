@@ -10,7 +10,7 @@ This is the canonical ``queryzen`` client (Python).d
 # Example
 
 ```python
-from querzen import QueryZen
+from queryzen import QueryZen
 
 qz = QueryZen()
 

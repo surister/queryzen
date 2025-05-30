@@ -16,7 +16,6 @@ services:
       timeout: 10s
       retries: 5
 
-
   redis:
     image: redis:7.4
     restart: on-failure

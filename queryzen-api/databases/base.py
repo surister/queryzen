@@ -6,6 +6,7 @@ import logging
 import re
 
 import sqlite3
+import psycopg2
 
 import httpx
 
@@ -22,7 +23,6 @@ class DatabaseResponse:
     """Represents a Response from a Database call"""
     rows: list
     columns: list
-    query: str
     query: str
     row_count: int = 0
 
@@ -150,3 +150,34 @@ class CrateDatabase(Database):
                                     row_count=data.get('rowcount'))
         else:
             raise DatabaseError(response.json().get('error').get('message'))
+
+
+class PostgresDatabase(Database):
+    """PostgresSQL"""
+
+    def __init__(self, database, user, password, host, port, *args, **kwargs):
+        self.connection = psycopg2.connect(
+            dbname=database,
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            *args,
+            **kwargs
+        )
+
+    def run_query(self, context, query) -> DatabaseResponse:
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        columns = [col[0] for col in cursor.description] if cursor.description else []
+
+        cursor.close()
+
+        return DatabaseResponse(
+            columns=columns,
+            rows=rows,
+            query=query,
+            row_count=len(rows)
+        )
