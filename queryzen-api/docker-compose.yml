@@ -8,7 +8,6 @@ services:
       - .:/app
     environment:
       CELERY_BROKER_URL: redis://redis:6379/1
-      POSTGRES_HOST: postgres
     command: >
       bash -c "celery -A queryzen_api worker -l INFO"
     healthcheck:
