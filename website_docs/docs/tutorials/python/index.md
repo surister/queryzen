@@ -1,10 +1,8 @@
 # Getting started
-todo:
--- how to distinguish query execution from differnet bakcends
+[![PyPI - Version](https://img.shields.io/pypi/v/queryzen)](https://pypi.org/project/queryzen/)
 
 `QueryZen` ships a complete Python library to use and manage your Zens.
 
-link: https://pypi.org/project/queryzen/
 
 ## Installation
 
@@ -19,6 +17,28 @@ poetry
 ```shell
 poetry add queryzen
 ```
+
+uv
+
+```shell
+uv add queryzen
+```
+
+!!! Important
+
+    The queryzen package connects to the QueryZen backend, see [todo add link] on how to quickly
+    get started.
+
+## Specify backend url
+
+```python
+import os
+os.environ['QUERYZEN_API_URL'] = 'https://yourqueryzenapi:8499'
+```
+
+By default it uses `'http://localhost:8000'`.
+
+See [todo add link] for more constants.
 
 ## Creating a Zen.
 

@@ -1,12 +1,14 @@
-# / Query Zen - SQL over HTTP made easy.
-[![Coverage](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=coverage&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Quality Gate Status](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=alert_status&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Vulnerabilities](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=vulnerabilities&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Security Rating](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=security_rating&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
+# QueryZen - SQL over HTTP made easy.
+[![📝🐍 Integration tests - master](https://github.com/surister/queryzen/actions/workflows/client_test.yml/badge.svg)](https://github.com/surister/queryzen/actions/workflows/client_test.yml)
+[![.github/workflows/release.yml](https://github.com/surister/queryzen/actions/workflows/release.yml/badge.svg)](https://github.com/surister/queryzen/actions/workflows/release.yml)
+![PyPI - Status](https://img.shields.io/pypi/status/queryzen)
 
-[![Tests](https://github.com/surister/queryzen/actions/workflows/client_test.yml/badge.svg)](https://github.com/surister/queryzen/actions/workflows/client_test.yml)
-[![Lint python client](https://github.com/surister/queryzen/actions/workflows/lint_code_client.yml/badge.svg)](https://github.com/surister/queryzen/actions/workflows/lint_code_client.yml)
-[![Lint python client](https://github.com/surister/queryzen/actions/workflows/lint_code_client.yml/badge.svg)](https://github.com/surister/queryzen/actions/workflows/lint_code_client.yml)
+[![Quality Gate Status](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=alert_status&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
+[![Security Hotspots](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=security_hotspots&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
+[![Vulnerabilities](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=vulnerabilities&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
+[![Code Smells](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=code_smells&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
+[![Maintainability Rating](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=sqale_rating&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
+
 
 QueryZen allows you to create and run Zens, a `Zen` is a named, parameterized and versioned SQL 
 query that is run over HTTP REST endpoints.
@@ -26,24 +28,7 @@ is open-source under MIT license.
 * Automatically version queries, name and safely parametrize queries with special functions.
 * High level of Coverage and Tests.
 * Track, save and analyze statistics of your queries over time and versions.
-* Everything is dockerized for easy development and production.
-
-## How to learn QueryZen.
-If this is your first time using QueryZen we recommend reading in this order:
-
-1. `Concepts: Zen` - It explains what a Zen is, (a supercharged SQL query).
-2. `Concepts: Queryzen` - It explains the architecture of the project and its components.
-
-If you will use HTTP:
-
-1. `Tutorials: Http` - It explains the HTTP Rest endpoints and functionalities.
-
-Python:
-
-1. `Tutorials: Python` - It explains the how to use the Python package.
-
-At this point you will know the basics, there are more tutorials for deployments and advanced
-use cases.
+* Everything is dockerized for easy development and deployment.
 
 ## Quick Overview
 With QueryZen backend deployed in `localhost:8000`, we can start using `Zens` with our Python
@@ -112,3 +97,20 @@ print(result.as_table())
 # | CH      | 4193   | Aletschhorn    | [7.99389, 46.465]   |
 # +---------+--------+----------------+---------------------+
 ```
+
+
+## Learn more.
+If this is your first time using QueryZen we recommend reading in this order:
+
+1. `Concepts: Zen` - It explains what a Zen is, (a supercharged SQL query).
+2. `Concepts: Queryzen` - It explains the architecture of the project and its components.
+
+If you will use HTTP:
+
+1. `Tutorials: Http` - It explains the HTTP Rest endpoints and functionalities.
+
+Python:
+
+1. `Tutorials: Python` - It explains the how to use the Python package.
+
+For more advanced use cases see [TODO ADD LINK]
