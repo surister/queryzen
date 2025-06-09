@@ -6,7 +6,6 @@ import logging
 import re
 
 import sqlite3
-import psycopg2
 
 import httpx
 
@@ -156,6 +155,13 @@ class PostgresDatabase(Database):
     """PostgresSQL"""
 
     def __init__(self, database, user, password, host, port, *args, **kwargs):
+        try:
+            import psycopg2 # pylint: disable=C0415
+        except ModuleNotFoundError as e:
+            raise Exception( # pylint: disable=W0719 broad-exception
+                f"Trying to use {self!r} without the appropriate driver installed"
+            ) from e
+
         self.connection = psycopg2.connect(
             dbname=database,
             user=user,
