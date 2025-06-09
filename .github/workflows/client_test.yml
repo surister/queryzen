@@ -46,7 +46,6 @@ jobs:
         with:
           pytest-coverage-path: /tmp/pytest-coverage.txt
           junitxml-path: /tmp/pytest.xml
-      - name: Setup coverage result for sonar
+      - name: Check if tests failed
         run: | 
-          cp /tmp/coverage.xml .
-          sed -i 's|<source>/|<source>|' coverage.xml
+          python3 .github/check_failed_tests.py
