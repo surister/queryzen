@@ -6,6 +6,7 @@ import dataclasses
 import datetime
 import json
 import typing
+from typing import Any, Generator
 
 from . import constants
 from .sql import safe_sql_replace, parse_parameters
@@ -109,7 +110,7 @@ class ZenExecution:
         """
         return iter(self.rows)
 
-    def iter_cols(self) -> list[list]:
+    def iter_cols(self) -> Generator[list[Any], Any, None]:
         """Iterate over columns, it copies items so it is not the most memory efficient.
 
         Returns:
@@ -502,6 +503,7 @@ class QueryZen:
             zen: Zen,
             database: str = constants.DEFAULT_DATABASE,
             timeout: int = int(constants.DEFAULT_ZEN_EXECUTION_TIMEOUT),
+            factory: typing.Any = None,
             **params):
         """Runs a zen with the given parameters.
 
@@ -512,6 +514,7 @@ class QueryZen:
             timeout: Time in seconds the backend will take until returning a timeout error
                 default time is 30 seconds, if you expect your queries to take more,
                  increase the value.
+            factory: Factory to be used to create rows, typically a dataclass or a pydantic model
             params: Parameters to send to the backend for the query.
 
         Backend Parameters:
@@ -525,7 +528,9 @@ class QueryZen:
             >>>result = qz.run(zen, database='postgres_main', timeout=1000)
             >>>result.as_table()
 
+            TODO: Add more examples:
             # Create and run a parametrized Zen.
+            # Run a zen with factory
         """
         response = self._client.run(name=zen.name,
                                     collection=zen.collection,
@@ -557,8 +562,14 @@ class QueryZen:
             raise UncaughtBackendError(response,
                                        zen=zen,
                                        context='Backend returned ok but did not send data back')
+
+        rows = response.get_from_data('rows')
+
+        if factory and rows:
+            rows = list(map(lambda row: factory(*row), rows))
+
         execution = ZenExecution(id=response.get_from_data('id'),
-                                 rows=response.get_from_data('rows'),
+                                 rows=rows,
                                  columns=response.get_from_data('columns'),
                                  row_count=len(response.get_from_data('rows'))
                                  if not hasattr(response.data[0], 'row_count')
