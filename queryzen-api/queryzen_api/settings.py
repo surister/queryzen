@@ -14,6 +14,8 @@ from pathlib import Path
 
 from databases.base import SQLiteDatabase, CrateDatabase
 
+from queryzen_api import strtobool, get_split_env
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -55,6 +57,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'django_celery_results',
+    'corsheaders',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -70,6 +73,7 @@ if DEBUG:
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -161,8 +165,12 @@ CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
 CELERY_IMPORTS = ('apps.core.tasks',)
 
 ZEN_DATABASES = {
-    'default': SQLiteDatabase('tdd.sqlite'),
+    'default': SQLiteDatabase('demo.sqlite3'),
     'crate': CrateDatabase()
 }
 
-ZEN_TIMEOUT = 2
+ZEN_TIMEOUT = 2  # seconds
+
+CORS_ALLOWED_ORIGINS = get_split_env('CORS_ALLOWED_ORIGINS', [])
+CORS_ALLOWED_ORIGIN_REGEXES = get_split_env('CORS_ALLOWED_ORIGIN_REGEXES', [])
+CORS_ALLOW_ALL_ORIGINS = strtobool(os.getenv('CORS_ALLOW_ALL_ORIGINS', 'False'))
