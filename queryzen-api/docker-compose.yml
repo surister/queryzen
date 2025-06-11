@@ -5,7 +5,13 @@ services:
       context: .
       dockerfile: compose/local/django/Dockerfile
     volumes:
-      - .:/app
+      - ./apps:/app/apps/
+      - ./databases:/app/databases/
+      - ./helpers:/app/helpers/
+      - ./databases:/app/databases/
+      - ./queryzen_api:/app/queryzen_api
+      - ./pyproject.toml:/app/pyproject.tml
+      - ./db.sqlite3:/app/db.sqlite3
     environment:
       CELERY_BROKER_URL: redis://redis:6379/1
     command: >
@@ -36,7 +42,7 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/1
     ports:
-      - 5555:5555
+      - "5555:5555"
     depends_on:
       - workers
       - redis
