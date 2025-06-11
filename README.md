@@ -3,12 +3,6 @@
 [![.github/workflows/release.yml](https://github.com/surister/queryzen/actions/workflows/release.yml/badge.svg)](https://github.com/surister/queryzen/actions/workflows/release.yml)
 ![PyPI - Status](https://img.shields.io/pypi/status/queryzen)
 
-[![Quality Gate Status](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=alert_status&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Security Hotspots](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=security_hotspots&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Vulnerabilities](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=vulnerabilities&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Code Smells](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=code_smells&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Maintainability Rating](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=sqale_rating&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-
 QueryZen allows you to create and run `Zens`, a `Zen` is a named, parameterized and versioned SQL query
 that is run over HTTP REST endpoints. Decouple your SQL from you application, version it, 
 and secure it from development to production.
