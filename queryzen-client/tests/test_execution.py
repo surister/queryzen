@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import json
 from collections.abc import Iterable
@@ -107,3 +108,28 @@ def test_execution_iter_cols(queryzen):
     assert list(result.iter_cols()) == [[1, 2, 3],
                                         ['Alice Johnson', 'Bob Smith', 'Charlie Brown'],
                                         [28, 35, 22]]
+
+def test_execution_factory(queryzen):
+
+    @dataclasses.dataclass
+    class Person:
+        id: int
+        name: str
+        age: int
+
+    q = queryzen.create('t', """
+        SELECT column1 as id, column2 as name, column3 as age FROM (
+        VALUES
+            (1, 'Alice Johnson', 28),
+            (2, 'Bob Smith', 35),
+            (3, 'Charlie Brown', 22)
+        )
+    """)
+
+    result = queryzen.run(q, factory=Person)
+
+    assert len(result.rows) == 3
+    assert isinstance(result.rows[0], Person)
+    assert result.rows[0].id == 1
+    assert result.rows[0].name == 'Alice Johnson'
+    assert result.rows[0].age == 28

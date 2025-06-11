@@ -17,7 +17,7 @@ def filter_dataclasses(items: list, filters: dict[str, object]) -> list:
 
 
 class MockQueryZenBackendClient(QueryZenClientABC):
-    # THIS CLASS IS VERY OUTDATED, DONT USE,
+    # THIS CLASS IS VERY OUTDATED, DONT USE.
     def __init__(self):
         self.zens = []
 
@@ -122,7 +122,7 @@ def local_queryzen():
 
 @pytest.fixture
 def queryzen(request) -> QueryZen:
-    # We either use mocked_queryzen or local_queryzen depending on chosen setting.
+    # We either use mocked_queryzen or local_queryzen depending on the chosen setting.
     use_local = request.config.getoption("--use-local")  # Get a CLI option
     use_mocked = request.config.getoption("--use-mocked")
     queryzen = 'mocked_queryzen' if use_mocked else 'local_queryzen'
