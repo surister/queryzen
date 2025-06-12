@@ -105,7 +105,9 @@ If this is your first time using QueryZen we recommend reading in this order:
 1. `Concepts: Zen` - It explains what a Zen is, (a supercharged SQL query).
 2. `Concepts: Queryzen` - It explains the architecture of the project and its components.
 
-If you will use HTTP:
+## Using QueryZen:
+
+HTTP:
 
 1. `Tutorials: Http` - It explains the HTTP Rest endpoints and functionalities.
 
