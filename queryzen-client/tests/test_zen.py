@@ -77,3 +77,7 @@ def test_zen_preview():
     expected = "SELECT * FROM system WHERE somedata > 123 OR uuid == 'adsfasdfasfasdfads'"
     assert zen.preview(intvalue=123, strvalue='adsfasdfasfasdfads') == expected
 
+def test_zen_parse_parameter():
+    zen = Zen.empty()
+    zen.query = 'select :val as :t'
+    assert zen.parameters == ['val', 't']

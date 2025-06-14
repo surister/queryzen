@@ -23,6 +23,7 @@ def strtobool(val: str) -> bool:
         raise TypeError(f'type should be bool or str, not {type(val)!r}')
 
     val = val.lower()
+
     if val in ('y', 'yes', 't', 'true', 'on', '1'):
         return True
     elif val in ('n', 'no', 'f', 'false', 'off', '0'):
@@ -63,7 +64,7 @@ def is_api_compatible(version):
     return API_VERSION_COMPATIBLE == version
 
 
-# Question, do we check only this at publish time or runtime?
+# Question: do we check only this at publish time or runtime?
 if ENFORCE_COMPATABILITY:
     backend_version = get_api_version()
     if not is_api_compatible(backend_version):

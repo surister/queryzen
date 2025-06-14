@@ -33,7 +33,7 @@ class Default:
         for k, v in mapping.items():
             self.values.append((k, type(v).__name__, v))
 
-    def missing_parameters(self, parameters: list[str]) -> (bool, str):
+    def is_missing(self, parameters: list[str]) -> (bool, str):
         """Check if the given the Default parameters are in the given `parameters`, it will return
         a (result, missing_parameter) tuple.
 
@@ -41,10 +41,10 @@ class Default:
             parameters: The parameters to check.
 
         Examples:
-            >>> Default(one=1, two=2).missing_parameters(['one'])
+            >>> Default(one=1, two=2).is_missing(['one'])
             (True, ['two'])
 
-            >>> Default(one=1, two=2).missing_parameters(['one', 'two'])
+            >>> Default(one=1, two=2).is_missing(['one', 'two'])
             (False, [])
         """
         for p in self.values:

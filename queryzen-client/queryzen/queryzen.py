@@ -38,6 +38,7 @@ class ZenExecution:
         started_at: The time the query was executed in UTC.
         finished_at: The time the query finished running in UTC.
         total_time: Time in ms that took for the query to run.
+        parameters: The parameters that were passed when running the query.
         query: The query that produced this result.
     """
     id: str
@@ -94,7 +95,7 @@ class ZenExecution:
         """Returns the row number i.
 
         Raises:
-            Index error if row i does not exist.
+            Index error if row doesn’t exist.
 
         Returns:
             The at position i
@@ -215,6 +216,10 @@ class Zen:
                    description='-1',
                    created_at=datetime.datetime(year=1978, month=12, day=6))
 
+    @property
+    def parameters(self):
+        return parse_parameters(self.query)
+
     def preview(self, **parameters) -> str:
         """Previews the SQL that would be run given the parameters in QueryZen, if a parameter
         is missing, it will not raise an exception, this is mainly for debugging purposes,
@@ -313,7 +318,7 @@ class QueryZen:
                 raise ValueError(f'default has to be {dict!r}'
                                  f' or {Default!r}, not {type(default)!r}')
 
-            has_all, missing = default.missing_parameters(parameters)
+            has_all, missing = default.is_missing(parameters)
 
             if not has_all:
                 raise DefaultValueDoesNotExistError(f'default received a parameter'
@@ -325,7 +330,6 @@ class QueryZen:
                                        query=query,
                                        description=description,
                                        default=default)
-
         if response.error:
             if response.error_code == 409:
                 raise ZenAlreadyExistsError()
@@ -375,7 +379,7 @@ class QueryZen:
             ...     handle_zen_not_existing()
 
         Raises:
-            ZenDoesNotExistError: if the ``Zen`` does not exist.
+            ZenDoesNotExistError: if the ``Zen`` doesn’t exist.
 
             If you don't want to manually handle if the query exists,
             check ``QueryZen.get_or_create``
@@ -602,7 +606,7 @@ class QueryZen:
             version: The version of the `Zen`, defaults to 'AUTO'.
 
         Raises:
-            ZenDoesNotExistError: if the ``Zen`` does not exist.
+            ZenDoesNotExistError: if the ``Zen`` doesn’t exist.
 
             If you don't want to manually handle if the query exists,
             check ``QueryZen.get_or_create``
