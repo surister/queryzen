@@ -5,6 +5,8 @@ from collections.abc import Iterable
 
 import pytest
 
+from queryzen import Default
+from queryzen.exceptions import ParametersMissmatchError
 from queryzen.queryzen import ZenExecution
 
 
@@ -108,6 +110,69 @@ def test_execution_iter_cols(queryzen):
     assert list(result.iter_cols()) == [[1, 2, 3],
                                         ['Alice Johnson', 'Bob Smith', 'Charlie Brown'],
                                         [28, 35, 22]]
+
+def test_execution_parameters(queryzen):
+    parameters = {
+        'value': 1,
+        'name': 'some'
+    }
+    q = queryzen.create('t',"select :value as :name")
+    result = queryzen.run(q, **parameters)
+    assert result.parameters == result.parameters
+
+    # The locally previewed query has to be the same that was executed
+    assert result.query == q.preview(**parameters)
+
+def test_execution_parameter_raises(queryzen):
+    """
+    Test that when we try to run a Zen, without supplying the necessary parameters, it raises an
+    Exception.
+    """
+    parameters = {
+        'value': 1,
+        'not_existing_parameter': 'some'
+    }
+
+    q = queryzen.create('t',"select :value as :name")
+
+    with pytest.raises(ParametersMissmatchError):
+        queryzen.run(q, **parameters)
+
+def test_execution_parameter_defaults(queryzen):
+    """
+    Test that default parameters are respected.
+    """
+    default_parameters = {
+        'value': 1
+    }
+    parameters = {
+        'name': 'some'
+    }
+
+    q = queryzen.create('t', "select :value as :name", default=default_parameters)
+    result = queryzen.run(q, **parameters)
+
+    # Merge two parameters dictionary
+    parameters.update(default_parameters)
+
+    assert result.parameters == parameters
+
+def test_execution_parameter_defaults_1(queryzen):
+    """
+    Test that default parameters are respected, using `Default` object.
+    """
+    default_parameters = Default(value=1)
+    parameters = {
+        'name': 'some'
+    }
+
+    q = queryzen.create('t', "select :value as :name", default=Default(value=1))
+    result = queryzen.run(q, **parameters)
+
+    # Merge the two parameters dictionary
+    parameters.update(default_parameters.to_dict())
+
+    assert result.parameters == parameters
 
 def test_execution_factory(queryzen):
 
