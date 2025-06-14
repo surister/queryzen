@@ -16,6 +16,7 @@ dependencies = [
     "sqlalchemy>=2.0.37,<3",
     "httpx>=0.28.1,<0.29",
     "psycopg2-binary>=2.9.10",
+    "django-cors-headers>=4.7.0",
 ]
 
 [dependency-groups]
