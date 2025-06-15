@@ -1,4 +1,4 @@
-A `Zen` is a super charged SQL query.
+A `Zen` is a supercharged SQL query.
 
 Lets take a normal SQL query.
 
