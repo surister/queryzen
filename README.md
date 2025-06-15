@@ -18,6 +18,22 @@ QueryZen ships:
 
 We also ship testing and production docker-composes to streamline development and deployment.
 
+For more information, see:
+
+* [Documentation]()
+* [How to contribute]()
+* [License]()
+
+# Why QueryZen & Use cases.
+
+With QueryZen you can:
+
+- Quickly create HTTP Rest endpoints of your SQL data.
+- Integrate your SQL data in your data pipelines with minimal configuration.
+- Monitor individual query executions and analyze metrics.
+- Version your SQL queries, build and test queries without affecting production.
+- Create materialized views for SQL databases that do not support them.
+
 ## Quick example using our python library.
 
 ```python
@@ -106,12 +122,6 @@ curl -X POST https://your-queryzen-server.com/v1/collection/development/zen/summ
          }'
 ```
 
-# Why QueryZen & Use cases.
-
-With QueryZen you can:
-
-- Quickly create HTTP Rest endpoints of your SQL data.
-- Integrate your SQL data in your data pipelines with minimal configuration.
-- Monitor individual query executions and analyze metrics.
-- Version your SQL queries, build and test queries without affecting production.
-- Create materialized views for SQL databases that do not support them.
+# License
+The project and all of its components its under MIT or Apache 2.0, whatever
+floats your boat.
