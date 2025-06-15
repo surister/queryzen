@@ -1,12 +1,13 @@
 # In depth: Creating a Zen.
 
 !!! Note
-    The snippets of this page assumes you have imported
+    The snippets of this page assumes you have imported queryzen.
     ```python
     from queryzen import QueryZen
 
     qz = QueryZen()
     ```
+    
 
 The simplest way to create a Zen is:
 
@@ -26,11 +27,14 @@ zen = qz.create('myzen', query='select 1')
 #     executions=[])
 ```
 
-This will create a Zen with name `"myzen"` and the collection `"main"`. If you run it again, it will create
-a new version of the query. The default is `AUTO`, this means that the backend will automatically
-handle versioning, they are monotonically increasing integers.
+This will create a Zen with name `myzen` and the default collection `main`. 
+If you another zen with the same name, it will create a new version of the zen, that is, if you don't specify a version.
 
-You can change the query and descriptions on new versions to reflect the evolution of your query.
+The default version is `AUTO`, this means that the backend will automatically handle versioning,
+they are monotonically increasing integers.
+
+You can change the query, descriptions and default parameters values on new versions 
+to reflect the evolution of your query.
 
 ```python
 zen = qz.create('myzen', query='select 2')
@@ -50,7 +54,7 @@ zen = qz.create('myzen', query='select 2')
 
 ## Collections
 
-A collection is a namespace to group your zens. The default collection is `"main"`.
+A collection is a namespace to group your zens. The default collection is `main`.
 
 You can specify in which collection you want your zen to be created:
 
@@ -69,16 +73,13 @@ zen = qz.create('myzen', collection='development', query='select 1')
 #     state='UN',
 #     executions=[])
 ```
+
 Now there is a Zen named `myzen` in collection `development`, if we now create
-a query in a the default collection
+a query in a the default collection it will not collide.
 
 ```python
 zen = qz.create('myzen', query='select 1')
-
-# ok
 ```
-
-it will not collide.
 
 ## Specifying a version
 
@@ -90,7 +91,7 @@ zen = qz.create('myzen', query='select 2', version=10)
 
 # Zen(id='8a839a35-46e2-4ebd-af07-4c1a381d99d2',
 #     name='myzen',
-#     version=10,
+#     version=10, <---------------
 #     query='select 1',
 #     description=None,
 #     created_at='2025-03-02T12:05:13.690029Z',
@@ -110,18 +111,17 @@ zen = qz.create('myzen', query='select 2', version=10)
 # queryzen.exceptions.ZenAlreadyExistsError
 ```
 
-If you create a Zen specifying a version, and then create a version with `AUTO` version (the
-default)
-the latest value will be picked to add +1.
+If you create a zen specifying a version, and then create a version with AUTO version the latest value
+will be used to create the new version (by incrementing it.)
 
 ```python
-qz.create('myzen', query='select 2')  # Will create version 1 if it does not exist
-qz.create('myzen', query='select 2', version=5)  # creates version 5
-zen = qz.create('myzen', query='select 2')  # creates version 5+1 = 6
+qz.create('myzen', query='select 2')  # version 1
+qz.create('myzen', query='select 2', version=5)  # version 5
+zen = qz.create('myzen', query='select 2')  # version 5+1 = 6
 
 # Zen(id='45da71b2-761d-4fac-a2c7-9ef5c0a6353a',
 #     name='myzen',
-#     version=6,
+#     version=6, <-----------------
 #     query='select 2',
 #     description=None,
 #     created_at='2025-03-02T12:13:47.229631Z',
@@ -132,5 +132,60 @@ zen = qz.create('myzen', query='select 2')  # creates version 5+1 = 6
 #     executions=[])
 ```
 
+## Parametrizing a Zen
 
-## 
+Zens are parametrized by writing a `:` character, following by the name of the parameter in the query.
+
+Example:
+
+```sql
+zen = qz.create("""
+    SELECT
+      country,
+      height,
+      mountain,
+      coordinates
+    FROM
+      IDENT(:schema).IDENT(:table_name)
+    WHERE
+      country = :country
+      and height >= :height
+    ORDER BY
+      :orderby
+    LIMIT 10
+"""
+)
+```
+
+This query has five parameters: `schema`, `table_name`, `country`, `height` and `orderby`
+
+A zen can have no parameters.
+
+todo: see running a zen with parameters.
+
+## Default parameter values
+
+A parameter can be given a default value. The default value will be used when running the query
+if a new value is not provided.
+
+```python
+zen = qz.create("zen_with_default", query="select :some_value", default={'some_value': 1})
+```
+
+Preferably, pass a `Default` object.
+
+
+```python
+from queryzen import Default
+
+zen = qz.create("zen_with_default", query="select :some_value", default=Default(some_value=1))
+```
+
+If a passed default parameter does not exist in the query, an exception will be raised.
+
+```python
+zen = qz.create("zen_with_default", query="select :some_value", default=Default(some_value=1, extra_param='job'))
+#    raise DefaultValueDoesNotExistError(f'default received a parameter'
+#queryzen.exceptions.DefaultValueDoesNotExistError: default received a parameter that is not in the query: 'extra_param'
+```
+

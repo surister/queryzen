@@ -10,7 +10,8 @@
 
 ## Running a Zen
 
-To run a zen, get a `Zen` object, and pass it to `.run`, to get a zen you can use `get_or_create`, `create`, and `get`.
+To run a zen, get a `Zen` object, and pass it to `QueryZen.run`, to get a zen you can use
+`get_or_create`, `create`, and `get`.
 
 ```python
 zen = qz.get_or_create('demo_query', 'select 1 as n')
