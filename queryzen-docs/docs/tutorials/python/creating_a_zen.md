@@ -1,4 +1,4 @@
-# In depth: Creating a Zen.
+# Creating a Zen.
 
 !!! Note
     The snippets of this page assumes you have imported queryzen.
@@ -31,7 +31,7 @@ This will create a Zen with name `myzen` and the default collection `main`.
 If you another zen with the same name, it will create a new version of the zen, that is, if you don't specify a version.
 
 The default version is `AUTO`, this means that the backend will automatically handle versioning,
-they are monotonically increasing integers.
+they’re monotonically increasing integers.
 
 You can change the query, descriptions and default parameters values on new versions 
 to reflect the evolution of your query.
@@ -161,6 +161,10 @@ This query has five parameters: `schema`, `table_name`, `country`, `height` and 
 
 A zen can have no parameters.
 
+`IDENT` is a special function that will convert the parameter to an `identifier`, it is designed
+to be used when referencing schemas, table and column names. Different databases might use different
+strategies.
+
 todo: see running a zen with parameters.
 
 ## Default parameter values
@@ -181,7 +185,7 @@ from queryzen import Default
 zen = qz.create("zen_with_default", query="select :some_value", default=Default(some_value=1))
 ```
 
-If a passed default parameter does not exist in the query, an exception will be raised.
+If a passed default parameter doesn’t exist in the query, an exception will be raised.
 
 ```python
 zen = qz.create("zen_with_default", query="select :some_value", default=Default(some_value=1, extra_param='job'))

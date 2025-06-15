@@ -23,5 +23,11 @@ to make your life easier. [link](https://github.com/surister/queryzen/tree/maste
 
 The core pieces are the QueryZen backend and the task backend, any HTTP client can be used.
 
-Supported databases are: SQLite, CrateDB and PostgresSQL, if you would like a new database, either develop it
-yourself (link: how to develop a new database driver) or open a new issue in the (repository)[https://github.com/surister/queryzen/issues].
+Supported databases are:
+* SQLite
+* CrateDB
+* PostgresSQL
+
+If you would like a new database, you can either easily implement it
+(link: how to develop a new database driver) or open a new issue
+in the [repository](https://github.com/surister/queryzen/issues).

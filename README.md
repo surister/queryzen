@@ -20,9 +20,10 @@ We also ship testing and production docker-composes to streamline development an
 
 For more information, see:
 
+* [Project repository](https://github.com/surister/queryzen)
 * [Documentation]()
 * [How to contribute]()
-* [License]()
+* [License](./LICENSE.md)
 
 # Why QueryZen & Use cases.
 
@@ -33,6 +34,14 @@ With QueryZen you can:
 - Monitor individual query executions and analyze metrics.
 - Version your SQL queries, build and test queries without affecting production.
 - Create materialized views for SQL databases that do not support them.
+
+Feature Overview:
+    * Create, get and delete Zens in different collections and run them in different Databases.
+    * Automatically version queries, name and safely parametrize queries with special functions.
+    * High level of Coverage and Tests.
+    * Track, save and analyze statistics of your queries over time and versions.
+    * Everything is dockerized for easy development and deployment.
+
 
 ## Quick example using our python library.
 

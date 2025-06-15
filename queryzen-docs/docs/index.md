@@ -3,36 +3,50 @@
 [![.github/workflows/release.yml](https://github.com/surister/queryzen/actions/workflows/release.yml/badge.svg)](https://github.com/surister/queryzen/actions/workflows/release.yml)
 ![PyPI - Status](https://img.shields.io/pypi/status/queryzen)
 
-[![Quality Gate Status](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=alert_status&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Security Hotspots](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=security_hotspots&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Vulnerabilities](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=vulnerabilities&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Code Smells](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=code_smells&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
-[![Maintainability Rating](https://sonar.pyramidops.com/api/project_badges/measure?project=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1&metric=sqale_rating&token=sqb_a2b02087bce2cb15b3cc68c0d4c03243da867f08)](https://sonar.pyramidops.com/dashboard?id=surister_queryzen_c0946901-04b6-4415-85f3-a9b95135b8e1)
+A `Zen` is a named, parameterized and versioned SQL query that is created, updated and executed
+over HTTP endpoints.
 
+It allows you to decouple SQL from your application. Controlling, versioning
+and securing your data access from development to production.
 
-QueryZen allows you to create and run Zens, a `Zen` is a named, parameterized and versioned SQL 
-query that is run over HTTP REST endpoints.
+QueryZen ships:
 
-The project ships several components, these components can be easily extended or improved; everything
-is open-source under MIT license.
+- HTTP REST backend to handle the lifetime of Zens.
+- Task execution backend to handle the execution of the queries.
+- Database driver abstraction for Python SQL drivers.
+- Pythonic package to programmatically use QueryZen.
 
-## QueryZen ships:
+We also ship testing and production docker-composes to streamline development and deployment.
 
-* HTTP REST backend to handle the lifetime of Zens. Made in Django.
-* Task execution backend to handle the execution of the `Zens`. Made in Celery.
-* Pythonic package to programmatically use QueryZen. Made in Python.
-* A Database driver abstraction layer for SQL Drivers. Made in Python.
+For more information, see:
 
-## Feature Overview:
-* Create, get and delete `Zens` in different collections and run them in different Databases.
-* Automatically version queries, name and safely parametrize queries with special functions.
-* High level of Coverage and Tests.
-* Track, save and analyze statistics of your queries over time and versions.
-* Everything is dockerized for easy development and deployment.
+* [Project repository](https://github.com/surister/queryzen)
+* [Documentation]()
+* [How to contribute]()
+* [License](./LICENSE.md)
+
+# Why QueryZen & Use cases.
+
+With QueryZen you can:
+
+- Quickly create HTTP Rest endpoints of your SQL data.
+- Integrate your SQL data in your data pipelines with minimal configuration.
+- Monitor individual query executions and analyze metrics.
+- Version your SQL queries, build and test queries without affecting production.
+- Create materialized views for SQL databases that do not support them.
+
+Feature Overview:
+    * Create, get and delete Zens in different collections and run them in different Databases.
+    * Automatically version queries, name and safely parametrize queries with special functions.
+    * High level of Coverage and Tests.
+    * Track, save and analyze statistics of your queries over time and versions.
+    * Everything is dockerized for easy development and deployment.
 
 ## Quick Overview
+
 With QueryZen backend deployed in `localhost:8000`, we can start using `Zens` with our Python
-package:
+package.
+
 ```python
 from queryzen import QueryZen
 

@@ -1,8 +1,8 @@
 # Getting started
 [![PyPI - Version](https://img.shields.io/pypi/v/queryzen)](https://pypi.org/project/queryzen/)
 
-`QueryZen` ships a complete Python library to use and manage your Zens.
-
+`QueryZen` ships a Python library to use and manage your Zens, the library has full feature parity
+with the HTTP api, we recommend that you use it if you are using python.
 
 ## Installation
 
