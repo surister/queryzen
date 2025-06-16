@@ -83,7 +83,7 @@ zen = qz.create('myzen', query='select 1')
 
 ## Specifying a version
 
-By default, the backend automatically handles Zen versioning; nonetheless
+By default, the backend automatically handles Zen versioning; nonetheless, 
 you can specify a version:
 
 ```python

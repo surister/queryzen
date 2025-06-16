@@ -42,7 +42,6 @@ Feature Overview:
     * Track, save and analyze statistics of your queries over time and versions.
     * Everything is dockerized for easy development and deployment.
 
-
 ## Quick example using our python library.
 
 ```python

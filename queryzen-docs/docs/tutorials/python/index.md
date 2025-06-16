@@ -36,7 +36,7 @@ import os
 os.environ['QUERYZEN_API_URL'] = 'https://yourqueryzenapi:8499'
 ```
 
-By default it uses `'http://localhost:8000'`.
+By default, it uses `'http://localhost:8000'`.
 
 See [todo add link] for more constants.
 
