@@ -1,4 +1,4 @@
-# Creating a Zen.
+# Creating a Zen
 
 !!! Note
     The snippets of this page assumes you have imported queryzen.
@@ -173,7 +173,11 @@ A parameter can be given a default value. The default value will be used when ru
 if a new value is not provided.
 
 ```python
-zen = qz.create("zen_with_default", query="select :some_value", default={'some_value': 1})
+zen = qz.create(
+    "zen_with_default",
+    query="select :some_value",
+    default={'some_value': 1}
+)
 ```
 
 Preferably, pass a `Default` object.
@@ -182,13 +186,21 @@ Preferably, pass a `Default` object.
 ```python
 from queryzen import Default
 
-zen = qz.create("zen_with_default", query="select :some_value", default=Default(some_value=1))
+zen = qz.create(
+    "zen_with_default",
+    query="select :some_value",
+    default=Default(some_value=1)
+)
 ```
 
 If a passed default parameter doesn’t exist in the query, an exception will be raised.
 
 ```python
-zen = qz.create("zen_with_default", query="select :some_value", default=Default(some_value=1, extra_param='job'))
+zen = qz.create(
+    "zen_with_default",
+    query="select :some_value",
+    default=Default(some_value=1, extra_param='job')
+)
 #    raise DefaultValueDoesNotExistError(f'default received a parameter'
 #queryzen.exceptions.DefaultValueDoesNotExistError: default received a parameter that is not in the query: 'extra_param'
 ```

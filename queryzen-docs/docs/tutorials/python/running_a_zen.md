@@ -1,4 +1,4 @@
-# Running a Zen.
+# Running a Zen
 
 !!! Note
     The snippets of this page assumes you have imported
@@ -13,7 +13,7 @@
 To run a zen, get a `Zen` object, and pass it to `QueryZen.run`.
 
 To get a zen you can use
-`get_or_create`, `create`, and `get`.
+`get_or_create`, `create`, and `get`
 
 ```python
 zen = qz.get_or_create('demo_query', 'select 1 as n')
