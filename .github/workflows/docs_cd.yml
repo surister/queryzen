@@ -18,9 +18,9 @@ jobs:
               git reset --hard origin/master
               git pull origin
   
-              docker compose -f ./queryzen/queryzen-docs/docker-compose.yml down
+              docker compose -f ./queryzen-docs/docker-compose.yml down
               docker run -v $PWD/queryzen-docs:/build --workdir /build/ ghcr.io/astral-sh/uv:python3.12-bookworm uv run mkdocs build
-              docker compose -f ./queryzen/queryzen-docs/docker-compose.yml down
+              docker compose -f ./queryzen-docs/docker-compose.yml up -d
 
             host: ${{ secrets.DEPLOYMENT_HOST }}
             port: ${{ secrets.DEPLOYMENT_PORT }}
