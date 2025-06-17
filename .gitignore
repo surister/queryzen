@@ -162,3 +162,7 @@ cython_debug/
 
 poetry.lock
 *.sqlite
+*.sqlite3
+
+dist
+site

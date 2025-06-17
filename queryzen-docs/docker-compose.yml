@@ -1,0 +1,19 @@
+services:
+  docs:
+    container_name: qz.surister.dev
+    image: nginx
+    restart: unless-stopped
+    networks:
+      - proxy
+    ports:
+      - 80
+    environment:
+      - VIRTUAL_HOST=qz.surister.dev
+      - NGINX_HOST=qz.surister.dev
+    volumes:
+      - ./site/:/usr/share/nginx/html
+
+networks:
+  proxy:
+    name: proxy
+    external: true
