@@ -5,10 +5,13 @@ way to work with it in Pycharm or Jetbrains-IDEs is to open every project separa
 To run the tests of queryzen-client, you need a working backend, some tests are unit, most are
 integration.
 
-We use [uv](https://github.com/astral-sh/uv), but other tools like pipx/pip could be used.
+We depend on two tools to develop and test:
 
-Follow the instructions in order to finally be able to run a full test suite, which
-is also the correct environment to develop new features.
+* [docker](https://docs.docker.com/engine/install/) and docker compose to run tests and develop locally.
+* [uv](https://github.com/astral-sh/uv), but other tools like pipx/pip could be used.
+
+Follow the instructions to run the full test suite, which proves you have set up
+a correct environment to develop new features.
 
 Clone the project:
 ```shell
