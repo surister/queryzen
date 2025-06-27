@@ -35,7 +35,7 @@ If it is the first time running, run the migrations:
 
 ```shell
 # Path: ./queryzen/queryzen-api
-$ uv run python managepy migrate
+$ uv run python manage.py migrate
 ```
 
 ## Set up other backend apps
