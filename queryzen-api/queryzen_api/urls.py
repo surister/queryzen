@@ -20,6 +20,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('', include('apps.core.urls')),
+    path('', include('apps.authentication.urls')),
     path('_healthcheck', lambda r: HttpResponse()),
 ]
 
