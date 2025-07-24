@@ -53,6 +53,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 INSTALLED_APPS = [
     'apps.core',
+    'apps.authentication',
 
     'rest_framework',
     'django_filters',
@@ -174,3 +175,6 @@ ZEN_TIMEOUT = 2  # seconds
 CORS_ALLOWED_ORIGINS = get_split_env('CORS_ALLOWED_ORIGINS', [])
 CORS_ALLOWED_ORIGIN_REGEXES = get_split_env('CORS_ALLOWED_ORIGIN_REGEXES', [])
 CORS_ALLOW_ALL_ORIGINS = strtobool(os.getenv('CORS_ALLOW_ALL_ORIGINS', 'False'))
+
+#### Authentication section ####
+AUTH_USER_MODEL = 'authentication.QueryzenUser'
