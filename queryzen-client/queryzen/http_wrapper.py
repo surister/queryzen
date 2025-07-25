@@ -32,13 +32,3 @@ class HttpxWrapper:
 
     def delete(self, url, **kwargs):
         return self._handle_request('delete', url, **kwargs)
-
-    def close(self):
-        self._client.close()
-
-    def __enter__(self):
-        self._client.__enter__()
-        return self
-
-    def __exit__(self, *args):
-        return self._client.__exit__(*args)
