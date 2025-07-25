@@ -16,6 +16,9 @@ class IncompatibleAPIError(Exception):
     """
     # Todo add message
 
+class AuthenticationError(Exception):
+    """Authentication failed."""
+
 
 class ExecutionEngineError(Exception):
     """Workers or the broker is unavailable."""

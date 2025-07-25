@@ -1,3 +1,4 @@
+# pylint: disable=C0114
 from django.urls import path
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,

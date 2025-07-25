@@ -1,3 +1,4 @@
+# pylint: disable=C0114
 from django.apps import AppConfig
 
 
