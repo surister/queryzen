@@ -256,10 +256,10 @@ class QueryZen:
     """
 
     def __init__(
-            self, email: str = None,
+            self, user: str = None,
             password: str = None,
             client: QueryZenClientABC | None = None):
-        self._client: QueryZenClientABC = client or QueryZenHttpClient(email, password)
+        self._client: QueryZenClientABC = client or QueryZenHttpClient(user, password)
 
     def _validate_version(self, version) -> str:
         """

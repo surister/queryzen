@@ -9,5 +9,5 @@ def test_instantiate_queryzen_client_without_valid_credentials(queryzen):
     All operations must proceed through queryzen client so if auth failed here, the client won't be authorized.
     """
     with pytest.raises(exceptions.AuthenticationError):
-        QueryZen(email='bad-email@test.com', password='test')
+        QueryZen(user='bad-email@test.com', password='test')
 

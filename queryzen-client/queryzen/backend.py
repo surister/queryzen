@@ -117,7 +117,7 @@ class QueryZenHttpClient(QueryZenClientABC):
     COLLECTIONS = 'collection/'
     VERSION = 'version/'
 
-    def __init__(self, email: str = None, password: str = None, client: httpx.Client = None):
+    def __init__(self, user: str = None, password: str = None, client: httpx.Client = None):
         self.client: HttpxWrapper = HttpxWrapper(
             (client or httpx.Client(timeout=int(constants.DEFAULT_HTTP_TIMEOUT)))
         )
@@ -126,17 +126,17 @@ class QueryZenHttpClient(QueryZenClientABC):
         # Everytime a QueryZenHttpClient is declared, a new pair is generated
         # It'd be interesting to keep this in mind for future auto refresh features
         # For the moment, clients won't be open so much time
-        self.access_token, self.refresh_token = self.get_jwt_pair(email, password)
+        self.access_token, self.refresh_token = self.get_jwt_pair(user, password)
 
         self.client.access_token = self.access_token
 
-    def get_jwt_pair(self, email, password) -> (str, str):
+    def get_jwt_pair(self, email: str, password: str) -> (str, str):
         """Authenticates user against queryzen auth service"""
         response = self.client.post(
             self.url / 'auth/token/', json={'email': email, 'password': password})
 
         if response.status_code == 401:
-            raise AuthenticationError()
+            raise AuthenticationError('Authentication failed. Please check your credentials.')
 
         payload = response.json()
         return payload['access'], payload['refresh']
