@@ -1,4 +1,11 @@
 # QueryZen - SQL over HTTP made easy.
+
+» [Documentation]
+| [Releases]
+| [Issues]
+| [Repository]
+| [License]
+
 [![📝🐍 Integration tests - master](https://github.com/surister/queryzen/actions/workflows/client_test.yml/badge.svg)](https://github.com/surister/queryzen/actions/workflows/client_test.yml)
 [![.github/workflows/release.yml](https://github.com/surister/queryzen/actions/workflows/release.yml/badge.svg)](https://github.com/surister/queryzen/actions/workflows/release.yml)
 ![PyPI - Status](https://img.shields.io/pypi/status/queryzen)
@@ -133,3 +140,10 @@ curl -X POST https://your-queryzen-server.com/v1/collection/development/zen/summ
 # License
 The project and all of its components its under MIT or Apache 2.0, whatever
 floats your boat.
+
+
+[Documentation]: https://qz.surister.dev/
+[Releases]: https://github.com/surister/queryzen/releases
+[Issues]: https://github.com/surister/queryzen/issues
+[Repository]: https://github.com/surister/queryzen/
+[License]: https://github.com/surister/queryzen/blob/master/LICENSE.md
