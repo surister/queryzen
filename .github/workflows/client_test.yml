@@ -19,7 +19,7 @@ jobs:
         python-version: [ "3.12" ]
     steps:
       # Check out the repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Run Docker Compose Action
       - name: Run docker compose
