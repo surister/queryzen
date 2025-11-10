@@ -11,7 +11,7 @@ dependencies = ["httpx>=0.28.1,<0.29"]
 [dependency-groups]
 dev = [
     "pylint>=3.3.3,<4",
-    "pytest>=8.3.4,<9",
+    "pytest>=8.3.4,<10",
     "pytest-cov>=6.0.0,<7",
     "polars>=1.22.0,<2",
     "requests>=2.32.3",
