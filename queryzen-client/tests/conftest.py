@@ -114,7 +114,7 @@ def local_queryzen():
     response = httpx.get(f'{constants.BACKEND_URL}/_testing/clean_db', timeout=1)
     assert response.status_code == 200
 
-    qz = QueryZen()
+    qz = QueryZen(user='test@test.com', password='test')
     yield qz
 
 

@@ -18,7 +18,7 @@ from .exceptions import (UncaughtBackendError,
                          MissingParametersError,
                          DatabaseDoesNotExistError,
                          DefaultValueDoesNotExistError,
-                         ParametersMissmatchError)
+                         ParametersMissmatchError, AuthenticationError)
 from .types import AUTO, Rows, Columns, _AUTO, Default, ZenState
 from .constants import DEFAULT_COLLECTION
 from .table import make_table, ColumnCenter
@@ -255,8 +255,11 @@ class QueryZen:
         ```
     """
 
-    def __init__(self, client: QueryZenClientABC | None = None):
-        self._client: QueryZenClientABC = client or QueryZenHttpClient()
+    def __init__(
+            self, user: str = None,
+            password: str = None,
+            client: QueryZenClientABC | None = None):
+        self._client: QueryZenClientABC = client or QueryZenHttpClient(user, password)
 
     def _validate_version(self, version) -> str:
         """
@@ -546,6 +549,9 @@ class QueryZen:
         if response.error:
             if response.error_code == 400:
                 raise MissingParametersError(response.error)
+
+            if response.error_code == 401:
+                raise AuthenticationError()
 
             if response.error_code == 409:
                 raise ParametersMissmatchError(response.error)

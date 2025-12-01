@@ -6,6 +6,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from django_filters import rest_framework as filters
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.response import Response
 from rest_framework import mixins, viewsets, status, views
@@ -33,6 +34,7 @@ class ZenFilterViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     Check ``QueryZenFilter.Meta.fields`` to see the available ones.
     """
+    permission_classes = (IsAuthenticated,)
     queryset = Zen.objects.all()
     serializer_class = ZenSerializer
     filter_backends = (filters.DjangoFilterBackend,)
@@ -46,6 +48,7 @@ class ZenView(views.APIView):
     PUT: Create a Zen.
     DELETE: Delete a Zen.
     """
+    permission_classes = (IsAuthenticated,)
 
     def _validate_parameters_replacement(self, zen: Zen, parameters: dict) -> None:
         """Validates that the required parameters to run the query are given by the user
@@ -153,6 +156,7 @@ class ZenView(views.APIView):
 
 class StatisticsView(views.APIView):
     """View to retrieve statistical execution time metrics for a given Zen version."""
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, collection: str, name: str, version: str):  # pylint: disable=W0613
         """
