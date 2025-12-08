@@ -5,7 +5,7 @@ requires-python = "~=3.12"
 readme = "README.md"
 license = "MIT"
 dependencies = [
-    "django>=5.1.5,<6",
+    "django>=5.1.5,<7",
     "djangorestframework>=3.15.2,<4",
     "django-filter~=25.1",
     "faker>=36.1.0,<38",
